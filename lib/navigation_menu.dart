@@ -31,18 +31,25 @@ class _NavigationMenuState extends State<NavigationMenu> {
         child: _pages.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        type: BottomNavigationBarType.fixed,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Icon(_selectedIndex == 0
+                ? Icons.collections_bookmark
+                : Icons.collections_bookmark_outlined),
+            label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Business',
+            icon: Icon(_selectedIndex == 1 ? Icons.book : Icons.book_outlined),
+            label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'School',
+            icon: Icon(_selectedIndex == 2
+                ? Icons.menu_book
+                : Icons.menu_book_outlined),
+            label: '',
           ),
         ],
         currentIndex: _selectedIndex,
