@@ -1,19 +1,18 @@
-import 'package:book_worm/models/book_model.dart';
+import 'package:book_worm/models/book.dart';
+import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:isar/isar.dart';
 
 class LibraryPage extends StatelessWidget {
   LibraryPage({super.key});
 
-  List<BookModel> books = [];
-
-  void _getInitialInfo() {
-    books = BookModel.getBooks();
+  Future<List<Book>> _getInitialInfo() async {
+    return await IsarService().getAllBooks();
   }
 
   @override
   Widget build(BuildContext context) {
-    _getInitialInfo();
     return Scaffold(
       appBar: appBar(),
       backgroundColor: Colors.white,
@@ -23,7 +22,20 @@ class LibraryPage extends StatelessWidget {
           const SizedBox(
             height: 40,
           ),
-          _bookList(),
+          FutureBuilder<List<Book>>(
+            future: _getInitialInfo(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('No books found'));
+              } else {
+                return _bookList(snapshot.data!);
+              }
+            },
+          ),
           const SizedBox(
             height: 40,
           ),
@@ -32,7 +44,7 @@ class LibraryPage extends StatelessWidget {
     );
   }
 
-  Column _bookList() {
+  Column _bookList(List<Book> books) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -50,6 +62,7 @@ class LibraryPage extends StatelessWidget {
         ListView.separated(
             itemCount: books.length,
             shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             separatorBuilder: (context, index) => SizedBox(
                   height: 25,
                 ),
@@ -64,6 +77,8 @@ class LibraryPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             books[index].name,
@@ -87,7 +102,6 @@ class LibraryPage extends StatelessWidget {
                           'assets/icons/button.svg',
                           width: 30,
                           height: 30,
-                          alignment: Alignment.centerRight,
                         ),
                       )
                     ]),

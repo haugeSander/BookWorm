@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:book_worm/models/book_model.dart';
+import 'package:book_worm/models/book.dart';
 
 class ReadingNowPage extends StatelessWidget {
   ReadingNowPage({super.key});
 
-  List<BookModel> books = [];
+  List<Book> books = [];
 
   void _getInitialInfo() {
-    books = BookModel.getBooks();
+    books = Book.getBooks();
   }
 
   @override
