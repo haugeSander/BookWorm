@@ -1,11 +1,34 @@
+import 'dart:ffi';
+
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:isar/isar.dart';
 
-class LibraryPage extends StatelessWidget {
-  LibraryPage({super.key});
+class LibraryPage extends StatefulWidget {
+  @override
+  _LibraryPageState createState() => _LibraryPageState();
+}
+
+class _LibraryPageState extends State<LibraryPage> {
+  late TextEditingController bookNameController;
+  late TextEditingController authorController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    bookNameController = TextEditingController();
+    authorController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    bookNameController.dispose();
+    authorController.dispose();
+    super.dispose();
+  }
 
   Future<List<Book>> _getInitialInfo() async {
     return await IsarService().getAllBooks();
@@ -41,7 +64,75 @@ class LibraryPage extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (() async {
+          final result = await openAddDialog(context);
+          if (result == null || result.isEmpty) return;
+          final newBook =
+              Book(name: result['name']!, author: result['author']!);
+          IsarService().saveBook(newBook);
+        }),
+        child: const Icon(Icons.book),
+      ),
     );
+  }
+
+  Future<Map<String, String>?> openAddDialog(BuildContext context) {
+    return showDialog<Map<String, String>>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add new book'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Text('Name of book:'),
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(hintText: 'Book name...'),
+                        controller: bookNameController,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text('Author:'),
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(hintText: 'Author name...'),
+                        controller: authorController,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text('SUBMIT'),
+              onPressed: () {
+                final bookData = {
+                  'name': bookNameController.text,
+                  'author': authorController.text,
+                };
+                submit(context, bookData);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void submit(context, bookData) {
+    Navigator.of(context).pop(bookData);
+    bookNameController.clear();
+    authorController.clear();
   }
 
   Column _bookList(List<Book> books) {

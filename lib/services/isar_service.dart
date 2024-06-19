@@ -40,7 +40,7 @@ class IsarService {
 
     if (Isar.instanceNames.isEmpty) {
       return await Isar.open([BookSchema, BookNotesSchema],
-          directory: dir.path, inspector: true);
+          directory: dir.path, maxSizeMiB: 1024, inspector: true);
     }
 
     return Future.value(Isar.getInstance());

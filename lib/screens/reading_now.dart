@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:book_worm/models/book.dart';
 
+import '../services/isar_service.dart';
+
 class ReadingNowPage extends StatelessWidget {
   ReadingNowPage({super.key});
 
   List<Book> books = [];
 
-  void _getInitialInfo() {
-    books = Book.getBooks();
+  Future<List<Book>> _getInitialInfo() async {
+    return await IsarService().getAllBooks();
   }
 
   @override
@@ -19,16 +21,56 @@ class ReadingNowPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: ListView(
         children: [
-          _bookList(),
+          FutureBuilder<List<Book>>(
+            future: _getInitialInfo(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('No books found'));
+              } else {
+                return _bookList(snapshot.data!);
+              }
+            },
+          ),
           const SizedBox(
             height: 40,
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          openAddDialog(context);
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
-  Column _bookList() {
+  Future openAddDialog(context) => showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+            title: Text('Fedda liker gutter!'),
+            content: TextField(
+              autofocus: true,
+              decoration: InputDecoration(hintText: 'Enter why'),
+            ),
+            actions: [
+              TextButton(
+                  child: Text('SUBMIT'),
+                  onPressed: () {
+                    submit(context);
+                  })
+            ],
+          ));
+
+  void submit(context) {
+    Navigator.of(context).pop();
+  }
+
+  Column _bookList(List<Book> books) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -46,6 +88,7 @@ class ReadingNowPage extends StatelessWidget {
         ListView.separated(
             itemCount: books.length,
             shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             separatorBuilder: (context, index) => SizedBox(
                   height: 25,
                 ),
@@ -55,11 +98,13 @@ class ReadingNowPage extends StatelessWidget {
             ),
             itemBuilder: (context, index) {
               return Container(
-                height: 200,
+                height: 100,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             books[index].name,

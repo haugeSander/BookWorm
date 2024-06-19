@@ -90,10 +90,10 @@ Book _bookDeserialize(
 ) {
   final object = Book(
     author: reader.readString(offsets[0]),
-    boxIsSelected: reader.readBool(offsets[1]),
     name: reader.readString(offsets[3]),
   );
   object.bookId = id;
+  object.boxIsSelected = reader.readBool(offsets[1]);
   object.isFiction = reader.readBoolOrNull(offsets[2]);
   return object;
 }
