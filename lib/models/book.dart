@@ -6,14 +6,14 @@ part 'book.g.dart';
 @Collection()
 class Book {
   Id bookId = Isar.autoIncrement;
-  String name;
+  String title;
   String author;
   bool boxIsSelected = false;
   bool? isFiction;
   final bookNote = IsarLink<BookNotes>();
 
   Book({
-    required this.name,
+    required this.title,
     required this.author,
   });
 }

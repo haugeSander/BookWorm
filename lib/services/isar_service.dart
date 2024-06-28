@@ -20,14 +20,12 @@ class IsarService {
     isar.writeTxnSync<int>(() => isar.bookNotes.putSync(newNote));
   }
 
-  Future<List<Book>> getAllBooks() async {
+  Stream<List<Book>> getAllBooks({String? search}) async* {
     final isar = await db;
-    return await isar.books.where().findAll();
-  }
-
-  Stream<List<Book>> listenForBooks() async* {
-    final isar = await db;
-    yield* isar.books.where().watch();
+    yield* isar.books
+        .filter()
+        .titleContains(search ?? '', caseSensitive: false)
+        .watch(fireImmediately: true);
   }
 
   Future<void> cleanDb() async {

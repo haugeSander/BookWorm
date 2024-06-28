@@ -32,9 +32,9 @@ const BookSchema = CollectionSchema(
       name: r'isFiction',
       type: IsarType.bool,
     ),
-    r'name': PropertySchema(
+    r'title': PropertySchema(
       id: 3,
-      name: r'name',
+      name: r'title',
       type: IsarType.string,
     )
   },
@@ -66,7 +66,7 @@ int _bookEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.author.length * 3;
-  bytesCount += 3 + object.name.length * 3;
+  bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
 
@@ -79,7 +79,7 @@ void _bookSerialize(
   writer.writeString(offsets[0], object.author);
   writer.writeBool(offsets[1], object.boxIsSelected);
   writer.writeBool(offsets[2], object.isFiction);
-  writer.writeString(offsets[3], object.name);
+  writer.writeString(offsets[3], object.title);
 }
 
 Book _bookDeserialize(
@@ -90,7 +90,7 @@ Book _bookDeserialize(
 ) {
   final object = Book(
     author: reader.readString(offsets[0]),
-    name: reader.readString(offsets[3]),
+    title: reader.readString(offsets[3]),
   );
   object.bookId = id;
   object.boxIsSelected = reader.readBool(offsets[1]);
@@ -424,20 +424,20 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameEqualTo(
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
+        property: r'title',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameGreaterThan(
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -445,14 +445,14 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'name',
+        property: r'title',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameLessThan(
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -460,14 +460,14 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'name',
+        property: r'title',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameBetween(
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -476,7 +476,7 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'name',
+        property: r'title',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -486,67 +486,67 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameStartsWith(
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'name',
+        property: r'title',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameEndsWith(
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'name',
+        property: r'title',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameContains(String value,
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleContains(String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'name',
+        property: r'title',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameMatches(String pattern,
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleMatches(String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'name',
+        property: r'title',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameIsEmpty() {
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
+        property: r'title',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> nameIsNotEmpty() {
+  QueryBuilder<Book, Book, QAfterFilterCondition> titleIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'name',
+        property: r'title',
         value: '',
       ));
     });
@@ -607,15 +607,15 @@ extension BookQuerySortBy on QueryBuilder<Book, Book, QSortBy> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByName() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.asc);
+      return query.addSortBy(r'title', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByNameDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortByTitleDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.desc);
+      return query.addSortBy(r'title', Sort.desc);
     });
   }
 }
@@ -669,15 +669,15 @@ extension BookQuerySortThenBy on QueryBuilder<Book, Book, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByName() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.asc);
+      return query.addSortBy(r'title', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByNameDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenByTitleDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.desc);
+      return query.addSortBy(r'title', Sort.desc);
     });
   }
 }
@@ -702,10 +702,10 @@ extension BookQueryWhereDistinct on QueryBuilder<Book, Book, QDistinct> {
     });
   }
 
-  QueryBuilder<Book, Book, QDistinct> distinctByName(
+  QueryBuilder<Book, Book, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'title', caseSensitive: caseSensitive);
     });
   }
 }
@@ -735,9 +735,9 @@ extension BookQueryProperty on QueryBuilder<Book, Book, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Book, String, QQueryOperations> nameProperty() {
+  QueryBuilder<Book, String, QQueryOperations> titleProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'name');
+      return query.addPropertyName(r'title');
     });
   }
 }

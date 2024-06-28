@@ -30,10 +30,6 @@ class _LibraryPageState extends State<LibraryPage> {
     super.dispose();
   }
 
-  Future<List<Book>> _getInitialInfo() async {
-    return await IsarService().getAllBooks();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,20 +41,17 @@ class _LibraryPageState extends State<LibraryPage> {
           const SizedBox(
             height: 40,
           ),
-          FutureBuilder<List<Book>>(
-            future: _getInitialInfo(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(child: Text('No books found'));
-              } else {
-                return _bookList(snapshot.data!);
-              }
-            },
-          ),
+          StreamBuilder<List<Book>>(
+              stream: IsarService().getAllBooks(),
+              builder: ((context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No books found'));
+                } else {
+                  return _bookList(snapshot.data!);
+                }
+              })),
           const SizedBox(
             height: 40,
           ),
@@ -69,7 +62,7 @@ class _LibraryPageState extends State<LibraryPage> {
           final result = await openAddDialog(context);
           if (result == null || result.isEmpty) return;
           final newBook =
-              Book(name: result['name']!, author: result['author']!);
+              Book(title: result['name']!, author: result['author']!);
           IsarService().saveBook(newBook);
         }),
         child: const Icon(Icons.book),
@@ -172,7 +165,7 @@ class _LibraryPageState extends State<LibraryPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            books[index].name,
+                            books[index].title,
                             style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: Colors.black,
@@ -231,7 +224,7 @@ class _LibraryPageState extends State<LibraryPage> {
             filled: true,
             fillColor: Colors.white,
             contentPadding: const EdgeInsets.all(15),
-            hintText: 'Search Pancake',
+            hintText: 'Search Books...',
             hintStyle: const TextStyle(color: Color(0xffDDDADA), fontSize: 14),
             prefixIcon: Padding(
               padding: const EdgeInsets.all(12),
@@ -260,6 +253,9 @@ class _LibraryPageState extends State<LibraryPage> {
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide.none)),
+        onChanged: (value) {
+          IsarService().getAllBooks(search: value);
+        },
       ),
     );
   }

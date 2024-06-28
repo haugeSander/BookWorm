@@ -9,8 +9,8 @@ class ReadingNowPage extends StatelessWidget {
 
   List<Book> books = [];
 
-  Future<List<Book>> _getInitialInfo() async {
-    return await IsarService().getAllBooks();
+  Stream<List<Book>> _getInitialInfo() async* {
+    IsarService().getAllBooks();
   }
 
   @override
@@ -21,20 +21,17 @@ class ReadingNowPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: ListView(
         children: [
-          FutureBuilder<List<Book>>(
-            future: _getInitialInfo(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(child: Text('No books found'));
-              } else {
-                return _bookList(snapshot.data!);
-              }
-            },
-          ),
+          StreamBuilder<List<Book>>(
+              stream: IsarService().getAllBooks(),
+              builder: ((context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No books found'));
+                } else {
+                  return _bookList(snapshot.data!);
+                }
+              })),
           const SizedBox(
             height: 40,
           ),
@@ -107,7 +104,7 @@ class ReadingNowPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            books[index].name,
+                            books[index].title,
                             style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 color: Colors.black,
