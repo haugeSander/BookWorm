@@ -128,21 +128,6 @@ class ReadingNowPage extends StatelessWidget {
                         ),
                       )
                     ]),
-                decoration: BoxDecoration(
-                    color: books[index].boxIsSelected
-                        ? Colors.white
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: books[index].boxIsSelected
-                        ? [
-                            BoxShadow(
-                                color:
-                                    const Color(0xff1D1617).withOpacity(0.07),
-                                offset: const Offset(0, 10),
-                                blurRadius: 40,
-                                spreadRadius: 0)
-                          ]
-                        : []),
               );
             })
       ],

@@ -22,15 +22,16 @@ const BookSchema = CollectionSchema(
       name: r'author',
       type: IsarType.string,
     ),
-    r'boxIsSelected': PropertySchema(
+    r'imageLocation': PropertySchema(
       id: 1,
-      name: r'boxIsSelected',
-      type: IsarType.bool,
+      name: r'imageLocation',
+      type: IsarType.string,
     ),
-    r'isFiction': PropertySchema(
+    r'status': PropertySchema(
       id: 2,
-      name: r'isFiction',
-      type: IsarType.bool,
+      name: r'status',
+      type: IsarType.byte,
+      enumMap: _BookstatusEnumValueMap,
     ),
     r'title': PropertySchema(
       id: 3,
@@ -66,6 +67,7 @@ int _bookEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.author.length * 3;
+  bytesCount += 3 + object.imageLocation.length * 3;
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -77,8 +79,8 @@ void _bookSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.author);
-  writer.writeBool(offsets[1], object.boxIsSelected);
-  writer.writeBool(offsets[2], object.isFiction);
+  writer.writeString(offsets[1], object.imageLocation);
+  writer.writeByte(offsets[2], object.status.index);
   writer.writeString(offsets[3], object.title);
 }
 
@@ -90,11 +92,12 @@ Book _bookDeserialize(
 ) {
   final object = Book(
     author: reader.readString(offsets[0]),
+    imageLocation: reader.readString(offsets[1]),
+    status: _BookstatusValueEnumMap[reader.readByteOrNull(offsets[2])] ??
+        BookStatus.finished,
     title: reader.readString(offsets[3]),
   );
   object.bookId = id;
-  object.boxIsSelected = reader.readBool(offsets[1]);
-  object.isFiction = reader.readBoolOrNull(offsets[2]);
   return object;
 }
 
@@ -108,15 +111,29 @@ P _bookDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (_BookstatusValueEnumMap[reader.readByteOrNull(offset)] ??
+          BookStatus.finished) as P;
     case 3:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
+
+const _BookstatusEnumValueMap = {
+  'finished': 0,
+  'started': 1,
+  'added': 2,
+  'dropped': 3,
+};
+const _BookstatusValueEnumMap = {
+  0: BookStatus.finished,
+  1: BookStatus.started,
+  2: BookStatus.added,
+  3: BookStatus.dropped,
+};
 
 Id _bookGetId(Book object) {
   return object.bookId;
@@ -388,38 +405,185 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> boxIsSelectedEqualTo(
-      bool value) {
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'boxIsSelected',
+        property: r'imageLocation',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'imageLocation',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'imageLocation',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'imageLocation',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'imageLocation',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'imageLocation',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'imageLocation',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'imageLocation',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'imageLocation',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'imageLocation',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> statusEqualTo(
+      BookStatus value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'status',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> isFictionIsNull() {
+  QueryBuilder<Book, Book, QAfterFilterCondition> statusGreaterThan(
+    BookStatus value, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'isFiction',
-      ));
-    });
-  }
-
-  QueryBuilder<Book, Book, QAfterFilterCondition> isFictionIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'isFiction',
-      ));
-    });
-  }
-
-  QueryBuilder<Book, Book, QAfterFilterCondition> isFictionEqualTo(
-      bool? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isFiction',
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'status',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> statusLessThan(
+    BookStatus value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'status',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> statusBetween(
+    BookStatus lower,
+    BookStatus upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'status',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -583,27 +747,27 @@ extension BookQuerySortBy on QueryBuilder<Book, Book, QSortBy> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByBoxIsSelected() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortByImageLocation() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'boxIsSelected', Sort.asc);
+      return query.addSortBy(r'imageLocation', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByBoxIsSelectedDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortByImageLocationDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'boxIsSelected', Sort.desc);
+      return query.addSortBy(r'imageLocation', Sort.desc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByIsFiction() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortByStatus() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isFiction', Sort.asc);
+      return query.addSortBy(r'status', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByIsFictionDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortByStatusDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isFiction', Sort.desc);
+      return query.addSortBy(r'status', Sort.desc);
     });
   }
 
@@ -645,27 +809,27 @@ extension BookQuerySortThenBy on QueryBuilder<Book, Book, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByBoxIsSelected() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenByImageLocation() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'boxIsSelected', Sort.asc);
+      return query.addSortBy(r'imageLocation', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByBoxIsSelectedDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenByImageLocationDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'boxIsSelected', Sort.desc);
+      return query.addSortBy(r'imageLocation', Sort.desc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByIsFiction() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenByStatus() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isFiction', Sort.asc);
+      return query.addSortBy(r'status', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByIsFictionDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenByStatusDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isFiction', Sort.desc);
+      return query.addSortBy(r'status', Sort.desc);
     });
   }
 
@@ -690,15 +854,17 @@ extension BookQueryWhereDistinct on QueryBuilder<Book, Book, QDistinct> {
     });
   }
 
-  QueryBuilder<Book, Book, QDistinct> distinctByBoxIsSelected() {
+  QueryBuilder<Book, Book, QDistinct> distinctByImageLocation(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'boxIsSelected');
+      return query.addDistinctBy(r'imageLocation',
+          caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Book, Book, QDistinct> distinctByIsFiction() {
+  QueryBuilder<Book, Book, QDistinct> distinctByStatus() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isFiction');
+      return query.addDistinctBy(r'status');
     });
   }
 
@@ -723,15 +889,15 @@ extension BookQueryProperty on QueryBuilder<Book, Book, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Book, bool, QQueryOperations> boxIsSelectedProperty() {
+  QueryBuilder<Book, String, QQueryOperations> imageLocationProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'boxIsSelected');
+      return query.addPropertyName(r'imageLocation');
     });
   }
 
-  QueryBuilder<Book, bool?, QQueryOperations> isFictionProperty() {
+  QueryBuilder<Book, BookStatus, QQueryOperations> statusProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isFiction');
+      return query.addPropertyName(r'status');
     });
   }
 
