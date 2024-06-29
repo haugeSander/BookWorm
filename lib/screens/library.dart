@@ -14,6 +14,7 @@ class LibraryPage extends StatefulWidget {
 class _LibraryPageState extends State<LibraryPage> {
   late TextEditingController bookNameController;
   late TextEditingController authorController;
+  String search = ""; //for searching
 
   @override
   void initState() {
@@ -27,6 +28,7 @@ class _LibraryPageState extends State<LibraryPage> {
   void dispose() {
     bookNameController.dispose();
     authorController.dispose();
+    search = "";
     super.dispose();
   }
 
@@ -42,7 +44,7 @@ class _LibraryPageState extends State<LibraryPage> {
             height: 40,
           ),
           StreamBuilder<List<Book>>(
-              stream: IsarService().getAllBooks(),
+              stream: IsarService().getAllBooks(search: search),
               builder: ((context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
@@ -254,7 +256,9 @@ class _LibraryPageState extends State<LibraryPage> {
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide.none)),
         onChanged: (value) {
-          IsarService().getAllBooks(search: value);
+          setState(() {
+            search = value;
+          });
         },
       ),
     );

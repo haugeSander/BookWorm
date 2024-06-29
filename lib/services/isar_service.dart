@@ -22,10 +22,16 @@ class IsarService {
 
   Stream<List<Book>> getAllBooks({String? search}) async* {
     final isar = await db;
-    yield* isar.books
+    final query = isar.books
+        .where()
         .filter()
-        .titleContains(search ?? '', caseSensitive: false)
-        .watch(fireImmediately: true);
+        .titleContains(search ?? '', caseSensitive: false);
+
+    await for (final results in query.watch(fireImmediately: true)) {
+      if (results.isNotEmpty) {
+        yield results;
+      }
+    }
   }
 
   Future<void> cleanDb() async {
