@@ -1,11 +1,10 @@
-import 'dart:ffi';
+import 'dart:io';
 
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:isar/isar.dart';
 
 class LibraryPage extends StatefulWidget {
   @override
@@ -15,10 +14,10 @@ class LibraryPage extends StatefulWidget {
 class _LibraryPageState extends State<LibraryPage> {
   late TextEditingController bookNameController;
   late TextEditingController authorController;
-  late TextEditingController statusController;
   late TextEditingController imageController;
+  late BookStatus _dropdownValue = BookStatus.added;
+  XFile? imageLoaded;
   String search = ""; //for searching
-  late BookStatus _dropdownValue;
 
   @override
   void initState() {
@@ -26,7 +25,6 @@ class _LibraryPageState extends State<LibraryPage> {
 
     bookNameController = TextEditingController();
     authorController = TextEditingController();
-    statusController = TextEditingController();
     imageController = TextEditingController();
   }
 
@@ -34,7 +32,6 @@ class _LibraryPageState extends State<LibraryPage> {
   void dispose() {
     bookNameController.dispose();
     authorController.dispose();
-    statusController.dispose();
     imageController.dispose();
     search = "";
     super.dispose();
@@ -74,9 +71,10 @@ class _LibraryPageState extends State<LibraryPage> {
           final newBook = Book(
               title: result['name']!,
               author: result['author']!,
-              status: BookStatus.added,
-              imageLocation: '');
+              status: _dropdownValue,
+              coverImage: imageLoaded == null ? "" : imageLoaded!.path);
           IsarService().saveBook(newBook);
+          imageLoaded = null;
         }),
         child: const Icon(Icons.book),
       ),
@@ -88,7 +86,7 @@ class _LibraryPageState extends State<LibraryPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Add book to library'),
+          title: const Text('Add book to Library'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -133,13 +131,11 @@ class _LibraryPageState extends State<LibraryPage> {
                         value: _dropdownValue,
                         items: BookStatus.values.map((BookStatus item) {
                           return DropdownMenuItem<BookStatus>(
-                              value: item,
-                              child: Text(item.toString().split('.')[1]));
+                              value: item, child: Text(item.toString()));
                         }).toList(),
                         onChanged: (BookStatus? newValue) {
                           setState(() {
                             _dropdownValue = newValue!;
-                            statusController.text = newValue.toString();
                           });
                         },
                       ),
@@ -151,13 +147,23 @@ class _LibraryPageState extends State<LibraryPage> {
                 ),
                 Center(
                   child: IconButton(
-                    icon: Icon(Icons.add_a_photo),
+                    icon: const Icon(Icons.add_a_photo),
                     onPressed: () {
-                      final location = _pickImageFromGallery();
-                      imageController.text = location.toString();
+                      _pickImageFromGallery();
                     },
                   ),
-                )
+                ),
+                Center(
+                    child: imageLoaded == null
+                        ? const SizedBox(
+                            width: 200.0,
+                            height: 300.0,
+                            child: Card(
+                                child: Center(child: Text('Hello World!'))),
+                          )
+                        : Image.file(
+                            File(imageLoaded!.path),
+                          ))
               ],
             ),
           ),
@@ -174,8 +180,6 @@ class _LibraryPageState extends State<LibraryPage> {
                 final bookData = {
                   'name': bookNameController.text,
                   'author': authorController.text,
-                  'status': statusController.text,
-                  'image': imageController.text,
                 };
                 submit(context, bookData);
               },
@@ -192,10 +196,14 @@ class _LibraryPageState extends State<LibraryPage> {
     authorController.clear();
   }
 
-  Future<String> _pickImageFromGallery() async {
-    final returnedImage =
+  Future<void> _pickImageFromGallery() async {
+    XFile? returnedImage =
         await ImagePicker().pickImage(source: ImageSource.gallery);
-    return returnedImage!.path;
+    if (returnedImage == null) return;
+
+    setState(() {
+      imageLoaded = returnedImage;
+    });
   }
 
   Column _bookList(List<Book> books) {
@@ -230,11 +238,18 @@ class _LibraryPageState extends State<LibraryPage> {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Image.asset(
-                        'assets/images/power_cover.jpg',
-                        width: 100,
-                        height: 100,
-                      ),
+                      books[index].coverImage == ""
+                          ? const SizedBox(
+                              width: 100.0,
+                              height: 100.0,
+                              child:
+                                  Card(child: Center(child: Text('No image'))),
+                            )
+                          : Image.file(
+                              File(books[index].coverImage),
+                              width: 100,
+                              height: 100,
+                            ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,7 +303,7 @@ class _LibraryPageState extends State<LibraryPage> {
               padding: const EdgeInsets.all(12),
               child: SvgPicture.asset('assets/icons/Search.svg'),
             ),
-            suffixIcon: Container(
+            suffixIcon: SizedBox(
               width: 100,
               child: IntrinsicHeight(
                 child: Row(

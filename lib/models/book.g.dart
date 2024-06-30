@@ -22,9 +22,9 @@ const BookSchema = CollectionSchema(
       name: r'author',
       type: IsarType.string,
     ),
-    r'imageLocation': PropertySchema(
+    r'coverImage': PropertySchema(
       id: 1,
-      name: r'imageLocation',
+      name: r'coverImage',
       type: IsarType.string,
     ),
     r'status': PropertySchema(
@@ -67,7 +67,7 @@ int _bookEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.author.length * 3;
-  bytesCount += 3 + object.imageLocation.length * 3;
+  bytesCount += 3 + object.coverImage.length * 3;
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -79,7 +79,7 @@ void _bookSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.author);
-  writer.writeString(offsets[1], object.imageLocation);
+  writer.writeString(offsets[1], object.coverImage);
   writer.writeByte(offsets[2], object.status.index);
   writer.writeString(offsets[3], object.title);
 }
@@ -92,7 +92,7 @@ Book _bookDeserialize(
 ) {
   final object = Book(
     author: reader.readString(offsets[0]),
-    imageLocation: reader.readString(offsets[1]),
+    coverImage: reader.readString(offsets[1]),
     status: _BookstatusValueEnumMap[reader.readByteOrNull(offsets[2])] ??
         BookStatus.finished,
     title: reader.readString(offsets[3]),
@@ -405,20 +405,20 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationEqualTo(
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'imageLocation',
+        property: r'coverImage',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationGreaterThan(
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -426,14 +426,14 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'imageLocation',
+        property: r'coverImage',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationLessThan(
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -441,14 +441,14 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'imageLocation',
+        property: r'coverImage',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationBetween(
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -457,7 +457,7 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'imageLocation',
+        property: r'coverImage',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -467,69 +467,69 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationStartsWith(
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'imageLocation',
+        property: r'coverImage',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationEndsWith(
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'imageLocation',
+        property: r'coverImage',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationContains(
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'imageLocation',
+        property: r'coverImage',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationMatches(
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'imageLocation',
+        property: r'coverImage',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationIsEmpty() {
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'imageLocation',
+        property: r'coverImage',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> imageLocationIsNotEmpty() {
+  QueryBuilder<Book, Book, QAfterFilterCondition> coverImageIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'imageLocation',
+        property: r'coverImage',
         value: '',
       ));
     });
@@ -747,15 +747,15 @@ extension BookQuerySortBy on QueryBuilder<Book, Book, QSortBy> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByImageLocation() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortByCoverImage() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imageLocation', Sort.asc);
+      return query.addSortBy(r'coverImage', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByImageLocationDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortByCoverImageDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imageLocation', Sort.desc);
+      return query.addSortBy(r'coverImage', Sort.desc);
     });
   }
 
@@ -809,15 +809,15 @@ extension BookQuerySortThenBy on QueryBuilder<Book, Book, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByImageLocation() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenByCoverImage() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imageLocation', Sort.asc);
+      return query.addSortBy(r'coverImage', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByImageLocationDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenByCoverImageDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'imageLocation', Sort.desc);
+      return query.addSortBy(r'coverImage', Sort.desc);
     });
   }
 
@@ -854,11 +854,10 @@ extension BookQueryWhereDistinct on QueryBuilder<Book, Book, QDistinct> {
     });
   }
 
-  QueryBuilder<Book, Book, QDistinct> distinctByImageLocation(
+  QueryBuilder<Book, Book, QDistinct> distinctByCoverImage(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'imageLocation',
-          caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'coverImage', caseSensitive: caseSensitive);
     });
   }
 
@@ -889,9 +888,9 @@ extension BookQueryProperty on QueryBuilder<Book, Book, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Book, String, QQueryOperations> imageLocationProperty() {
+  QueryBuilder<Book, String, QQueryOperations> coverImageProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'imageLocation');
+      return query.addPropertyName(r'coverImage');
     });
   }
 

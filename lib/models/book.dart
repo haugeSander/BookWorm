@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'book_notes.dart';
 
@@ -12,13 +13,13 @@ class Book {
   String author;
   @enumerated
   BookStatus status;
-  String imageLocation;
+  String coverImage;
   final bookNote = IsarLink<BookNotes>();
 
   Book({
     required this.title,
     required this.author,
     required this.status,
-    required this.imageLocation,
+    required this.coverImage,
   });
 }
