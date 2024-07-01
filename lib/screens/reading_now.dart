@@ -8,24 +8,17 @@ import 'package:book_worm/models/book.dart';
 import '../services/isar_service.dart';
 
 class ReadingNowPage extends StatelessWidget {
-  ReadingNowPage({super.key});
-
-  List<Book> books = [];
-
-  Stream<List<Book>> _getInitialInfo() async* {
-    IsarService().getAllBooks();
-  }
+  const ReadingNowPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    _getInitialInfo();
     return Scaffold(
       appBar: appBar(),
       backgroundColor: Colors.white,
       body: ListView(
         children: [
           StreamBuilder<List<Book>>(
-              stream: IsarService().getAllBooks(),
+              stream: IsarService().getBooksOfStatus(BookStatus.started),
               builder: ((context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));

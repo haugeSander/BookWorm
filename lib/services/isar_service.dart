@@ -34,6 +34,17 @@ class IsarService {
     }
   }
 
+  Stream<List<Book>> getBooksOfStatus(BookStatus status) async* {
+    final isar = await db;
+    final query = isar.books.where().filter().statusEqualTo(status);
+
+    await for (final results in query.watch(fireImmediately: true)) {
+      if (results.isNotEmpty) {
+        yield results;
+      }
+    }
+  }
+
   Future<void> cleanDb() async {
     final isar = await db;
     await isar.writeTxn(() => isar.clear());
