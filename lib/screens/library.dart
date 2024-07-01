@@ -96,7 +96,9 @@ class _LibraryPageState extends State<LibraryPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       const Text('Title:'),
-                      const Expanded(child: SizedBox()),
+                      const SizedBox(
+                        width: 90.0,
+                      ),
                       Expanded(
                         child: TextField(
                           decoration: const InputDecoration(
@@ -112,7 +114,9 @@ class _LibraryPageState extends State<LibraryPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       const Text('Author:'),
-                      const Expanded(child: SizedBox()),
+                      const SizedBox(
+                        width: 75.0,
+                      ),
                       Expanded(
                         child: TextField(
                           decoration:
@@ -125,8 +129,10 @@ class _LibraryPageState extends State<LibraryPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      const Text('Status'),
-                      const Expanded(child: SizedBox()),
+                      const Text('Status:'),
+                      const SizedBox(
+                        width: 80.0,
+                      ),
                       Expanded(
                         child: DropdownButton(
                           value: _dropdownValue,
@@ -145,7 +151,7 @@ class _LibraryPageState extends State<LibraryPage> {
                     ],
                   ),
                   const Row(
-                    children: [Text('Cover')],
+                    children: [Text('Cover:')],
                   ),
                   Center(
                     child: IconButton(
@@ -163,14 +169,14 @@ class _LibraryPageState extends State<LibraryPage> {
                       child: imageLoaded == null
                           ? const SizedBox(
                               width: 200.0,
-                              height: 300.0,
+                              height: 200.0,
                               child:
                                   Card(child: Center(child: Text('No image'))),
                             )
                           : Image.file(
                               File(imageLoaded!.path),
                               width: 200.0,
-                              height: 300.0,
+                              height: 200.0,
                             ))
                 ],
               ),
@@ -185,11 +191,20 @@ class _LibraryPageState extends State<LibraryPage> {
               TextButton(
                 child: const Text('SUBMIT'),
                 onPressed: () {
-                  final bookData = {
-                    'name': bookNameController.text,
-                    'author': authorController.text,
-                  };
-                  submit(context, bookData);
+                  if (bookNameController.text.isEmpty &&
+                      authorController.text.isEmpty) {
+                    const message = SnackBar(
+                      content: Text("Invalid title or author!"),
+                      duration: Duration(seconds: 2),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(message);
+                  } else {
+                    final bookData = {
+                      'name': bookNameController.text,
+                      'author': authorController.text,
+                    };
+                    submit(context, bookData);
+                  }
                 },
               ),
             ],
