@@ -16,7 +16,7 @@ class _LibraryPageState extends State<LibraryPage> {
   late TextEditingController authorController;
   late TextEditingController imageController;
   late BookStatus _dropdownValue = BookStatus.added;
-  XFile? imageLoaded;
+  File? imageLoaded;
   String search = ""; //for searching
 
   @override
@@ -85,107 +85,116 @@ class _LibraryPageState extends State<LibraryPage> {
     return showDialog<Map<String, String>>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Add book to Library'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Text('Title:'),
-                    const Expanded(child: SizedBox()),
-                    Expanded(
-                      child: TextField(
-                        decoration: const InputDecoration(
-                            hintText: 'title...',
-                            contentPadding: EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 10.0)),
-                        controller: bookNameController,
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Add book to Library'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Text('Title:'),
+                      const Expanded(child: SizedBox()),
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                              hintText: 'title...',
+                              contentPadding: EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 10.0)),
+                          controller: bookNameController,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Text('Author:'),
-                    const Expanded(child: SizedBox()),
-                    Expanded(
-                      child: TextField(
-                        decoration:
-                            const InputDecoration(hintText: 'author...'),
-                        controller: authorController,
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Text('Status'),
-                    const Expanded(child: SizedBox()),
-                    Expanded(
-                      child: DropdownButton(
-                        value: _dropdownValue,
-                        items: BookStatus.values.map((BookStatus item) {
-                          return DropdownMenuItem<BookStatus>(
-                              value: item, child: Text(item.toString()));
-                        }).toList(),
-                        onChanged: (BookStatus? newValue) {
-                          setState(() {
-                            _dropdownValue = newValue!;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const Row(
-                  children: [Text('Cover')],
-                ),
-                Center(
-                  child: IconButton(
-                    icon: const Icon(Icons.add_a_photo),
-                    onPressed: () {
-                      _pickImageFromGallery();
-                    },
+                    ],
                   ),
-                ),
-                Center(
-                    child: imageLoaded == null
-                        ? const SizedBox(
-                            width: 200.0,
-                            height: 300.0,
-                            child: Card(
-                                child: Center(child: Text('Hello World!'))),
-                          )
-                        : Image.file(
-                            File(imageLoaded!.path),
-                          ))
-              ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Text('Author:'),
+                      const Expanded(child: SizedBox()),
+                      Expanded(
+                        child: TextField(
+                          decoration:
+                              const InputDecoration(hintText: 'author...'),
+                          controller: authorController,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Text('Status'),
+                      const Expanded(child: SizedBox()),
+                      Expanded(
+                        child: DropdownButton(
+                          value: _dropdownValue,
+                          items: BookStatus.values.map((BookStatus item) {
+                            return DropdownMenuItem<BookStatus>(
+                                value: item,
+                                child: Text(item.toString().split(".")[1]));
+                          }).toList(),
+                          onChanged: (BookStatus? newValue) {
+                            setState(() {
+                              _dropdownValue = newValue!;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Row(
+                    children: [Text('Cover')],
+                  ),
+                  Center(
+                    child: IconButton(
+                      icon: const Icon(Icons.add_a_photo),
+                      onPressed: () async {
+                        final returnedImage = await _pickImageFromGallery();
+
+                        setState(() {
+                          imageLoaded = returnedImage;
+                        });
+                      },
+                    ),
+                  ),
+                  Center(
+                      child: imageLoaded == null
+                          ? const SizedBox(
+                              width: 200.0,
+                              height: 300.0,
+                              child:
+                                  Card(child: Center(child: Text('No image'))),
+                            )
+                          : Image.file(
+                              File(imageLoaded!.path),
+                              width: 200.0,
+                              height: 300.0,
+                            ))
+                ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('SUBMIT'),
-              onPressed: () {
-                final bookData = {
-                  'name': bookNameController.text,
-                  'author': authorController.text,
-                };
-                submit(context, bookData);
-              },
-            ),
-          ],
-        );
+            actions: [
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('SUBMIT'),
+                onPressed: () {
+                  final bookData = {
+                    'name': bookNameController.text,
+                    'author': authorController.text,
+                  };
+                  submit(context, bookData);
+                },
+              ),
+            ],
+          );
+        });
       },
     );
   }
@@ -196,39 +205,36 @@ class _LibraryPageState extends State<LibraryPage> {
     authorController.clear();
   }
 
-  Future<void> _pickImageFromGallery() async {
+  Future<File?> _pickImageFromGallery() async {
     XFile? returnedImage =
         await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (returnedImage == null) return;
-
-    setState(() {
-      imageLoaded = returnedImage;
-    });
+    if (returnedImage == null) return null;
+    return File(returnedImage.path);
   }
 
   Column _bookList(List<Book> books) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20),
+        const Padding(
+          padding: EdgeInsets.only(left: 20),
           child: Text(
             'Your added books',
             style: TextStyle(
                 color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 15,
         ),
         ListView.separated(
             itemCount: books.length,
             shrinkWrap: true,
             physics: NeverScrollableScrollPhysics(),
-            separatorBuilder: (context, index) => SizedBox(
+            separatorBuilder: (context, index) => const SizedBox(
                   height: 25,
                 ),
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               right: 20,
               left: 20,
             ),
