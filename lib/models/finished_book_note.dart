@@ -1,6 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:isar/isar.dart';
-
 import 'package:book_worm/models/book.dart';
 
 part 'finished_book_note.g.dart';

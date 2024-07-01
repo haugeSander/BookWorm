@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:book_worm/screens/book_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:book_worm/models/book.dart';
@@ -71,64 +74,76 @@ class ReadingNowPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20),
-          child: Text(
-            'Popular',
-            style: TextStyle(
-                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-        ),
-        SizedBox(
+        const SizedBox(
           height: 15,
         ),
         ListView.separated(
             itemCount: books.length,
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            separatorBuilder: (context, index) => SizedBox(
+            physics: const NeverScrollableScrollPhysics(),
+            separatorBuilder: (context, index) => const SizedBox(
                   height: 25,
                 ),
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               right: 20,
               left: 20,
             ),
             itemBuilder: (context, index) {
-              return Container(
-                height: 100,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BookDetailPage(
+                                book: books[index],
+                              )),
+                    );
+                  },
+                  child: Container(
+                    height: 100,
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(
-                            books[index].title,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                                fontSize: 16),
+                          books[index].coverImage == ""
+                              ? const SizedBox(
+                                  width: 100.0,
+                                  height: 100.0,
+                                  child: Card(
+                                      child: Center(child: Text('No image'))),
+                                )
+                              : Image.file(
+                                  File(books[index].coverImage),
+                                  width: 100,
+                                  height: 100,
+                                ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                books[index].title,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                    fontSize: 16),
+                              ),
+                              Text(
+                                books[index].author,
+                                style: const TextStyle(
+                                    color: Color(0xff7B6F72),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            ],
                           ),
-                          Text(
-                            books[index].author,
-                            style: const TextStyle(
-                                color: Color(0xff7B6F72),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400),
+                          const Expanded(child: SizedBox()),
+                          Icon(
+                            books[index].status == BookStatus.finished
+                                ? Icons.check
+                                : Icons.library_add,
                           ),
-                        ],
-                      ),
-                      GestureDetector(
-                        onTap: () {},
-                        child: SvgPicture.asset(
-                          'assets/icons/button.svg',
-                          width: 30,
-                          height: 30,
-                        ),
-                      )
-                    ]),
-              );
+                        ]),
+                  ));
             })
       ],
     );
@@ -144,39 +159,6 @@ class ReadingNowPage extends StatelessWidget {
       backgroundColor: Colors.white,
       elevation: 0.0,
       centerTitle: true,
-      leading: GestureDetector(
-        onTap: () {},
-        child: Container(
-          margin: const EdgeInsets.all(10),
-          alignment: Alignment.center,
-          child: SvgPicture.asset(
-            'assets/icons/Arrow - Left 2.svg',
-            height: 20,
-            width: 20,
-          ),
-          decoration: BoxDecoration(
-              color: const Color(0xffF7F8F8),
-              borderRadius: BorderRadius.circular(10)),
-        ),
-      ),
-      actions: [
-        GestureDetector(
-          onTap: () {},
-          child: Container(
-            margin: const EdgeInsets.all(10),
-            alignment: Alignment.center,
-            width: 37,
-            child: SvgPicture.asset(
-              'assets/icons/dots.svg',
-              height: 5,
-              width: 5,
-            ),
-            decoration: BoxDecoration(
-                color: const Color(0xffF7F8F8),
-                borderRadius: BorderRadius.circular(10)),
-          ),
-        ),
-      ],
     );
   }
 }

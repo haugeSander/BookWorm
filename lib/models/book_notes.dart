@@ -1,5 +1,4 @@
 import 'package:book_worm/models/book.dart';
-import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 
 part 'book_notes.g.dart';
