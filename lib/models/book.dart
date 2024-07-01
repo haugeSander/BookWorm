@@ -14,6 +14,7 @@ class Book {
   @enumerated
   BookStatus status;
   String coverImage;
+  bool? asAudioBook;
   final bookNote = IsarLink<BookNotes>();
 
   Book({

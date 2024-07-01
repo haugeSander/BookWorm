@@ -17,60 +17,15 @@ const BookNotesSchema = CollectionSchema(
   name: r'BookNotes',
   id: 2573453524368001867,
   properties: {
-    r'asAudioBook': PropertySchema(
+    r'noteContent': PropertySchema(
       id: 0,
-      name: r'asAudioBook',
-      type: IsarType.bool,
+      name: r'noteContent',
+      type: IsarType.string,
     ),
-    r'howChangedMe': PropertySchema(
+    r'timeOfNote': PropertySchema(
       id: 1,
-      name: r'howChangedMe',
-      type: IsarType.string,
-    ),
-    r'impressions': PropertySchema(
-      id: 2,
-      name: r'impressions',
-      type: IsarType.string,
-    ),
-    r'inThreeSentences': PropertySchema(
-      id: 3,
-      name: r'inThreeSentences',
-      type: IsarType.string,
-    ),
-    r'isReadingNow': PropertySchema(
-      id: 4,
-      name: r'isReadingNow',
-      type: IsarType.bool,
-    ),
-    r'rating': PropertySchema(
-      id: 5,
-      name: r'rating',
-      type: IsarType.long,
-    ),
-    r'summary': PropertySchema(
-      id: 6,
-      name: r'summary',
-      type: IsarType.string,
-    ),
-    r'timeEnded': PropertySchema(
-      id: 7,
-      name: r'timeEnded',
+      name: r'timeOfNote',
       type: IsarType.dateTime,
-    ),
-    r'timeStarted': PropertySchema(
-      id: 8,
-      name: r'timeStarted',
-      type: IsarType.dateTime,
-    ),
-    r'topThreeQuotes': PropertySchema(
-      id: 9,
-      name: r'topThreeQuotes',
-      type: IsarType.string,
-    ),
-    r'whoShouldRead': PropertySchema(
-      id: 10,
-      name: r'whoShouldRead',
-      type: IsarType.string,
     )
   },
   estimateSize: _bookNotesEstimateSize,
@@ -101,42 +56,7 @@ int _bookNotesEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  {
-    final value = object.howChangedMe;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
-    final value = object.impressions;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
-    final value = object.inThreeSentences;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
-    final value = object.summary;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
-    final value = object.topThreeQuotes;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
-  {
-    final value = object.whoShouldRead;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
+  bytesCount += 3 + object.noteContent.length * 3;
   return bytesCount;
 }
 
@@ -146,17 +66,8 @@ void _bookNotesSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeBool(offsets[0], object.asAudioBook);
-  writer.writeString(offsets[1], object.howChangedMe);
-  writer.writeString(offsets[2], object.impressions);
-  writer.writeString(offsets[3], object.inThreeSentences);
-  writer.writeBool(offsets[4], object.isReadingNow);
-  writer.writeLong(offsets[5], object.rating);
-  writer.writeString(offsets[6], object.summary);
-  writer.writeDateTime(offsets[7], object.timeEnded);
-  writer.writeDateTime(offsets[8], object.timeStarted);
-  writer.writeString(offsets[9], object.topThreeQuotes);
-  writer.writeString(offsets[10], object.whoShouldRead);
+  writer.writeString(offsets[0], object.noteContent);
+  writer.writeDateTime(offsets[1], object.timeOfNote);
 }
 
 BookNotes _bookNotesDeserialize(
@@ -165,19 +76,11 @@ BookNotes _bookNotesDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = BookNotes();
-  object.asAudioBook = reader.readBoolOrNull(offsets[0]);
-  object.howChangedMe = reader.readStringOrNull(offsets[1]);
-  object.impressions = reader.readStringOrNull(offsets[2]);
-  object.inThreeSentences = reader.readStringOrNull(offsets[3]);
-  object.isReadingNow = reader.readBoolOrNull(offsets[4]);
+  final object = BookNotes(
+    noteContent: reader.readString(offsets[0]),
+    timeOfNote: reader.readDateTime(offsets[1]),
+  );
   object.noteId = id;
-  object.rating = reader.readLongOrNull(offsets[5]);
-  object.summary = reader.readStringOrNull(offsets[6]);
-  object.timeEnded = reader.readDateTimeOrNull(offsets[7]);
-  object.timeStarted = reader.readDateTimeOrNull(offsets[8]);
-  object.topThreeQuotes = reader.readStringOrNull(offsets[9]);
-  object.whoShouldRead = reader.readStringOrNull(offsets[10]);
   return object;
 }
 
@@ -189,27 +92,9 @@ P _bookNotesDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
-    case 2:
-      return (reader.readStringOrNull(offset)) as P;
-    case 3:
-      return (reader.readStringOrNull(offset)) as P;
-    case 4:
-      return (reader.readBoolOrNull(offset)) as P;
-    case 5:
-      return (reader.readLongOrNull(offset)) as P;
-    case 6:
-      return (reader.readStringOrNull(offset)) as P;
-    case 7:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 8:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 9:
-      return (reader.readStringOrNull(offset)) as P;
-    case 10:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -312,59 +197,13 @@ extension BookNotesQueryWhere
 
 extension BookNotesQueryFilter
     on QueryBuilder<BookNotes, BookNotes, QFilterCondition> {
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      asAudioBookIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'asAudioBook',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      asAudioBookIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'asAudioBook',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> asAudioBookEqualTo(
-      bool? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'asAudioBook',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      howChangedMeIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'howChangedMe',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      howChangedMeIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'howChangedMe',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> howChangedMeEqualTo(
-    String? value, {
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> noteContentEqualTo(
+    String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'howChangedMe',
+        property: r'noteContent',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -372,47 +211,46 @@ extension BookNotesQueryFilter
   }
 
   QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      howChangedMeGreaterThan(
-    String? value, {
+      noteContentGreaterThan(
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'howChangedMe',
+        property: r'noteContent',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      howChangedMeLessThan(
-    String? value, {
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> noteContentLessThan(
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'howChangedMe',
+        property: r'noteContent',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> howChangedMeBetween(
-    String? lower,
-    String? upper, {
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> noteContentBetween(
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'howChangedMe',
+        property: r'noteContent',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -423,202 +261,50 @@ extension BookNotesQueryFilter
   }
 
   QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      howChangedMeStartsWith(
+      noteContentStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'howChangedMe',
+        property: r'noteContent',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      howChangedMeEndsWith(
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> noteContentEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'howChangedMe',
+        property: r'noteContent',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      howChangedMeContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'howChangedMe',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> howChangedMeMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'howChangedMe',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      howChangedMeIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'howChangedMe',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      howChangedMeIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'howChangedMe',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      impressionsIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'impressions',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      impressionsIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'impressions',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> impressionsEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'impressions',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      impressionsGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'impressions',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> impressionsLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'impressions',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> impressionsBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'impressions',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      impressionsStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'impressions',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> impressionsEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'impressions',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> impressionsContains(
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> noteContentContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'impressions',
+        property: r'noteContent',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> impressionsMatches(
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> noteContentMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'impressions',
+        property: r'noteContent',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -626,203 +312,21 @@ extension BookNotesQueryFilter
   }
 
   QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      impressionsIsEmpty() {
+      noteContentIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'impressions',
+        property: r'noteContent',
         value: '',
       ));
     });
   }
 
   QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      impressionsIsNotEmpty() {
+      noteContentIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'impressions',
+        property: r'noteContent',
         value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'inThreeSentences',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'inThreeSentences',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'inThreeSentences',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'inThreeSentences',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'inThreeSentences',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'inThreeSentences',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'inThreeSentences',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'inThreeSentences',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'inThreeSentences',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'inThreeSentences',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'inThreeSentences',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      inThreeSentencesIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'inThreeSentences',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      isReadingNowIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'isReadingNow',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      isReadingNowIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'isReadingNow',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> isReadingNowEqualTo(
-      bool? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isReadingNow',
-        value: value,
       ));
     });
   }
@@ -880,669 +384,56 @@ extension BookNotesQueryFilter
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> ratingIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'rating',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> ratingIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'rating',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> ratingEqualTo(
-      int? value) {
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeOfNoteEqualTo(
+      DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'rating',
+        property: r'timeOfNote',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> ratingGreaterThan(
-    int? value, {
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
+      timeOfNoteGreaterThan(
+    DateTime value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'rating',
+        property: r'timeOfNote',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> ratingLessThan(
-    int? value, {
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeOfNoteLessThan(
+    DateTime value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'rating',
+        property: r'timeOfNote',
         value: value,
       ));
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> ratingBetween(
-    int? lower,
-    int? upper, {
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeOfNoteBetween(
+    DateTime lower,
+    DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'rating',
+        property: r'timeOfNote',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'summary',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'summary',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'summary',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'summary',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> summaryIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'summary',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      summaryIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'summary',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeEndedIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'timeEnded',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      timeEndedIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'timeEnded',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeEndedEqualTo(
-      DateTime? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'timeEnded',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      timeEndedGreaterThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'timeEnded',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeEndedLessThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'timeEnded',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeEndedBetween(
-    DateTime? lower,
-    DateTime? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'timeEnded',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      timeStartedIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'timeStarted',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      timeStartedIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'timeStarted',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeStartedEqualTo(
-      DateTime? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'timeStarted',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      timeStartedGreaterThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'timeStarted',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeStartedLessThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'timeStarted',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeStartedBetween(
-    DateTime? lower,
-    DateTime? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'timeStarted',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'topThreeQuotes',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'topThreeQuotes',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'topThreeQuotes',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'topThreeQuotes',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'topThreeQuotes',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'topThreeQuotes',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'topThreeQuotes',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'topThreeQuotes',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'topThreeQuotes',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'topThreeQuotes',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'topThreeQuotes',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      topThreeQuotesIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'topThreeQuotes',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'whoShouldRead',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'whoShouldRead',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'whoShouldRead',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'whoShouldRead',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'whoShouldRead',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'whoShouldRead',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'whoShouldRead',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'whoShouldRead',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'whoShouldRead',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'whoShouldRead',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'whoShouldRead',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
-      whoShouldReadIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'whoShouldRead',
-        value: '',
       ));
     });
   }
@@ -1569,200 +460,42 @@ extension BookNotesQueryLinks
 }
 
 extension BookNotesQuerySortBy on QueryBuilder<BookNotes, BookNotes, QSortBy> {
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByAsAudioBook() {
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByNoteContent() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'asAudioBook', Sort.asc);
+      return query.addSortBy(r'noteContent', Sort.asc);
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByAsAudioBookDesc() {
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByNoteContentDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'asAudioBook', Sort.desc);
+      return query.addSortBy(r'noteContent', Sort.desc);
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByHowChangedMe() {
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByTimeOfNote() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'howChangedMe', Sort.asc);
+      return query.addSortBy(r'timeOfNote', Sort.asc);
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByHowChangedMeDesc() {
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByTimeOfNoteDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'howChangedMe', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByImpressions() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'impressions', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByImpressionsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'impressions', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByInThreeSentences() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'inThreeSentences', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy>
-      sortByInThreeSentencesDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'inThreeSentences', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByIsReadingNow() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isReadingNow', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByIsReadingNowDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isReadingNow', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByRating() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'rating', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByRatingDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'rating', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortBySummary() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'summary', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortBySummaryDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'summary', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByTimeEnded() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timeEnded', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByTimeEndedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timeEnded', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByTimeStarted() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timeStarted', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByTimeStartedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timeStarted', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByTopThreeQuotes() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'topThreeQuotes', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByTopThreeQuotesDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'topThreeQuotes', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByWhoShouldRead() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'whoShouldRead', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByWhoShouldReadDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'whoShouldRead', Sort.desc);
+      return query.addSortBy(r'timeOfNote', Sort.desc);
     });
   }
 }
 
 extension BookNotesQuerySortThenBy
     on QueryBuilder<BookNotes, BookNotes, QSortThenBy> {
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByAsAudioBook() {
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByNoteContent() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'asAudioBook', Sort.asc);
+      return query.addSortBy(r'noteContent', Sort.asc);
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByAsAudioBookDesc() {
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByNoteContentDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'asAudioBook', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByHowChangedMe() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'howChangedMe', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByHowChangedMeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'howChangedMe', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByImpressions() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'impressions', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByImpressionsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'impressions', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByInThreeSentences() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'inThreeSentences', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy>
-      thenByInThreeSentencesDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'inThreeSentences', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByIsReadingNow() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isReadingNow', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByIsReadingNowDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isReadingNow', Sort.desc);
+      return query.addSortBy(r'noteContent', Sort.desc);
     });
   }
 
@@ -1778,153 +511,31 @@ extension BookNotesQuerySortThenBy
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByRating() {
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByTimeOfNote() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'rating', Sort.asc);
+      return query.addSortBy(r'timeOfNote', Sort.asc);
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByRatingDesc() {
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByTimeOfNoteDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'rating', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenBySummary() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'summary', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenBySummaryDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'summary', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByTimeEnded() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timeEnded', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByTimeEndedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timeEnded', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByTimeStarted() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timeStarted', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByTimeStartedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timeStarted', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByTopThreeQuotes() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'topThreeQuotes', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByTopThreeQuotesDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'topThreeQuotes', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByWhoShouldRead() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'whoShouldRead', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByWhoShouldReadDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'whoShouldRead', Sort.desc);
+      return query.addSortBy(r'timeOfNote', Sort.desc);
     });
   }
 }
 
 extension BookNotesQueryWhereDistinct
     on QueryBuilder<BookNotes, BookNotes, QDistinct> {
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByAsAudioBook() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'asAudioBook');
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByHowChangedMe(
+  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByNoteContent(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'howChangedMe', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'noteContent', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByImpressions(
-      {bool caseSensitive = true}) {
+  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByTimeOfNote() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'impressions', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByInThreeSentences(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'inThreeSentences',
-          caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByIsReadingNow() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isReadingNow');
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByRating() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'rating');
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctBySummary(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'summary', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByTimeEnded() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'timeEnded');
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByTimeStarted() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'timeStarted');
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByTopThreeQuotes(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'topThreeQuotes',
-          caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByWhoShouldRead(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'whoShouldRead',
-          caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'timeOfNote');
     });
   }
 }
@@ -1937,70 +548,15 @@ extension BookNotesQueryProperty
     });
   }
 
-  QueryBuilder<BookNotes, bool?, QQueryOperations> asAudioBookProperty() {
+  QueryBuilder<BookNotes, String, QQueryOperations> noteContentProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'asAudioBook');
+      return query.addPropertyName(r'noteContent');
     });
   }
 
-  QueryBuilder<BookNotes, String?, QQueryOperations> howChangedMeProperty() {
+  QueryBuilder<BookNotes, DateTime, QQueryOperations> timeOfNoteProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'howChangedMe');
-    });
-  }
-
-  QueryBuilder<BookNotes, String?, QQueryOperations> impressionsProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'impressions');
-    });
-  }
-
-  QueryBuilder<BookNotes, String?, QQueryOperations>
-      inThreeSentencesProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'inThreeSentences');
-    });
-  }
-
-  QueryBuilder<BookNotes, bool?, QQueryOperations> isReadingNowProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isReadingNow');
-    });
-  }
-
-  QueryBuilder<BookNotes, int?, QQueryOperations> ratingProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'rating');
-    });
-  }
-
-  QueryBuilder<BookNotes, String?, QQueryOperations> summaryProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'summary');
-    });
-  }
-
-  QueryBuilder<BookNotes, DateTime?, QQueryOperations> timeEndedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'timeEnded');
-    });
-  }
-
-  QueryBuilder<BookNotes, DateTime?, QQueryOperations> timeStartedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'timeStarted');
-    });
-  }
-
-  QueryBuilder<BookNotes, String?, QQueryOperations> topThreeQuotesProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'topThreeQuotes');
-    });
-  }
-
-  QueryBuilder<BookNotes, String?, QQueryOperations> whoShouldReadProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'whoShouldRead');
+      return query.addPropertyName(r'timeOfNote');
     });
   }
 }
