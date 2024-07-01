@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:book_worm/models/book.dart';
+import 'package:book_worm/screens/book_detail.dart';
+import 'package:book_worm/screens/reading_now.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -245,7 +247,7 @@ class _LibraryPageState extends State<LibraryPage> {
         ListView.separated(
             itemCount: books.length,
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             separatorBuilder: (context, index) => const SizedBox(
                   height: 25,
                 ),
@@ -254,51 +256,61 @@ class _LibraryPageState extends State<LibraryPage> {
               left: 20,
             ),
             itemBuilder: (context, index) {
-              return Container(
-                height: 100,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      books[index].coverImage == ""
-                          ? const SizedBox(
-                              width: 100.0,
-                              height: 100.0,
-                              child:
-                                  Card(child: Center(child: Text('No image'))),
-                            )
-                          : Image.file(
-                              File(books[index].coverImage),
-                              width: 100,
-                              height: 100,
-                            ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => BookDetailPage(
+                                book: books[index],
+                              )),
+                    );
+                  },
+                  child: Container(
+                    height: 100,
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(
-                            books[index].title,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                                fontSize: 16),
+                          books[index].coverImage == ""
+                              ? const SizedBox(
+                                  width: 100.0,
+                                  height: 100.0,
+                                  child: Card(
+                                      child: Center(child: Text('No image'))),
+                                )
+                              : Image.file(
+                                  File(books[index].coverImage),
+                                  width: 100,
+                                  height: 100,
+                                ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                books[index].title,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                    fontSize: 16),
+                              ),
+                              Text(
+                                books[index].author,
+                                style: const TextStyle(
+                                    color: Color(0xff7B6F72),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            ],
                           ),
-                          Text(
-                            books[index].author,
-                            style: const TextStyle(
-                                color: Color(0xff7B6F72),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400),
+                          const Expanded(child: SizedBox()),
+                          Icon(
+                            books[index].status == BookStatus.finished
+                                ? Icons.check
+                                : Icons.library_add,
                           ),
-                        ],
-                      ),
-                      const Expanded(child: SizedBox()),
-                      Icon(
-                        books[index].status == BookStatus.finished
-                            ? Icons.check
-                            : Icons.library_add,
-                      ),
-                    ]),
-              );
+                        ]),
+                  ));
             })
       ],
     );
