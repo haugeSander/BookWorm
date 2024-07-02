@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:book_worm/models/book_notes.dart';
 import 'package:book_worm/screens/book_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm/models/book.dart';
@@ -7,7 +8,9 @@ import 'package:book_worm/models/book.dart';
 import '../services/isar_service.dart';
 
 class ReadingNowPage extends StatelessWidget {
-  const ReadingNowPage({super.key});
+  ReadingNowPage({super.key});
+  DateTime? selectedDate;
+  TextEditingController noteController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -146,13 +149,7 @@ class ReadingNowPage extends StatelessWidget {
             itemBuilder: (context, index) {
               return GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => BookDetailPage(
-                                book: books[index],
-                              )),
-                    );
+                    _openAddNote(context, books[index]);
                   },
                   child: SizedBox(
                     height: 100,
@@ -203,6 +200,67 @@ class ReadingNowPage extends StatelessWidget {
       ],
     );
   }
+
+  Future _openAddNote(context, Book book) => showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Add a note ${book.title}'),
+              content:
+                  Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const Text("Set date for note:"),
+                    TextButton(
+                      child: Text(
+                        selectedDate == null
+                            ? 'Select Date'
+                            : selectedDate!.toLocal().toString().split(' ')[0],
+                      ),
+                      onPressed: () async {
+                        DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2017, 9, 7),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            selectedDate = picked;
+                          });
+                        }
+                      },
+                    )
+                  ],
+                ),
+                const Text("Note:"),
+                TextField(
+                  controller: noteController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter note',
+                  ),
+                )
+              ]),
+              actions: [
+                TextButton(
+                    child: const Text('Cancel'),
+                    onPressed: () {
+                      submit(context);
+                    }),
+                TextButton(
+                    child: const Text('Add note'),
+                    onPressed: () {
+                      final newNote = BookNotes(
+                          timeOfNote: selectedDate!,
+                          noteContent: noteController.text);
+                      IsarService().saveBookNote(newNote);
+                      submit(context);
+                    })
+              ],
+            );
+          }));
 
   AppBar appBar() {
     return AppBar(
