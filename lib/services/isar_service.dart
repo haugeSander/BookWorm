@@ -34,9 +34,10 @@ class IsarService {
     }
   }
 
-  Stream<List<Book>> getBooksOfStatus(BookStatus status) async* {
+  Stream<List<Book>> getBooksOfStatus(List<BookStatus> status) async* {
     final isar = await db;
-    final query = isar.books.where().filter().statusEqualTo(status);
+    final query =
+        isar.books.where().filter().statusBetween(status[0], status[1]);
 
     await for (final results in query.watch(fireImmediately: true)) {
       if (results.isNotEmpty) {

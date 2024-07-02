@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'book_notes.dart';
 
 part 'book.g.dart';
 
-enum BookStatus { finished, started, added, dropped }
+enum BookStatus { finished, reading, listening, added, dropped }
 
 @Collection()
 class Book {
@@ -14,7 +13,6 @@ class Book {
   @enumerated
   BookStatus status;
   String coverImage;
-  bool? asAudioBook;
   final bookNote = IsarLink<BookNotes>();
 
   Book({

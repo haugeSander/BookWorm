@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:book_worm/screens/book_detail.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:book_worm/models/book.dart';
 
 import '../services/isar_service.dart';
@@ -18,12 +17,13 @@ class ReadingNowPage extends StatelessWidget {
       body: ListView(
         children: [
           StreamBuilder<List<Book>>(
-              stream: IsarService().getBooksOfStatus(BookStatus.started),
+              stream: IsarService()
+                  .getBooksOfStatus([BookStatus.reading, BookStatus.listening]),
               builder: ((context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No books found'));
+                  return const Center(child: Text('No books found'));
                 } else {
                   return _bookList(snapshot.data!);
                 }
@@ -35,29 +35,91 @@ class ReadingNowPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          openAddDialog(context);
+          openAddCurrentlyReading(context);
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.chrome_reader_mode),
       ),
     );
   }
 
-  Future openAddDialog(context) => showDialog(
+  Future openAddCurrentlyReading(context) => showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-            title: Text('Fedda liker gutter!'),
-            content: TextField(
-              autofocus: true,
-              decoration: InputDecoration(hintText: 'Enter why'),
-            ),
-            actions: [
-              TextButton(
-                  child: Text('SUBMIT'),
-                  onPressed: () {
-                    submit(context);
-                  })
-            ],
-          ));
+      builder: (context) => StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Add a book you are currently reading'),
+              content: StreamBuilder<List<Book>>(
+                  stream: IsarService().getAllBooks(),
+                  builder: ((context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No books found'));
+                    } else {
+                      final books = snapshot.data!;
+                      return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            ListView.separated(
+                                itemCount: books.length,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(
+                                      height: 25,
+                                    ),
+                                padding: const EdgeInsets.only(
+                                  right: 20,
+                                  left: 20,
+                                ),
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    child: SizedBox(
+                                        height: 50.0,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Text(books[index].title),
+                                            Checkbox(
+                                                value: ([
+                                                  BookStatus.reading,
+                                                  BookStatus.listening
+                                                ].contains(
+                                                    books[index].status)),
+                                                onChanged: (newValue) {
+                                                  setState(() {
+                                                    if (newValue == null)
+                                                      return;
+                                                    else if (newValue) {
+                                                      books[index].status =
+                                                          BookStatus.reading;
+                                                    } else {
+                                                      books[index].status =
+                                                          BookStatus.finished;
+                                                    }
+                                                    IsarService()
+                                                        .saveBook(books[index]);
+                                                  });
+                                                })
+                                          ],
+                                        )),
+                                  );
+                                })
+                          ]);
+                    }
+                  })),
+              actions: [
+                TextButton(
+                    child: const Text('SUBMIT'),
+                    onPressed: () {
+                      submit(context);
+                    })
+              ],
+            );
+          }));
 
   void submit(context) {
     Navigator.of(context).pop();
@@ -92,7 +154,7 @@ class ReadingNowPage extends StatelessWidget {
                               )),
                     );
                   },
-                  child: Container(
+                  child: SizedBox(
                     height: 100,
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

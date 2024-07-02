@@ -17,29 +17,24 @@ const BookSchema = CollectionSchema(
   name: r'Book',
   id: 4089735379470416465,
   properties: {
-    r'asAudioBook': PropertySchema(
-      id: 0,
-      name: r'asAudioBook',
-      type: IsarType.bool,
-    ),
     r'author': PropertySchema(
-      id: 1,
+      id: 0,
       name: r'author',
       type: IsarType.string,
     ),
     r'coverImage': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'coverImage',
       type: IsarType.string,
     ),
     r'status': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'status',
       type: IsarType.byte,
       enumMap: _BookstatusEnumValueMap,
     ),
     r'title': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'title',
       type: IsarType.string,
     )
@@ -83,11 +78,10 @@ void _bookSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeBool(offsets[0], object.asAudioBook);
-  writer.writeString(offsets[1], object.author);
-  writer.writeString(offsets[2], object.coverImage);
-  writer.writeByte(offsets[3], object.status.index);
-  writer.writeString(offsets[4], object.title);
+  writer.writeString(offsets[0], object.author);
+  writer.writeString(offsets[1], object.coverImage);
+  writer.writeByte(offsets[2], object.status.index);
+  writer.writeString(offsets[3], object.title);
 }
 
 Book _bookDeserialize(
@@ -97,13 +91,12 @@ Book _bookDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Book(
-    author: reader.readString(offsets[1]),
-    coverImage: reader.readString(offsets[2]),
-    status: _BookstatusValueEnumMap[reader.readByteOrNull(offsets[3])] ??
+    author: reader.readString(offsets[0]),
+    coverImage: reader.readString(offsets[1]),
+    status: _BookstatusValueEnumMap[reader.readByteOrNull(offsets[2])] ??
         BookStatus.finished,
-    title: reader.readString(offsets[4]),
+    title: reader.readString(offsets[3]),
   );
-  object.asAudioBook = reader.readBoolOrNull(offsets[0]);
   object.bookId = id;
   return object;
 }
@@ -116,15 +109,13 @@ P _bookDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
       return (_BookstatusValueEnumMap[reader.readByteOrNull(offset)] ??
           BookStatus.finished) as P;
-    case 4:
+    case 3:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -133,15 +124,17 @@ P _bookDeserializeProp<P>(
 
 const _BookstatusEnumValueMap = {
   'finished': 0,
-  'started': 1,
-  'added': 2,
-  'dropped': 3,
+  'reading': 1,
+  'listening': 2,
+  'added': 3,
+  'dropped': 4,
 };
 const _BookstatusValueEnumMap = {
   0: BookStatus.finished,
-  1: BookStatus.started,
-  2: BookStatus.added,
-  3: BookStatus.dropped,
+  1: BookStatus.reading,
+  2: BookStatus.listening,
+  3: BookStatus.added,
+  4: BookStatus.dropped,
 };
 
 Id _bookGetId(Book object) {
@@ -234,32 +227,6 @@ extension BookQueryWhere on QueryBuilder<Book, Book, QWhereClause> {
 }
 
 extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
-  QueryBuilder<Book, Book, QAfterFilterCondition> asAudioBookIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'asAudioBook',
-      ));
-    });
-  }
-
-  QueryBuilder<Book, Book, QAfterFilterCondition> asAudioBookIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'asAudioBook',
-      ));
-    });
-  }
-
-  QueryBuilder<Book, Book, QAfterFilterCondition> asAudioBookEqualTo(
-      bool? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'asAudioBook',
-        value: value,
-      ));
-    });
-  }
-
   QueryBuilder<Book, Book, QAfterFilterCondition> authorEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -770,18 +737,6 @@ extension BookQueryLinks on QueryBuilder<Book, Book, QFilterCondition> {
 }
 
 extension BookQuerySortBy on QueryBuilder<Book, Book, QSortBy> {
-  QueryBuilder<Book, Book, QAfterSortBy> sortByAsAudioBook() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'asAudioBook', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Book, Book, QAfterSortBy> sortByAsAudioBookDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'asAudioBook', Sort.desc);
-    });
-  }
-
   QueryBuilder<Book, Book, QAfterSortBy> sortByAuthor() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'author', Sort.asc);
@@ -832,18 +787,6 @@ extension BookQuerySortBy on QueryBuilder<Book, Book, QSortBy> {
 }
 
 extension BookQuerySortThenBy on QueryBuilder<Book, Book, QSortThenBy> {
-  QueryBuilder<Book, Book, QAfterSortBy> thenByAsAudioBook() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'asAudioBook', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Book, Book, QAfterSortBy> thenByAsAudioBookDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'asAudioBook', Sort.desc);
-    });
-  }
-
   QueryBuilder<Book, Book, QAfterSortBy> thenByAuthor() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'author', Sort.asc);
@@ -906,12 +849,6 @@ extension BookQuerySortThenBy on QueryBuilder<Book, Book, QSortThenBy> {
 }
 
 extension BookQueryWhereDistinct on QueryBuilder<Book, Book, QDistinct> {
-  QueryBuilder<Book, Book, QDistinct> distinctByAsAudioBook() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'asAudioBook');
-    });
-  }
-
   QueryBuilder<Book, Book, QDistinct> distinctByAuthor(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -944,12 +881,6 @@ extension BookQueryProperty on QueryBuilder<Book, Book, QQueryProperty> {
   QueryBuilder<Book, int, QQueryOperations> bookIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'bookId');
-    });
-  }
-
-  QueryBuilder<Book, bool?, QQueryOperations> asAudioBookProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'asAudioBook');
     });
   }
 
