@@ -253,8 +253,10 @@ class ReadingNowPage extends StatelessWidget {
                     child: const Text('Add note'),
                     onPressed: () {
                       final newNote = BookNotes(
-                          timeOfNote: selectedDate!,
-                          noteContent: noteController.text);
+                        timeOfNote: selectedDate!,
+                        noteContent: noteController.text,
+                      );
+                      newNote.bookReference.value = book;
                       IsarService().saveBookNote(newNote);
                       submit(context);
                     })
