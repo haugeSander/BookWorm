@@ -106,7 +106,7 @@ class HomePage extends StatelessWidget {
           title: Center(
             child: Text(
               "Note for ${note.bookReference.value!.title}",
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
