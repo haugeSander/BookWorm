@@ -2,6 +2,7 @@ import 'package:book_worm/screens/home.dart';
 import 'package:book_worm/screens/library.dart';
 import 'package:book_worm/screens/reading_now.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({Key? key}) : super(key: key);
@@ -11,7 +12,7 @@ class NavigationMenu extends StatefulWidget {
 }
 
 class _NavigationMenuState extends State<NavigationMenu> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
 
   // List of pages to display for each bottom navigation bar item
   static final List<Widget> _pages = <Widget>[
@@ -36,21 +37,17 @@ class _NavigationMenuState extends State<NavigationMenu> {
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        items: <BottomNavigationBarItem>[
+        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(_selectedIndex == 0
-                ? Icons.collections_bookmark
-                : Icons.collections_bookmark_outlined),
+            icon: Icon(Icons.bookmark),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(_selectedIndex == 1 ? Icons.book : Icons.book_outlined),
+            icon: Icon(Icons.home),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(_selectedIndex == 2
-                ? Icons.menu_book
-                : Icons.menu_book_outlined),
+            icon: Icon(Icons.now_widgets),
             label: '',
           ),
         ],

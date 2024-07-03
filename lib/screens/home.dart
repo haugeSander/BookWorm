@@ -37,40 +37,7 @@ class HomePage extends StatelessWidget {
           const SizedBox(
             height: 15,
           ),
-          SizedBox(
-              height: 120,
-              child: FutureBuilder(
-                future: _getInfo(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No books found'));
-                  } else {
-                    return ListView.separated(
-                      itemCount: snapshot.data!.length,
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(left: 20, right: 20),
-                      separatorBuilder: (context, index) => const SizedBox(
-                        width: 25,
-                      ),
-                      itemBuilder: (BuildContext context, int index) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: Image.file(
-                              File(snapshot.data![index].bookReference.value!
-                                  .coverImage),
-                              height: 100,
-                              width: 100,
-                              fit: BoxFit.fill),
-                        );
-                      },
-                    );
-                  }
-                },
-              )),
+          _recentNoteScroll(),
           const SizedBox(
             height: 40,
           ),
@@ -86,6 +53,99 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  SizedBox _recentNoteScroll() {
+    return SizedBox(
+        height: 120,
+        child: FutureBuilder(
+          future: _getInfo(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No books found'));
+            } else {
+              return ListView.separated(
+                itemCount: snapshot.data!.length,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                separatorBuilder: (context, index) => const SizedBox(
+                  width: 25,
+                ),
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                      onTap: () {
+                        _noteDialog(context, snapshot, snapshot.data![index]);
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: Image.file(
+                            File(snapshot
+                                .data![index].bookReference.value!.coverImage),
+                            height: 100,
+                            width: 100,
+                            fit: BoxFit.fill),
+                      ));
+                },
+              );
+            }
+          },
+        ));
+  }
+
+  Future<Map<String, String>?> _noteDialog(BuildContext context,
+      AsyncSnapshot<List<BookNotes>> snapshot, BookNotes note) {
+    return showDialog<Map<String, String>>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(
+            child: Text(
+              "Note for ${note.bookReference.value!.title}",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          content: Container(
+            padding: const EdgeInsets.all(10.0),
+            height: 160,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  note.noteContent,
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Noted on ${note.timeOfNote.toString().split(" ").first}",
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      "Close",
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
