@@ -46,6 +46,11 @@ class IsarService {
     }
   }
 
+  Future<List<BookNotes>> getAllBookNotes() async {
+    final isar = await db;
+    return isar.bookNotes.where(sort: Sort.asc).findAll();
+  }
+
   Future<void> cleanDb() async {
     final isar = await db;
     await isar.writeTxn(() => isar.clear());

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/screens/book_detail.dart';
-import 'package:book_worm/screens/reading_now.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
