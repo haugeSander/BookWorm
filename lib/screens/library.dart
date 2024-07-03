@@ -303,16 +303,29 @@ class _LibraryPageState extends State<LibraryPage> {
                             ],
                           ),
                           const Expanded(child: SizedBox()),
-                          Icon(
-                            books[index].status == BookStatus.finished
-                                ? Icons.check
-                                : Icons.library_add,
-                          ),
+                          _getCorrespondingIcon(books[index]),
                         ]),
                   ));
             })
       ],
     );
+  }
+
+  Widget _getCorrespondingIcon(Book book) {
+    switch (book.status) {
+      case BookStatus.finished:
+        return const Icon(Icons.check);
+      case BookStatus.reading:
+        return SvgPicture.asset("assets/icons/reading_icon.svg",
+            width: 24.0, height: 24.0);
+      case BookStatus.listening:
+        return const Icon(Icons.headphones);
+      case BookStatus.dropped:
+        return const Icon(Icons.block_outlined);
+      case BookStatus.added:
+        return SvgPicture.asset("assets/icons/added_icon.svg",
+            width: 24.0, height: 24.0);
+    }
   }
 
   Container _searchField() {
