@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:book_worm/models/book_notes.dart';
-import 'package:book_worm/screens/book_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm/models/book.dart';
+import 'package:flutter_svg/svg.dart';
 
 import '../services/isar_service.dart';
 
@@ -116,7 +116,7 @@ class ReadingNowPage extends StatelessWidget {
                   })),
               actions: [
                 TextButton(
-                    child: const Text('SUBMIT'),
+                    child: const Text('Done'),
                     onPressed: () {
                       submit(context);
                     })
@@ -189,11 +189,7 @@ class ReadingNowPage extends StatelessWidget {
                             ],
                           ),
                           const Expanded(child: SizedBox()),
-                          Icon(
-                            books[index].status == BookStatus.finished
-                                ? Icons.check
-                                : Icons.library_add,
-                          ),
+                          _getCorrespondingIcon(books[index])
                         ]),
                   ));
             })
@@ -201,41 +197,73 @@ class ReadingNowPage extends StatelessWidget {
     );
   }
 
+  Widget _getCorrespondingIcon(Book book) {
+    switch (book.status) {
+      case BookStatus.finished:
+        return const Icon(Icons.check);
+      case BookStatus.reading:
+        return SvgPicture.asset("assets/icons/reading_icon.svg",
+            width: 24.0, height: 24.0);
+      case BookStatus.listening:
+        return const Icon(Icons.headphones);
+      case BookStatus.dropped:
+        return const Icon(Icons.block_outlined);
+      case BookStatus.added:
+        return SvgPicture.asset("assets/icons/added_icon.svg",
+            width: 24.0, height: 24.0);
+    }
+  }
+
   Future _openAddNote(context, Book book) => showDialog(
       context: context,
       builder: (context) => StatefulBuilder(builder: (context, setState) {
             return AlertDialog(
-              title: Text('Add a note ${book.title}'),
+              title: Text('Add a note for: ${book.title}'),
               content:
                   Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-                Row(
+                Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     const Text("Set date for note:"),
-                    TextButton(
-                      child: Text(
-                        selectedDate == null
-                            ? 'Select Date'
-                            : selectedDate!.toLocal().toString().split(' ')[0],
-                      ),
-                      onPressed: () async {
-                        DateTime? picked = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2017, 9, 7),
-                          lastDate: DateTime.now(),
-                        );
-                        if (picked != null) {
-                          setState(() {
-                            selectedDate = picked;
-                          });
-                        }
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.calendar_today),
+                        TextButton(
+                          child: Text(
+                            selectedDate == null
+                                ? 'Select Date'
+                                : selectedDate!
+                                    .toLocal()
+                                    .toString()
+                                    .split(' ')[0],
+                          ),
+                          onPressed: () async {
+                            DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2017, 9, 7),
+                              lastDate: DateTime.now(),
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                selectedDate = picked;
+                              });
+                            }
+                          },
+                        ),
+                      ],
                     )
                   ],
                 ),
+                const SizedBox(
+                  height: 10,
+                ),
                 const Text("Note:"),
                 TextField(
+                  autofocus: true,
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
                   controller: noteController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),

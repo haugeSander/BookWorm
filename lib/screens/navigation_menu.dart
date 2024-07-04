@@ -2,7 +2,6 @@ import 'package:book_worm/screens/home.dart';
 import 'package:book_worm/screens/library.dart';
 import 'package:book_worm/screens/reading_now.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({Key? key}) : super(key: key);

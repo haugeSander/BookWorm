@@ -114,6 +114,9 @@ class _LibraryPageState extends State<LibraryPage> {
                         const SizedBox(width: 16.0),
                         Expanded(
                           child: TextField(
+                            autofocus: true,
+                            textCapitalization: TextCapitalization.sentences,
+                            maxLines: null,
                             decoration: const InputDecoration(
                               hintText: 'Title...',
                               contentPadding: EdgeInsets.symmetric(
@@ -134,6 +137,8 @@ class _LibraryPageState extends State<LibraryPage> {
                         const SizedBox(width: 16.0),
                         Expanded(
                           child: TextField(
+                            textCapitalization: TextCapitalization.sentences,
+                            maxLines: null,
                             decoration: const InputDecoration(
                               hintText: 'Author...',
                               contentPadding: EdgeInsets.symmetric(
