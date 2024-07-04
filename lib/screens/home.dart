@@ -114,19 +114,19 @@ class HomePage extends StatelessWidget {
           ),
           content: Container(
             padding: const EdgeInsets.all(10.0),
-            height: 160,
+            height: 200,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   note.noteContent,
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   "Noted on ${note.timeOfNote.toString().split(" ").first}",
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 20),
                 Align(

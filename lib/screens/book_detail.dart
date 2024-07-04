@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:book_worm/models/book.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 class BookDetailPage extends StatelessWidget {
   final Book book;
@@ -20,7 +19,7 @@ class BookDetailPage extends StatelessWidget {
           const SizedBox(height: 16.0),
           SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0),
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
               child: Row(
                 children: [
                   Chip(
@@ -113,53 +112,5 @@ class BookDetailPage extends StatelessWidget {
       case BookStatus.added:
         return Colors.black;
     }
-  }
-
-  AppBar appBar(String title, BuildContext context) {
-    return AppBar(
-      title: Text(
-        title,
-        style: TextStyle(
-            color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      backgroundColor: Colors.white,
-      elevation: 0.0,
-      centerTitle: true,
-      leading: GestureDetector(
-        onTap: () {
-          Navigator.pop(context);
-        },
-        child: Container(
-          margin: const EdgeInsets.all(10),
-          alignment: Alignment.center,
-          child: SvgPicture.asset(
-            'assets/icons/Arrow - Left 2.svg',
-            height: 20,
-            width: 20,
-          ),
-          decoration: BoxDecoration(
-              color: const Color(0xffF7F8F8),
-              borderRadius: BorderRadius.circular(10)),
-        ),
-      ),
-      actions: [
-        GestureDetector(
-          onTap: () {},
-          child: Container(
-            margin: const EdgeInsets.all(10),
-            alignment: Alignment.center,
-            width: 37,
-            child: SvgPicture.asset(
-              'assets/icons/dots.svg',
-              height: 5,
-              width: 5,
-            ),
-            decoration: BoxDecoration(
-                color: const Color(0xffF7F8F8),
-                borderRadius: BorderRadius.circular(10)),
-          ),
-        ),
-      ],
-    );
   }
 }
