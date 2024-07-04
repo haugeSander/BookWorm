@@ -6,6 +6,7 @@ import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class LibraryPage extends StatefulWidget {
   @override
@@ -69,11 +70,18 @@ class _LibraryPageState extends State<LibraryPage> {
         onPressed: (() async {
           final result = await openAddDialog(context);
           if (result == null || result.isEmpty) return;
+          // getting a directory path for saving
+          final applicationDirectory = await getApplicationDocumentsDirectory();
+          final path = applicationDirectory.path;
+          // copy the file to a new path
+          final File newImage =
+              await imageLoaded!.copy('$path/${result['name']}.jpg');
+
           final newBook = Book(
               title: result['name']!,
               author: result['author']!,
               status: _dropdownValue,
-              coverImage: imageLoaded == null ? "" : imageLoaded!.path);
+              coverImage: imageLoaded == null ? "" : newImage.path);
           IsarService().saveBook(newBook);
           imageLoaded = null;
         }),
