@@ -30,30 +30,25 @@ const FinishedBookNoteSchema = CollectionSchema(
     r'inThreeSentences': PropertySchema(
       id: 2,
       name: r'inThreeSentences',
-      type: IsarType.string,
+      type: IsarType.stringList,
     ),
     r'rating': PropertySchema(
       id: 3,
       name: r'rating',
       type: IsarType.long,
     ),
-    r'summary': PropertySchema(
-      id: 4,
-      name: r'summary',
-      type: IsarType.string,
-    ),
     r'timeEnded': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'timeEnded',
       type: IsarType.dateTime,
     ),
     r'topThreeQuotes': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'topThreeQuotes',
-      type: IsarType.string,
+      type: IsarType.stringList,
     ),
     r'whoShouldRead': PropertySchema(
-      id: 7,
+      id: 6,
       name: r'whoShouldRead',
       type: IsarType.string,
     )
@@ -65,10 +60,10 @@ const FinishedBookNoteSchema = CollectionSchema(
   idName: r'noteId',
   indexes: {},
   links: {
-    r'bookReference': LinkSchema(
-      id: 3280464850837827532,
-      name: r'bookReference',
-      target: r'Book',
+    r'bookDataReference': LinkSchema(
+      id: 1013598117759763890,
+      name: r'bookDataReference',
+      target: r'UserBookEntry',
       single: true,
       linkName: r'bookNote',
     )
@@ -89,8 +84,19 @@ int _finishedBookNoteEstimateSize(
   bytesCount += 3 + object.howChangedMe.length * 3;
   bytesCount += 3 + object.impressions.length * 3;
   bytesCount += 3 + object.inThreeSentences.length * 3;
-  bytesCount += 3 + object.summary.length * 3;
+  {
+    for (var i = 0; i < object.inThreeSentences.length; i++) {
+      final value = object.inThreeSentences[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.topThreeQuotes.length * 3;
+  {
+    for (var i = 0; i < object.topThreeQuotes.length; i++) {
+      final value = object.topThreeQuotes[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.whoShouldRead.length * 3;
   return bytesCount;
 }
@@ -103,12 +109,11 @@ void _finishedBookNoteSerialize(
 ) {
   writer.writeString(offsets[0], object.howChangedMe);
   writer.writeString(offsets[1], object.impressions);
-  writer.writeString(offsets[2], object.inThreeSentences);
+  writer.writeStringList(offsets[2], object.inThreeSentences);
   writer.writeLong(offsets[3], object.rating);
-  writer.writeString(offsets[4], object.summary);
-  writer.writeDateTime(offsets[5], object.timeEnded);
-  writer.writeString(offsets[6], object.topThreeQuotes);
-  writer.writeString(offsets[7], object.whoShouldRead);
+  writer.writeDateTime(offsets[4], object.timeEnded);
+  writer.writeStringList(offsets[5], object.topThreeQuotes);
+  writer.writeString(offsets[6], object.whoShouldRead);
 }
 
 FinishedBookNote _finishedBookNoteDeserialize(
@@ -120,13 +125,12 @@ FinishedBookNote _finishedBookNoteDeserialize(
   final object = FinishedBookNote(
     howChangedMe: reader.readString(offsets[0]),
     impressions: reader.readString(offsets[1]),
-    inThreeSentences: reader.readString(offsets[2]),
+    inThreeSentences: reader.readStringList(offsets[2]) ?? [],
     noteId: id,
     rating: reader.readLong(offsets[3]),
-    summary: reader.readString(offsets[4]),
-    timeEnded: reader.readDateTime(offsets[5]),
-    topThreeQuotes: reader.readString(offsets[6]),
-    whoShouldRead: reader.readString(offsets[7]),
+    timeEnded: reader.readDateTime(offsets[4]),
+    topThreeQuotes: reader.readStringList(offsets[5]) ?? [],
+    whoShouldRead: reader.readString(offsets[6]),
   );
   return object;
 }
@@ -143,16 +147,14 @@ P _finishedBookNoteDeserializeProp<P>(
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 3:
       return (reader.readLong(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
-    case 5:
       return (reader.readDateTime(offset)) as P;
+    case 5:
+      return (reader.readStringList(offset) ?? []) as P;
     case 6:
-      return (reader.readString(offset)) as P;
-    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -164,14 +166,14 @@ Id _finishedBookNoteGetId(FinishedBookNote object) {
 }
 
 List<IsarLinkBase<dynamic>> _finishedBookNoteGetLinks(FinishedBookNote object) {
-  return [object.bookReference];
+  return [object.bookDataReference];
 }
 
 void _finishedBookNoteAttach(
     IsarCollection<dynamic> col, Id id, FinishedBookNote object) {
   object.noteId = id;
-  object.bookReference
-      .attach(col, col.isar.collection<Book>(), r'bookReference', id);
+  object.bookDataReference.attach(
+      col, col.isar.collection<UserBookEntry>(), r'bookDataReference', id);
 }
 
 extension FinishedBookNoteQueryWhereSort
@@ -529,7 +531,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesEqualTo(
+      inThreeSentencesElementEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -543,7 +545,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesGreaterThan(
+      inThreeSentencesElementGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -559,7 +561,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesLessThan(
+      inThreeSentencesElementLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -575,7 +577,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesBetween(
+      inThreeSentencesElementBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -595,7 +597,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesStartsWith(
+      inThreeSentencesElementStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -609,7 +611,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesEndsWith(
+      inThreeSentencesElementEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -623,7 +625,8 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesContains(String value, {bool caseSensitive = true}) {
+      inThreeSentencesElementContains(String value,
+          {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r'inThreeSentences',
@@ -634,7 +637,8 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesMatches(String pattern, {bool caseSensitive = true}) {
+      inThreeSentencesElementMatches(String pattern,
+          {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r'inThreeSentences',
@@ -645,7 +649,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesIsEmpty() {
+      inThreeSentencesElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'inThreeSentences',
@@ -655,12 +659,101 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      inThreeSentencesIsNotEmpty() {
+      inThreeSentencesElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'inThreeSentences',
         value: '',
       ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      inThreeSentencesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'inThreeSentences',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      inThreeSentencesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'inThreeSentences',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      inThreeSentencesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'inThreeSentences',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      inThreeSentencesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'inThreeSentences',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      inThreeSentencesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'inThreeSentences',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      inThreeSentencesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'inThreeSentences',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -777,142 +870,6 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryLessThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryBetween(
-    String lower,
-    String upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'summary',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'summary',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'summary',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'summary',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      summaryIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'summary',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
       timeEndedEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -969,7 +926,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesEqualTo(
+      topThreeQuotesElementEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -983,7 +940,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesGreaterThan(
+      topThreeQuotesElementGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -999,7 +956,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesLessThan(
+      topThreeQuotesElementLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -1015,7 +972,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesBetween(
+      topThreeQuotesElementBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -1035,7 +992,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesStartsWith(
+      topThreeQuotesElementStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -1049,7 +1006,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesEndsWith(
+      topThreeQuotesElementEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -1063,7 +1020,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesContains(String value, {bool caseSensitive = true}) {
+      topThreeQuotesElementContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r'topThreeQuotes',
@@ -1074,7 +1031,8 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesMatches(String pattern, {bool caseSensitive = true}) {
+      topThreeQuotesElementMatches(String pattern,
+          {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r'topThreeQuotes',
@@ -1085,7 +1043,7 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesIsEmpty() {
+      topThreeQuotesElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'topThreeQuotes',
@@ -1095,12 +1053,101 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      topThreeQuotesIsNotEmpty() {
+      topThreeQuotesElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'topThreeQuotes',
         value: '',
       ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      topThreeQuotesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'topThreeQuotes',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      topThreeQuotesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'topThreeQuotes',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      topThreeQuotesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'topThreeQuotes',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      topThreeQuotesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'topThreeQuotes',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      topThreeQuotesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'topThreeQuotes',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      topThreeQuotesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'topThreeQuotes',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -1247,16 +1294,16 @@ extension FinishedBookNoteQueryObject
 extension FinishedBookNoteQueryLinks
     on QueryBuilder<FinishedBookNote, FinishedBookNote, QFilterCondition> {
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      bookReference(FilterQuery<Book> q) {
+      bookDataReference(FilterQuery<UserBookEntry> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'bookReference');
+      return query.link(q, r'bookDataReference');
     });
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      bookReferenceIsNull() {
+      bookDataReferenceIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'bookReference', 0, true, 0, true);
+      return query.linkLength(r'bookDataReference', 0, true, 0, true);
     });
   }
 }
@@ -1292,20 +1339,6 @@ extension FinishedBookNoteQuerySortBy
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      sortByInThreeSentences() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'inThreeSentences', Sort.asc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      sortByInThreeSentencesDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'inThreeSentences', Sort.desc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
       sortByRating() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'rating', Sort.asc);
@@ -1320,20 +1353,6 @@ extension FinishedBookNoteQuerySortBy
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      sortBySummary() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'summary', Sort.asc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      sortBySummaryDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'summary', Sort.desc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
       sortByTimeEnded() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timeEnded', Sort.asc);
@@ -1344,20 +1363,6 @@ extension FinishedBookNoteQuerySortBy
       sortByTimeEndedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timeEnded', Sort.desc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      sortByTopThreeQuotes() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'topThreeQuotes', Sort.asc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      sortByTopThreeQuotesDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'topThreeQuotes', Sort.desc);
     });
   }
 
@@ -1407,20 +1412,6 @@ extension FinishedBookNoteQuerySortThenBy
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      thenByInThreeSentences() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'inThreeSentences', Sort.asc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      thenByInThreeSentencesDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'inThreeSentences', Sort.desc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
       thenByNoteId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'noteId', Sort.asc);
@@ -1449,20 +1440,6 @@ extension FinishedBookNoteQuerySortThenBy
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      thenBySummary() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'summary', Sort.asc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      thenBySummaryDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'summary', Sort.desc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
       thenByTimeEnded() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timeEnded', Sort.asc);
@@ -1473,20 +1450,6 @@ extension FinishedBookNoteQuerySortThenBy
       thenByTimeEndedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timeEnded', Sort.desc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      thenByTopThreeQuotes() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'topThreeQuotes', Sort.asc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      thenByTopThreeQuotesDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'topThreeQuotes', Sort.desc);
     });
   }
 
@@ -1522,10 +1485,9 @@ extension FinishedBookNoteQueryWhereDistinct
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QDistinct>
-      distinctByInThreeSentences({bool caseSensitive = true}) {
+      distinctByInThreeSentences() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'inThreeSentences',
-          caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'inThreeSentences');
     });
   }
 
@@ -1533,13 +1495,6 @@ extension FinishedBookNoteQueryWhereDistinct
       distinctByRating() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'rating');
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QDistinct> distinctBySummary(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'summary', caseSensitive: caseSensitive);
     });
   }
 
@@ -1551,10 +1506,9 @@ extension FinishedBookNoteQueryWhereDistinct
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QDistinct>
-      distinctByTopThreeQuotes({bool caseSensitive = true}) {
+      distinctByTopThreeQuotes() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'topThreeQuotes',
-          caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'topThreeQuotes');
     });
   }
 
@@ -1589,7 +1543,7 @@ extension FinishedBookNoteQueryProperty
     });
   }
 
-  QueryBuilder<FinishedBookNote, String, QQueryOperations>
+  QueryBuilder<FinishedBookNote, List<String>, QQueryOperations>
       inThreeSentencesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'inThreeSentences');
@@ -1602,12 +1556,6 @@ extension FinishedBookNoteQueryProperty
     });
   }
 
-  QueryBuilder<FinishedBookNote, String, QQueryOperations> summaryProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'summary');
-    });
-  }
-
   QueryBuilder<FinishedBookNote, DateTime, QQueryOperations>
       timeEndedProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -1615,7 +1563,7 @@ extension FinishedBookNoteQueryProperty
     });
   }
 
-  QueryBuilder<FinishedBookNote, String, QQueryOperations>
+  QueryBuilder<FinishedBookNote, List<String>, QQueryOperations>
       topThreeQuotesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'topThreeQuotes');

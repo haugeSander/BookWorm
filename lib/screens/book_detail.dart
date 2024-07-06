@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:book_worm/models/book.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class BookDetailPage extends StatelessWidget {
   final Book book;
@@ -111,6 +112,23 @@ class BookDetailPage extends StatelessWidget {
         return Colors.red;
       case BookStatus.added:
         return Colors.black;
+    }
+  }
+
+  Widget _getCorrespondingIcon(Book book) {
+    switch (book.status) {
+      case BookStatus.finished:
+        return const Icon(Icons.check);
+      case BookStatus.reading:
+        return SvgPicture.asset("assets/icons/reading_icon.svg",
+            width: 24.0, height: 24.0);
+      case BookStatus.listening:
+        return const Icon(Icons.headphones);
+      case BookStatus.dropped:
+        return const Icon(Icons.block_outlined);
+      case BookStatus.added:
+        return SvgPicture.asset("assets/icons/added_icon.svg",
+            width: 24.0, height: 24.0);
     }
   }
 }

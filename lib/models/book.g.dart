@@ -27,11 +27,10 @@ const BookSchema = CollectionSchema(
       name: r'coverImage',
       type: IsarType.string,
     ),
-    r'status': PropertySchema(
+    r'summary': PropertySchema(
       id: 2,
-      name: r'status',
-      type: IsarType.byte,
-      enumMap: _BookstatusEnumValueMap,
+      name: r'summary',
+      type: IsarType.string,
     ),
     r'title': PropertySchema(
       id: 3,
@@ -46,10 +45,10 @@ const BookSchema = CollectionSchema(
   idName: r'bookId',
   indexes: {},
   links: {
-    r'bookNote': LinkSchema(
-      id: -6049950692118725211,
-      name: r'bookNote',
-      target: r'BookNotes',
+    r'userDataReference': LinkSchema(
+      id: 2261201817875466000,
+      name: r'userDataReference',
+      target: r'UserBookEntry',
       single: true,
     )
   },
@@ -68,6 +67,12 @@ int _bookEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.author.length * 3;
   bytesCount += 3 + object.coverImage.length * 3;
+  {
+    final value = object.summary;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
 }
@@ -80,7 +85,7 @@ void _bookSerialize(
 ) {
   writer.writeString(offsets[0], object.author);
   writer.writeString(offsets[1], object.coverImage);
-  writer.writeByte(offsets[2], object.status.index);
+  writer.writeString(offsets[2], object.summary);
   writer.writeString(offsets[3], object.title);
 }
 
@@ -93,8 +98,7 @@ Book _bookDeserialize(
   final object = Book(
     author: reader.readString(offsets[0]),
     coverImage: reader.readString(offsets[1]),
-    status: _BookstatusValueEnumMap[reader.readByteOrNull(offsets[2])] ??
-        BookStatus.finished,
+    summary: reader.readStringOrNull(offsets[2]),
     title: reader.readString(offsets[3]),
   );
   object.bookId = id;
@@ -113,8 +117,7 @@ P _bookDeserializeProp<P>(
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (_BookstatusValueEnumMap[reader.readByteOrNull(offset)] ??
-          BookStatus.finished) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
       return (reader.readString(offset)) as P;
     default:
@@ -122,33 +125,18 @@ P _bookDeserializeProp<P>(
   }
 }
 
-const _BookstatusEnumValueMap = {
-  'finished': 0,
-  'reading': 1,
-  'listening': 2,
-  'added': 3,
-  'dropped': 4,
-};
-const _BookstatusValueEnumMap = {
-  0: BookStatus.finished,
-  1: BookStatus.reading,
-  2: BookStatus.listening,
-  3: BookStatus.added,
-  4: BookStatus.dropped,
-};
-
 Id _bookGetId(Book object) {
   return object.bookId;
 }
 
 List<IsarLinkBase<dynamic>> _bookGetLinks(Book object) {
-  return [object.bookNote];
+  return [object.userDataReference];
 }
 
 void _bookAttach(IsarCollection<dynamic> col, Id id, Book object) {
   object.bookId = id;
-  object.bookNote
-      .attach(col, col.isar.collection<BookNotes>(), r'bookNote', id);
+  object.userDataReference.attach(
+      col, col.isar.collection<UserBookEntry>(), r'userDataReference', id);
 }
 
 extension BookQueryWhereSort on QueryBuilder<Book, Book, QWhere> {
@@ -537,55 +525,146 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> statusEqualTo(
-      BookStatus value) {
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'status',
-        value: value,
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'summary',
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> statusGreaterThan(
-    BookStatus value, {
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'summary',
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'summary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryGreaterThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'status',
+        property: r'summary',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> statusLessThan(
-    BookStatus value, {
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryLessThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'status',
+        property: r'summary',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> statusBetween(
-    BookStatus lower,
-    BookStatus upper, {
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryBetween(
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'status',
+        property: r'summary',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'summary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'summary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryContains(String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'summary',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryMatches(String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'summary',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'summary',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Book, Book, QAfterFilterCondition> summaryIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'summary',
+        value: '',
       ));
     });
   }
@@ -722,16 +801,16 @@ extension BookQueryFilter on QueryBuilder<Book, Book, QFilterCondition> {
 extension BookQueryObject on QueryBuilder<Book, Book, QFilterCondition> {}
 
 extension BookQueryLinks on QueryBuilder<Book, Book, QFilterCondition> {
-  QueryBuilder<Book, Book, QAfterFilterCondition> bookNote(
-      FilterQuery<BookNotes> q) {
+  QueryBuilder<Book, Book, QAfterFilterCondition> userDataReference(
+      FilterQuery<UserBookEntry> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'bookNote');
+      return query.link(q, r'userDataReference');
     });
   }
 
-  QueryBuilder<Book, Book, QAfterFilterCondition> bookNoteIsNull() {
+  QueryBuilder<Book, Book, QAfterFilterCondition> userDataReferenceIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'bookNote', 0, true, 0, true);
+      return query.linkLength(r'userDataReference', 0, true, 0, true);
     });
   }
 }
@@ -761,15 +840,15 @@ extension BookQuerySortBy on QueryBuilder<Book, Book, QSortBy> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByStatus() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortBySummary() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'status', Sort.asc);
+      return query.addSortBy(r'summary', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> sortByStatusDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> sortBySummaryDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'status', Sort.desc);
+      return query.addSortBy(r'summary', Sort.desc);
     });
   }
 
@@ -823,15 +902,15 @@ extension BookQuerySortThenBy on QueryBuilder<Book, Book, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByStatus() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenBySummary() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'status', Sort.asc);
+      return query.addSortBy(r'summary', Sort.asc);
     });
   }
 
-  QueryBuilder<Book, Book, QAfterSortBy> thenByStatusDesc() {
+  QueryBuilder<Book, Book, QAfterSortBy> thenBySummaryDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'status', Sort.desc);
+      return query.addSortBy(r'summary', Sort.desc);
     });
   }
 
@@ -863,9 +942,10 @@ extension BookQueryWhereDistinct on QueryBuilder<Book, Book, QDistinct> {
     });
   }
 
-  QueryBuilder<Book, Book, QDistinct> distinctByStatus() {
+  QueryBuilder<Book, Book, QDistinct> distinctBySummary(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'status');
+      return query.addDistinctBy(r'summary', caseSensitive: caseSensitive);
     });
   }
 
@@ -896,9 +976,9 @@ extension BookQueryProperty on QueryBuilder<Book, Book, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Book, BookStatus, QQueryOperations> statusProperty() {
+  QueryBuilder<Book, String?, QQueryOperations> summaryProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'status');
+      return query.addPropertyName(r'summary');
     });
   }
 

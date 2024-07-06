@@ -1,3 +1,4 @@
+import 'package:book_worm/models/user_book_entry.dart';
 import 'package:isar/isar.dart';
 import 'package:book_worm/models/book.dart';
 
@@ -7,16 +8,15 @@ part 'finished_book_note.g.dart';
 class FinishedBookNote {
   Id noteId = Isar.autoIncrement;
   DateTime timeEnded;
-  String inThreeSentences;
+  List<String> inThreeSentences;
   String impressions;
   String whoShouldRead;
   String howChangedMe;
-  String topThreeQuotes;
-  String summary;
+  List<String> topThreeQuotes;
   int rating;
 
   @Backlink(to: "bookNote")
-  final bookReference = IsarLink<Book>();
+  final bookDataReference = IsarLink<UserBookEntry>();
 
   FinishedBookNote({
     required this.noteId,
@@ -26,7 +26,6 @@ class FinishedBookNote {
     required this.whoShouldRead,
     required this.howChangedMe,
     required this.topThreeQuotes,
-    required this.summary,
     required this.rating,
   });
 }

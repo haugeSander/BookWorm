@@ -36,9 +36,9 @@ const BookNotesSchema = CollectionSchema(
   indexes: {},
   links: {
     r'bookReference': LinkSchema(
-      id: 3280464850837827532,
+      id: 1013598117759763890,
       name: r'bookReference',
-      target: r'Book',
+      target: r'UserBookEntry',
       single: true,
       linkName: r'bookNote',
     )
@@ -111,7 +111,7 @@ List<IsarLinkBase<dynamic>> _bookNotesGetLinks(BookNotes object) {
 void _bookNotesAttach(IsarCollection<dynamic> col, Id id, BookNotes object) {
   object.noteId = id;
   object.bookReference
-      .attach(col, col.isar.collection<Book>(), r'bookReference', id);
+      .attach(col, col.isar.collection<UserBookEntry>(), r'bookReference', id);
 }
 
 extension BookNotesQueryWhereSort
@@ -445,7 +445,7 @@ extension BookNotesQueryObject
 extension BookNotesQueryLinks
     on QueryBuilder<BookNotes, BookNotes, QFilterCondition> {
   QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> bookReference(
-      FilterQuery<Book> q) {
+      FilterQuery<UserBookEntry> q) {
     return QueryBuilder.apply(this, (query) {
       return query.link(q, r'bookReference');
     });
