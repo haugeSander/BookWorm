@@ -9,6 +9,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+// Add this extension method to capitalize the first letter of a string
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
+  }
+}
+
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
 
@@ -21,7 +28,8 @@ class _LibraryPageState extends State<LibraryPage> {
   late TextEditingController authorController;
   late TextEditingController imageController;
   late BookStatus _dropdownValue = BookStatus.added;
-  File? imageLoaded;
+  File? _imageLoaded;
+  final picker = ImagePicker();
   String search = ""; //for searching
 
   @override
@@ -78,7 +86,7 @@ class _LibraryPageState extends State<LibraryPage> {
           final path = applicationDirectory.path;
           // copy the file to a new path
           final File newImage =
-              await imageLoaded!.copy('$path/${result['name']}.jpg');
+              await _imageLoaded!.copy('$path/${result['name']}.jpg');
 
           final newUserDataBook = UserBookEntry(
               status: _dropdownValue,
@@ -88,14 +96,14 @@ class _LibraryPageState extends State<LibraryPage> {
           final newBook = Book(
               title: result['name']!,
               author: result['author']!,
-              coverImage: imageLoaded == null ? "" : newImage.path);
+              coverImage: _imageLoaded == null ? "" : newImage.path);
 
           // Establish the link between the UserBookEntry and Book
           newUserDataBook.bookReference.value = newBook;
           newBook.userDataReference.value = newUserDataBook;
 
           IsarService().saveBook(newBook, newUserDataBook);
-          imageLoaded = null;
+          _imageLoaded = null;
         }),
         child: const Icon(Icons.book),
       ),
@@ -103,162 +111,240 @@ class _LibraryPageState extends State<LibraryPage> {
   }
 
   Future<Map<String, String>?> openAddDialog(BuildContext context) {
-    return showDialog<Map<String, String>>(
+    return showGeneralDialog<Map<String, String>>(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(builder: (context, setState) {
-          return AlertDialog(
-            title: const Text(
-              'Add Book to Library',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            content: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text('Title:'),
-                        const SizedBox(width: 16.0),
-                        Expanded(
-                          child: TextField(
-                            autofocus: true,
-                            textCapitalization: TextCapitalization.sentences,
-                            maxLines: null,
-                            decoration: const InputDecoration(
-                              hintText: 'Title...',
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: 10.0,
-                                horizontal: 10.0,
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            controller: bookNameController,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16.0),
-                    Row(
-                      children: [
-                        const Text('Author:'),
-                        const SizedBox(width: 16.0),
-                        Expanded(
-                          child: TextField(
-                            textCapitalization: TextCapitalization.sentences,
-                            maxLines: null,
-                            decoration: const InputDecoration(
-                              hintText: 'Author...',
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: 10.0,
-                                horizontal: 10.0,
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            controller: authorController,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16.0),
-                    Row(
-                      children: [
-                        const Text('Status:'),
-                        const SizedBox(width: 16.0),
-                        Expanded(
-                          child: DropdownButtonFormField<BookStatus>(
-                            value: _dropdownValue,
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: 10.0,
-                                horizontal: 10.0,
-                              ),
-                              border: OutlineInputBorder(),
-                            ),
-                            items: BookStatus.values.map((BookStatus status) {
-                              return DropdownMenuItem<BookStatus>(
-                                value: status,
-                                child: Text(
-                                  status.toString().split('.').last,
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (BookStatus? newValue) {
-                              setState(() {
-                                _dropdownValue = newValue!;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16.0),
-                    const Text('Cover:'),
-                    const SizedBox(height: 8.0),
-                    Center(
-                      child: IconButton(
-                        icon: const Icon(Icons.add_a_photo),
-                        onPressed: () async {
-                          final returnedImage = await _pickImageFromGallery();
-                          setState(() {
-                            imageLoaded = returnedImage;
-                          });
-                        },
-                      ),
-                    ),
-                    Center(
-                      child: imageLoaded == null
-                          ? const SizedBox(
-                              width: 200.0,
-                              height: 200.0,
-                              child: Card(
-                                child: Center(child: Text('No image')),
-                              ),
-                            )
-                          : Image.file(
-                              File(imageLoaded!.path),
-                              width: 200.0,
-                              height: 200.0,
-                            ),
-                    ),
-                  ],
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (BuildContext buildContext, Animation animation,
+          Animation secondaryAnimation) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setDialogState) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Center(
+                    child: Text(
+                  'Add Book to Library',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                  ),
+                )),
+                leading: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    _imageLoaded = null;
+                    Navigator.of(context).pop();
+                  },
                 ),
               ),
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+              body: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInputField('Title', bookNameController),
+                      const SizedBox(height: 16.0),
+                      _buildInputField('Author', authorController),
+                      const SizedBox(height: 16.0),
+                      _buildDropdownField('Status'),
+                      const SizedBox(height: 20.0),
+                      _buildCoverImageSection(context, setDialogState),
+                      const SizedBox(height: 20.0),
+                      Center(
+                        child: ElevatedButton(
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.add),
+                              Text(
+                                'Add book',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            if (bookNameController.text.isEmpty ||
+                                authorController.text.isEmpty) {
+                              const message = SnackBar(
+                                content: Text("Invalid title or author!"),
+                                duration: Duration(seconds: 2),
+                              );
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(message);
+                            } else {
+                              final bookData = {
+                                'name': bookNameController.text,
+                                'author': authorController.text,
+                              };
+                              submit(context, bookData);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              TextButton(
-                child: const Text('SUBMIT'),
-                onPressed: () {
-                  if (bookNameController.text.isEmpty ||
-                      authorController.text.isEmpty) {
-                    const message = SnackBar(
-                      content: Text("Invalid title or author!"),
-                      duration: Duration(seconds: 2),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(message);
-                  } else {
-                    final bookData = {
-                      'name': bookNameController.text,
-                      'author': authorController.text,
-                    };
-                    submit(context, bookData);
-                  }
-                },
+            );
+          },
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: Tween<double>(
+            begin: 0.0,
+            end: 1.0,
+          ).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            ),
+          ),
+          alignment: Alignment.bottomRight,
+          child: child,
+        );
+      },
+    );
+  }
+
+  Widget _buildInputField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8.0),
+        SizedBox(
+          width: double.infinity,
+          child: TextField(
+            textCapitalization: TextCapitalization.sentences,
+            maxLines: 1,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 12.0,
+                horizontal: 16.0,
+              ),
+              border: OutlineInputBorder(),
+            ),
+            controller: controller,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField(String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8.0),
+        SizedBox(
+          width: double.infinity,
+          child: DropdownButtonFormField<BookStatus>(
+            value: _dropdownValue,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 12.0,
+                horizontal: 16.0,
+              ),
+              border: OutlineInputBorder(),
+            ),
+            items: BookStatus.values.map((BookStatus status) {
+              return DropdownMenuItem<BookStatus>(
+                value: status,
+                child: Text(
+                  status.toString().split('.').last.capitalize(),
+                ),
+              );
+            }).toList(),
+            onChanged: (BookStatus? newValue) {
+              setState(() {
+                _dropdownValue = newValue!;
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCoverImageSection(
+      BuildContext context, StateSetter setDialogState) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Cover image',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8.0),
+        Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 200.0,
+                height: 200.0,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8.0),
+                  image: _imageLoaded != null
+                      ? DecorationImage(
+                          image: FileImage(File(_imageLoaded!.path)),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: _imageLoaded == null
+                    ? const Center(
+                        child: Text(
+                          'No image',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                        ),
+                      )
+                    : null,
+              ),
+              Positioned(
+                right: 8,
+                bottom: 8,
+                child: IconButton(
+                  icon: const Icon(Icons.add_a_photo),
+                  onPressed: () async {
+                    await _showOptions(context, setDialogState);
+                  },
+                ),
               ),
             ],
-          );
-        });
-      },
+          ),
+        ),
+      ],
     );
   }
 
@@ -268,11 +354,45 @@ class _LibraryPageState extends State<LibraryPage> {
     authorController.clear();
   }
 
-  Future<File?> _pickImageFromGallery() async {
-    XFile? returnedImage =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (returnedImage == null) return null;
-    return File(returnedImage.path);
+  Future<void> _showOptions(
+      BuildContext context, StateSetter setDialogState) async {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _getImage(ImageSource.gallery);
+                  setDialogState(() {});
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Take a Photo'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _getImage(ImageSource.camera);
+                  setDialogState(() {});
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _getImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+    if (pickedFile != null) {
+      _imageLoaded = File(pickedFile.path);
+    }
   }
 
   Column _bookList(List<Book> books) {
