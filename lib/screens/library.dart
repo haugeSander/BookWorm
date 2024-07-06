@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:book_worm/models/book.dart';
+import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/screens/book_detail.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
@@ -79,12 +80,21 @@ class _LibraryPageState extends State<LibraryPage> {
           final File newImage =
               await imageLoaded!.copy('$path/${result['name']}.jpg');
 
+          final newUserDataBook = UserBookEntry(
+              status: _dropdownValue,
+              dateOfCurrentStatus:
+                  _dropdownValue == BookStatus.added ? DateTime.now() : null);
+
           final newBook = Book(
               title: result['name']!,
               author: result['author']!,
-              status: _dropdownValue,
               coverImage: imageLoaded == null ? "" : newImage.path);
-          IsarService().saveBook(newBook);
+
+          // Establish the link between the UserBookEntry and Book
+          newUserDataBook.bookReference.value = newBook;
+          newBook.userDataReference.value = newUserDataBook;
+
+          IsarService().saveBook(newBook, newUserDataBook);
           imageLoaded = null;
         }),
         child: const Icon(Icons.book),
@@ -340,7 +350,8 @@ class _LibraryPageState extends State<LibraryPage> {
                             ],
                           ),
                           const Expanded(child: SizedBox()),
-                          _getCorrespondingIcon(books[index]),
+                          _getCorrespondingIcon(
+                              books[index].userDataReference.value!),
                         ]),
                   ));
             })
@@ -348,7 +359,7 @@ class _LibraryPageState extends State<LibraryPage> {
     );
   }
 
-  Widget _getCorrespondingIcon(Book book) {
+  Widget _getCorrespondingIcon(UserBookEntry book) {
     switch (book.status) {
       case BookStatus.finished:
         return const Icon(Icons.check);

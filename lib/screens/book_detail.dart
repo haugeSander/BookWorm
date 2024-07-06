@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:book_worm/models/book.dart';
+import 'package:book_worm/models/user_book_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -11,7 +12,7 @@ class BookDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    color = _getCorrespondingColor(book);
+    color = _getCorrespondingColor(book.userDataReference.value!);
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,7 +26,7 @@ class BookDetailPage extends StatelessWidget {
                 children: [
                   Chip(
                     label: Text(
-                      book.status.name,
+                      book.userDataReference.value!.status.name,
                       style: const TextStyle(color: Colors.white),
                     ),
                     shape: RoundedRectangleBorder(
@@ -100,7 +101,7 @@ class BookDetailPage extends StatelessWidget {
     );
   }
 
-  Color _getCorrespondingColor(Book book) {
+  Color _getCorrespondingColor(UserBookEntry book) {
     switch (book.status) {
       case BookStatus.finished:
         return Colors.green;
@@ -115,7 +116,7 @@ class BookDetailPage extends StatelessWidget {
     }
   }
 
-  Widget _getCorrespondingIcon(Book book) {
+  Widget _getCorrespondingIcon(UserBookEntry book) {
     switch (book.status) {
       case BookStatus.finished:
         return const Icon(Icons.check);

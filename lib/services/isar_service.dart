@@ -1,5 +1,6 @@
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/book_notes.dart';
+import 'package:book_worm/models/user_book_entry.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -10,9 +11,10 @@ class IsarService {
     db = openDB();
   }
 
-  Future<void> saveBook(Book newBook) async {
+  Future<void> saveBook(Book newBook, UserBookEntry newUserBookEntry) async {
     final isar = await db;
     isar.writeTxnSync<int>(() => isar.books.putSync(newBook));
+    isar.writeTxnSync<int>(() => isar.userBookEntrys.putSync(newUserBookEntry));
   }
 
   Future<void> saveBookNote(BookNotes newNote) async {
@@ -34,14 +36,27 @@ class IsarService {
     }
   }
 
-  Stream<List<Book>> getBooksOfStatus(List<BookStatus> status) async* {
+  Stream<List<Book>> getBooksOfStatus(List<BookStatus> statusList) async* {
     final isar = await db;
-    final query =
-        isar.books.where().filter().statusBetween(status[0], status[1]);
 
-    await for (final results in query.watch(fireImmediately: true)) {
-      if (results.isNotEmpty) {
-        yield results;
+    // Query UserBookEntry based on status list
+    final query = isar.userBookEntrys
+        .where()
+        .filter()
+        .anyOf(statusList, (q, status) => q.statusEqualTo(status));
+
+    await for (final userBookEntries in query.watch(fireImmediately: true)) {
+      // If there are matching UserBookEntries, map them to Books
+      if (userBookEntries.isNotEmpty) {
+        final books = <Book>[];
+        for (final entry in userBookEntries) {
+          if (entry.bookReference.value != null) {
+            books.add(entry.bookReference.value!);
+          }
+        }
+        yield books;
+      } else {
+        yield [];
       }
     }
   }
@@ -60,7 +75,7 @@ class IsarService {
     final dir = await getApplicationDocumentsDirectory();
 
     if (Isar.instanceNames.isEmpty) {
-      return await Isar.open([BookSchema, BookNotesSchema],
+      return await Isar.open([BookSchema, UserBookEntrySchema, BookNotesSchema],
           directory: dir.path, maxSizeMiB: 1024, inspector: true);
     }
 

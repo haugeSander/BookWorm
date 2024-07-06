@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:book_worm/models/book_notes.dart';
+import 'package:book_worm/models/user_book_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm/models/book.dart';
 import 'package:flutter_svg/svg.dart';
@@ -86,27 +87,6 @@ class ReadingNowPage extends StatelessWidget {
                                               MainAxisAlignment.spaceEvenly,
                                           children: [
                                             Text(books[index].title),
-                                            Checkbox(
-                                                value: ([
-                                                  BookStatus.reading,
-                                                  BookStatus.listening
-                                                ].contains(
-                                                    books[index].status)),
-                                                onChanged: (newValue) {
-                                                  setState(() {
-                                                    if (newValue == null)
-                                                      return;
-                                                    else if (newValue) {
-                                                      books[index].status =
-                                                          BookStatus.reading;
-                                                    } else {
-                                                      books[index].status =
-                                                          BookStatus.finished;
-                                                    }
-                                                    IsarService()
-                                                        .saveBook(books[index]);
-                                                  });
-                                                })
                                           ],
                                         )),
                                   );
@@ -149,7 +129,8 @@ class ReadingNowPage extends StatelessWidget {
             itemBuilder: (context, index) {
               return GestureDetector(
                   onTap: () {
-                    _openAddNote(context, books[index]);
+                    _openAddNote(
+                        context, books[index].userDataReference.value!);
                   },
                   child: SizedBox(
                     height: 100,
@@ -189,7 +170,8 @@ class ReadingNowPage extends StatelessWidget {
                             ],
                           ),
                           const Expanded(child: SizedBox()),
-                          _getCorrespondingIcon(books[index])
+                          _getCorrespondingIcon(
+                              books[index].userDataReference.value!)
                         ]),
                   ));
             })
@@ -197,7 +179,7 @@ class ReadingNowPage extends StatelessWidget {
     );
   }
 
-  Widget _getCorrespondingIcon(Book book) {
+  Widget _getCorrespondingIcon(UserBookEntry book) {
     switch (book.status) {
       case BookStatus.finished:
         return const Icon(Icons.check);
@@ -214,11 +196,11 @@ class ReadingNowPage extends StatelessWidget {
     }
   }
 
-  Future _openAddNote(context, Book book) => showDialog(
+  Future _openAddNote(context, UserBookEntry book) => showDialog(
       context: context,
       builder: (context) => StatefulBuilder(builder: (context, setState) {
             return AlertDialog(
-              title: Text('Add a note for: ${book.title}'),
+              title: Text('Add a note for: ${book.bookReference.value!.title}'),
               content:
                   Column(mainAxisAlignment: MainAxisAlignment.start, children: [
                 Column(

@@ -84,8 +84,8 @@ class HomePage extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(100),
                         child: Image.file(
-                            File(snapshot
-                                .data![index].bookReference.value!.coverImage),
+                            File(snapshot.data![index].bookReference.value!
+                                .bookReference.value!.coverImage),
                             height: 100,
                             width: 100,
                             fit: BoxFit.fill),
@@ -105,7 +105,7 @@ class HomePage extends StatelessWidget {
         return AlertDialog(
           title: Center(
             child: Text(
-              "Note for ${note.bookReference.value!.title}",
+              "Note for ${note.bookReference.value!.bookReference.value!.title}",
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
