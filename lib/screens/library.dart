@@ -395,86 +395,112 @@ class _LibraryPageState extends State<LibraryPage> {
     }
   }
 
-  Column _bookList(List<Book> books) {
+  Widget _bookList(List<Book> books) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: EdgeInsets.only(left: 20),
+          padding: EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             'Your added books',
             style: TextStyle(
-                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+              color: Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        const SizedBox(
-          height: 15,
-        ),
+        const SizedBox(height: 15),
         ListView.separated(
-            itemCount: books.length,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            separatorBuilder: (context, index) => const SizedBox(
-                  height: 25,
+          itemCount: books.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          separatorBuilder: (context, index) => const SizedBox(height: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemBuilder: (context, index) {
+            final book = books[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookDetailPage(book: book),
+                  ),
+                );
+              },
+              child: Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-            padding: const EdgeInsets.only(
-              right: 20,
-              left: 20,
-            ),
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => BookDetailPage(
-                                book: books[index],
-                              )),
-                    );
-                  },
-                  child: Container(
-                    height: 100,
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        bottomLeft: Radius.circular(10),
+                      ),
+                      child: book.coverImage.isEmpty
+                          ? Container(
+                              width: 80,
+                              color: Colors.grey[200],
+                              child: const Center(child: Text('No image')),
+                            )
+                          : Image.file(
+                              File(book.coverImage),
+                              width: 80,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          books[index].coverImage == ""
-                              ? const SizedBox(
-                                  width: 100.0,
-                                  height: 100.0,
-                                  child: Card(
-                                      child: Center(child: Text('No image'))),
-                                )
-                              : Image.file(
-                                  File(books[index].coverImage),
-                                  width: 100,
-                                  height: 100,
-                                ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                books[index].title,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                    fontSize: 16),
-                              ),
-                              Text(
-                                books[index].author,
-                                style: const TextStyle(
-                                    color: Color(0xff7B6F72),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w400),
-                              ),
-                            ],
+                          Text(
+                            book.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const Expanded(child: SizedBox()),
-                          _getCorrespondingIcon(
-                              books[index].userDataReference.value!),
-                        ]),
-                  ));
-            })
+                          const SizedBox(height: 4),
+                          Text(
+                            book.author,
+                            style: const TextStyle(
+                              color: Color(0xff7B6F72),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _getCorrespondingIcon(book.userDataReference.value!),
+                    const SizedBox(width: 10),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ],
     );
   }

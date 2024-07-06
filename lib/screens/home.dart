@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:book_worm/models/book_notes.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
@@ -103,47 +104,65 @@ class HomePage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(
-            child: Text(
-              "Note for ${note.bookReference.value!.bookReference.value!.title}",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          content: Container(
-            padding: const EdgeInsets.all(10.0),
-            height: 200,
+          title: Text(
+            note.bookReference.value!.bookReference.value!.title,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Text(
+                  "Note:",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Text(
                   note.noteContent,
                   style: const TextStyle(fontSize: 16),
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  "Noted on ${note.timeOfNote.toString().split(" ").first}",
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      "Close",
-                      style: TextStyle(color: Colors.blue),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_today,
+                        size: 16, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Noted on ${DateFormat('MMMM d, y').format(note.timeOfNote)}",
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Close"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Implement edit functionality
+                Navigator.of(context).pop();
+              },
+              child: const Text("Edit"),
+            ),
+          ],
         );
       },
     );
