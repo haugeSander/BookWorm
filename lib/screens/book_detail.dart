@@ -66,93 +66,90 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         const SizedBox(height: 16.0), // Add some spacing
                         _buildGallerySection(),
                         const SizedBox(height: 16.0), // Add some spacing
-                        Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Notes",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 20.0,
-                                    ),
-                                  ),
-                                  ListView.separated(
-                                      itemCount: userData.bookNote.length,
-                                      shrinkWrap: true,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      separatorBuilder: (context, index) =>
-                                          const SizedBox(height: 15),
-                                      itemBuilder: (context, index) {
-                                        final note =
-                                            userData.bookNote.elementAt(index);
-                                        return GestureDetector(
-                                          onTap: () {},
-                                          child: Container(
-                                            height: 100,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey
-                                                      .withOpacity(0.3),
-                                                  spreadRadius: 1,
-                                                  blurRadius: 5,
-                                                  offset: const Offset(0, 3),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    const Icon(
-                                                        Icons.calendar_today),
-                                                    Text(
-                                                      DateFormat('MMMM d, y')
-                                                          .format(
-                                                              note.timeOfNote),
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        color: Colors.black,
-                                                        fontSize: 16,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  note.noteContent,
-                                                  style: const TextStyle(
-                                                    color: Color(0xff7B6F72),
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w400,
-                                                  ),
-                                                  maxLines: null,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      })
-                                ]))
+                        _buildNotesSection(),
+                        const SizedBox(height: 16.0), // Add some spacing
                       ]))))
     ]));
+  }
+
+  Widget _buildNotesSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Notes",
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 20.0,
+            ),
+          ),
+          const SizedBox(height: 8), // Small gap between title and list
+          ListView.separated(
+            padding: EdgeInsets.zero, // Remove default padding
+            itemCount: userData.bookNote.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            separatorBuilder: (context, index) => const SizedBox(height: 16),
+            itemBuilder: (context, index) {
+              final note = userData.bookNote.elementAt(index);
+              return GestureDetector(
+                onTap: () {},
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.calendar_today,
+                                size: 18, color: Colors.blue[700]),
+                            const SizedBox(width: 8),
+                            Text(
+                              DateFormat('MMMM d, y').format(note.timeOfNote),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.blue[700],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          note.noteContent,
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildGallerySection() {
@@ -168,30 +165,29 @@ class _BookDetailPageState extends State<BookDetailPage> {
               fontSize: 20.0,
             ),
           ),
-          const SizedBox(
-              height: 8.0), // Add some spacing between title and summary
+          const SizedBox(height: 8.0),
           SizedBox(
-            height: 100, // Fixed height for the gallery
+            height: 100,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount:
-                  (userData.gallery.length) + 1, // +1 for the "add" button
+              itemCount: userData.gallery!.length + 1,
               itemBuilder: (context, index) {
-                if (index < (userData.gallery.length)) {
+                if (index < userData.gallery!.length) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: GestureDetector(
                       onTap: () async {
                         await showDialog(
-                            context: context,
-                            builder: (_) => ImageDialog(
-                                  imagePath: userData.gallery[index],
-                                ));
+                          context: context,
+                          builder: (_) => ImageDialog(
+                            imagePath: userData.gallery![index],
+                          ),
+                        );
                       },
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(5),
                         child: Image.file(
-                          File(userData.gallery[index]),
+                          File(userData.gallery![index]),
                           height: 100,
                           width: 100,
                           fit: BoxFit.cover,
@@ -214,23 +210,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
                           icon: const Icon(Icons.add_a_photo),
                           onPressed: () async {
                             await _showOptions(context);
-
-                            if (_imageLoaded != null) {
-                              final applicationDirectory =
-                                  await getApplicationDocumentsDirectory();
-                              final path = applicationDirectory.path;
-
-                              final File newImage = await _imageLoaded!.copy(
-                                  '$path/${book.title}-${userData.gallery.length + 1}.jpg');
-                              userData.gallery.add(newImage.path);
-
-                              await IsarService().updateUserDataEntry(userData);
-                              setState(() {});
-                            }
                           },
-                          iconSize:
-                              30, // Increased icon size for better visibility
-                          color: Colors.grey[700], // Darker color for contrast
+                          iconSize: 30,
+                          color: Colors.grey[700],
                         ),
                       ),
                     ),
@@ -278,9 +260,23 @@ class _BookDetailPageState extends State<BookDetailPage> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
-      _imageLoaded = File(pickedFile.path);
-      setState(() {});
+      final File imageFile = File(pickedFile.path);
+      await _saveImage(imageFile);
     }
+  }
+
+  Future<void> _saveImage(File imageFile) async {
+    final applicationDirectory = await getApplicationDocumentsDirectory();
+    final path = applicationDirectory.path;
+    final fileName =
+        '${book.title}-${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final File newImage = await imageFile.copy('$path/$fileName');
+
+    setState(() {
+      userData.gallery.add(newImage.path);
+    });
+
+    await IsarService().updateUserDataEntry(userData);
   }
 
   Widget _buildSummerySection() {
@@ -608,17 +604,13 @@ class ImageDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.zero,
       child: GestureDetector(
         onTap: () => Navigator.of(context).pop(),
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: FileImage(File(imagePath)),
-              fit: BoxFit.contain,
-            ),
-          ),
+        child: Image.file(
+          File(imagePath),
+          fit: BoxFit.contain,
         ),
       ),
     );

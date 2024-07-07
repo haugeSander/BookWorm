@@ -103,11 +103,11 @@ UserBookEntry _userBookEntryDeserialize(
 ) {
   final object = UserBookEntry(
     dateOfCurrentStatus: reader.readDateTimeOrNull(offsets[0]),
+    gallery: reader.readStringList(offsets[1]) ?? const [],
     status:
         _UserBookEntrystatusValueEnumMap[reader.readByteOrNull(offsets[2])] ??
             BookStatus.finished,
   );
-  object.gallery = reader.readStringList(offsets[1]) ?? [];
   object.id = id;
   return object;
 }
@@ -122,7 +122,7 @@ P _userBookEntryDeserializeProp<P>(
     case 0:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 1:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readStringList(offset) ?? const []) as P;
     case 2:
       return (_UserBookEntrystatusValueEnumMap[reader.readByteOrNull(offset)] ??
           BookStatus.finished) as P;

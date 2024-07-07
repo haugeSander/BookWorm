@@ -9,11 +9,14 @@ enum BookStatus { finished, reading, listening, added, dropped }
 
 @Collection()
 class UserBookEntry {
-  Id id = Isar.autoIncrement; // Ensure this is correctly set
+  Id id = Isar.autoIncrement;
+
   @enumerated
   BookStatus status;
+
   DateTime? dateOfCurrentStatus;
-  List<String> gallery = List.empty(growable: true);
+
+  List<String> gallery;
 
   final bookNote = IsarLinks<BookNotes>();
   final finishedNote = IsarLink<FinishedBookNote>();
@@ -24,5 +27,6 @@ class UserBookEntry {
   UserBookEntry({
     required this.status,
     this.dateOfCurrentStatus,
-  });
+    List<String> gallery = const [],
+  }) : gallery = List<String>.from(gallery);
 }
