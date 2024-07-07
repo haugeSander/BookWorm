@@ -1,6 +1,5 @@
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:isar/isar.dart';
-import 'package:book_worm/models/book.dart';
 
 part 'finished_book_note.g.dart';
 
