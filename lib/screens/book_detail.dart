@@ -2,24 +2,46 @@ import 'dart:io';
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/finished_book_note.dart';
 import 'package:book_worm/models/user_book_entry.dart';
+import 'package:book_worm/screens/library.dart';
+import 'package:book_worm/services/isar_service.dart';
 import 'package:book_worm/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
-class BookDetailPage extends StatelessWidget {
+class BookDetailPage extends StatefulWidget {
   final Book book;
+
+  const BookDetailPage({super.key, required this.book});
+
+  @override
+  _BookDetailPageState createState() => _BookDetailPageState();
+}
+
+class _BookDetailPageState extends State<BookDetailPage> {
+  late final Book book;
   late final UserBookEntry userData;
   late final FinishedBookNote? finalNote;
   late final Color color;
   late final bool isFinished;
+  File? _imageLoaded;
 
-  BookDetailPage({super.key, required this.book}) {
+  @override
+  void initState() {
+    super.initState();
+    book = widget.book;
     userData = book.userDataReference.value!;
     isFinished = userData.status == BookStatus.finished;
     finalNote = userData.finishedNote.value;
     color = _getCorrespondingColor(userData.status);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -29,17 +51,174 @@ class BookDetailPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
-          const SizedBox(height: 16.0),
+          const SizedBox(height: 8.0),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Column(
-                  children: [_buildTagSection(), _buildCardView()],
+                  crossAxisAlignment: CrossAxisAlignment
+                      .start, // This aligns all children to the start
+                  children: [
+                    _buildTagSection(),
+                    const SizedBox(height: 16.0), // Add some spacing
+                    _buildCardView(),
+                    const SizedBox(height: 16.0), // Add some spacing
+                    _buildSummerySection(),
+                    const SizedBox(height: 16.0), // Add some spacing
+                    _buildGallerySection()
+                  ],
                 ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGallerySection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Gallery",
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 20.0,
+            ),
+          ),
+          const SizedBox(
+              height: 8.0), // Add some spacing between title and summary
+          SizedBox(
+            height: 100, // Fixed height for the gallery
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount:
+                  (userData.gallery!.length) + 1, // +1 for the "add" button
+              itemBuilder: (context, index) {
+                if (index < (userData.gallery!.length)) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: GestureDetector(
+                      onTap: () async {
+                        await showDialog(
+                            context: context,
+                            builder: (_) => ImageDialog(
+                                  imagePath: userData.gallery![index],
+                                ));
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: Image.file(
+                          File(userData.gallery![index]),
+                          height: 100,
+                          width: 100,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  );
+                } else {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Center(
+                        child: IconButton(
+                          icon: const Icon(Icons.add_a_photo),
+                          onPressed: () async {
+                            await _showOptions(context);
+
+                            if (_imageLoaded != null) {
+                              final applicationDirectory =
+                                  await getApplicationDocumentsDirectory();
+                              final path = applicationDirectory.path;
+                              // copy the file to a new path
+                              final File newImage = await _imageLoaded!.copy(
+                                  '$path/${book.title}-${userData.gallery!.length + 1}.jpg');
+                              userData.gallery!.add(newImage.path);
+                              IsarService().updateUserDataEntry(userData);
+                            }
+                          },
+                          iconSize:
+                              30, // Increased icon size for better visibility
+                          color: Colors.grey[700], // Darker color for contrast
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showOptions(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _getImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Take a Photo'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _getImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _getImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+    if (pickedFile != null) {
+      _imageLoaded = File(pickedFile.path);
+      setState(() {});
+    }
+  }
+
+  Widget _buildSummerySection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Summary",
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 20.0,
+            ),
+          ),
+          const SizedBox(
+              height: 8.0), // Add some spacing between title and summary
+          Text(book.summary ?? "") // Using null-aware operator for cleaner code
         ],
       ),
     );
@@ -114,20 +293,23 @@ class BookDetailPage extends StatelessWidget {
   }
 
   Widget _buildTagSection() {
-    return Row(
-      children: [
-        Chip(
-          label: Text(
-            userData.status.name,
-            style: const TextStyle(color: Colors.white),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        children: [
+          Chip(
+            label: Text(
+              userData.status.name.capitalize(),
+              style: const TextStyle(color: Colors.white),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(color: color),
+            ),
+            backgroundColor: color,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: color),
-          ),
-          backgroundColor: color,
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -289,7 +471,7 @@ class BookDetailPage extends StatelessWidget {
                   ignoreGestures: true,
                   ratingWidget: RatingWidget(
                     full: const Icon(Icons.star, color: Colors.yellow),
-                    half: const Icon(Icons.star_half),
+                    half: const Icon(Icons.star_half, color: Colors.yellow),
                     empty: const Icon(Icons.star_border),
                   ),
                   allowHalfRating: false,
@@ -335,5 +517,30 @@ class BookDetailPage extends StatelessWidget {
         return SvgPicture.asset("assets/icons/added_icon.svg",
             width: 75.0, height: 75.0);
     }
+  }
+}
+
+class ImageDialog extends StatelessWidget {
+  final String imagePath;
+
+  const ImageDialog({super.key, required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: FileImage(File(imagePath)),
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

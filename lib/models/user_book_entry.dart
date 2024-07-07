@@ -13,7 +13,7 @@ class UserBookEntry {
   @enumerated
   BookStatus status;
   DateTime? dateOfCurrentStatus;
-  List<String>? gallery;
+  List<String> gallery = List.empty();
 
   final bookNote = IsarLinks<BookNotes>();
   final finishedNote = IsarLink<FinishedBookNote>();
@@ -24,6 +24,5 @@ class UserBookEntry {
   UserBookEntry({
     required this.status,
     this.dateOfCurrentStatus,
-    this.gallery,
   });
 }

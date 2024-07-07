@@ -28,6 +28,7 @@ class _LibraryPageState extends State<LibraryPage> {
   late TextEditingController authorController;
   late TextEditingController imageController;
   late BookStatus _dropdownValue = BookStatus.added;
+
   File? _imageLoaded;
   final picker = ImagePicker();
   String search = ""; //for searching

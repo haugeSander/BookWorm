@@ -74,16 +74,11 @@ int _userBookEntryEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.gallery.length * 3;
   {
-    final list = object.gallery;
-    if (list != null) {
-      bytesCount += 3 + list.length * 3;
-      {
-        for (var i = 0; i < list.length; i++) {
-          final value = list[i];
-          bytesCount += value.length * 3;
-        }
-      }
+    for (var i = 0; i < object.gallery.length; i++) {
+      final value = object.gallery[i];
+      bytesCount += value.length * 3;
     }
   }
   return bytesCount;
@@ -108,11 +103,11 @@ UserBookEntry _userBookEntryDeserialize(
 ) {
   final object = UserBookEntry(
     dateOfCurrentStatus: reader.readDateTimeOrNull(offsets[0]),
-    gallery: reader.readStringList(offsets[1]),
     status:
         _UserBookEntrystatusValueEnumMap[reader.readByteOrNull(offsets[2])] ??
             BookStatus.finished,
   );
+  object.gallery = reader.readStringList(offsets[1]) ?? [];
   object.id = id;
   return object;
 }
@@ -127,7 +122,7 @@ P _userBookEntryDeserializeProp<P>(
     case 0:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 1:
-      return (reader.readStringList(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 2:
       return (_UserBookEntrystatusValueEnumMap[reader.readByteOrNull(offset)] ??
           BookStatus.finished) as P;
@@ -323,24 +318,6 @@ extension UserBookEntryQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
-      galleryIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'gallery',
-      ));
-    });
-  }
-
-  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
-      galleryIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'gallery',
       ));
     });
   }
@@ -883,7 +860,7 @@ extension UserBookEntryQueryProperty
     });
   }
 
-  QueryBuilder<UserBookEntry, List<String>?, QQueryOperations>
+  QueryBuilder<UserBookEntry, List<String>, QQueryOperations>
       galleryProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'gallery');
