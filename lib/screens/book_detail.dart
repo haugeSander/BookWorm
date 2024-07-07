@@ -47,34 +47,112 @@ class _BookDetailPageState extends State<BookDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(context),
-          const SizedBox(height: 8.0),
-          Expanded(
-            child: SingleChildScrollView(
+        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      _buildHeader(context),
+      const SizedBox(height: 8.0),
+      Expanded(
+          child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment
-                      .start, // This aligns all children to the start
-                  children: [
-                    _buildTagSection(),
-                    const SizedBox(height: 16.0), // Add some spacing
-                    _buildCardView(),
-                    const SizedBox(height: 16.0), // Add some spacing
-                    _buildSummerySection(),
-                    const SizedBox(height: 16.0), // Add some spacing
-                    _buildGallerySection()
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment
+                          .start, // This aligns all children to the start
+                      children: [
+                        _buildTagSection(),
+                        const SizedBox(height: 16.0), // Add some spacing
+                        _buildCardView(),
+                        const SizedBox(height: 16.0), // Add some spacing
+                        _buildSummerySection(),
+                        const SizedBox(height: 16.0), // Add some spacing
+                        _buildGallerySection(),
+                        const SizedBox(height: 16.0), // Add some spacing
+                        Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Notes",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.0,
+                                    ),
+                                  ),
+                                  ListView.separated(
+                                      itemCount: userData.bookNote.length,
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(height: 15),
+                                      itemBuilder: (context, index) {
+                                        final note =
+                                            userData.bookNote.elementAt(index);
+                                        return GestureDetector(
+                                          onTap: () {},
+                                          child: Container(
+                                            height: 100,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.3),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 5,
+                                                  offset: const Offset(0, 3),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    const Icon(
+                                                        Icons.calendar_today),
+                                                    Text(
+                                                      DateFormat('MMMM d, y')
+                                                          .format(
+                                                              note.timeOfNote),
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color: Colors.black,
+                                                        fontSize: 16,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  note.noteContent,
+                                                  style: const TextStyle(
+                                                    color: Color(0xff7B6F72),
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                  maxLines: null,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      })
+                                ]))
+                      ]))))
+    ]));
   }
 
   Widget _buildGallerySection() {
@@ -97,9 +175,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount:
-                  (userData.gallery!.length) + 1, // +1 for the "add" button
+                  (userData.gallery.length) + 1, // +1 for the "add" button
               itemBuilder: (context, index) {
-                if (index < (userData.gallery!.length)) {
+                if (index < (userData.gallery.length)) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: GestureDetector(
@@ -107,13 +185,13 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         await showDialog(
                             context: context,
                             builder: (_) => ImageDialog(
-                                  imagePath: userData.gallery![index],
+                                  imagePath: userData.gallery[index],
                                 ));
                       },
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(5),
                         child: Image.file(
-                          File(userData.gallery![index]),
+                          File(userData.gallery[index]),
                           height: 100,
                           width: 100,
                           fit: BoxFit.cover,
@@ -141,11 +219,13 @@ class _BookDetailPageState extends State<BookDetailPage> {
                               final applicationDirectory =
                                   await getApplicationDocumentsDirectory();
                               final path = applicationDirectory.path;
-                              // copy the file to a new path
+
                               final File newImage = await _imageLoaded!.copy(
-                                  '$path/${book.title}-${userData.gallery!.length + 1}.jpg');
-                              userData.gallery!.add(newImage.path);
-                              IsarService().updateUserDataEntry(userData);
+                                  '$path/${book.title}-${userData.gallery.length + 1}.jpg');
+                              userData.gallery.add(newImage.path);
+
+                              await IsarService().updateUserDataEntry(userData);
+                              setState(() {});
                             }
                           },
                           iconSize:

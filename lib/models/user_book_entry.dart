@@ -13,7 +13,7 @@ class UserBookEntry {
   @enumerated
   BookStatus status;
   DateTime? dateOfCurrentStatus;
-  List<String> gallery = List.empty();
+  List<String> gallery = List.empty(growable: true);
 
   final bookNote = IsarLinks<BookNotes>();
   final finishedNote = IsarLink<FinishedBookNote>();
