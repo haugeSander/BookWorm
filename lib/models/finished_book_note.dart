@@ -15,7 +15,7 @@ class FinishedBookNote {
   List<String> topThreeQuotes;
   int rating;
 
-  @Backlink(to: "bookNote")
+  @Backlink(to: "finishedNote")
   final bookDataReference = IsarLink<UserBookEntry>();
 
   FinishedBookNote({

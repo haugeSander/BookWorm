@@ -1,5 +1,6 @@
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/book_notes.dart';
+import 'package:book_worm/models/finished_book_note.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -80,8 +81,12 @@ class IsarService {
     final dir = await getApplicationDocumentsDirectory();
 
     if (Isar.instanceNames.isEmpty) {
-      return await Isar.open([BookSchema, UserBookEntrySchema, BookNotesSchema],
-          directory: dir.path, maxSizeMiB: 1024, inspector: true);
+      return await Isar.open([
+        BookSchema,
+        UserBookEntrySchema,
+        BookNotesSchema,
+        FinishedBookNoteSchema
+      ], directory: dir.path, maxSizeMiB: 1024, inspector: true);
     }
 
     return Future.value(Isar.getInstance());

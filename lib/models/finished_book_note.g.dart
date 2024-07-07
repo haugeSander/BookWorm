@@ -61,11 +61,11 @@ const FinishedBookNoteSchema = CollectionSchema(
   indexes: {},
   links: {
     r'bookDataReference': LinkSchema(
-      id: 1013598117759763890,
+      id: -1403008970436645318,
       name: r'bookDataReference',
       target: r'UserBookEntry',
       single: true,
-      linkName: r'bookNote',
+      linkName: r'finishedNote',
     )
   },
   embeddedSchemas: {},

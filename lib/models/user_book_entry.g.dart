@@ -45,6 +45,12 @@ const UserBookEntrySchema = CollectionSchema(
       id: -3787082839783751551,
       name: r'bookNote',
       target: r'BookNotes',
+      single: false,
+    ),
+    r'finishedNote': LinkSchema(
+      id: 501166541234078424,
+      name: r'finishedNote',
+      target: r'FinishedBookNote',
       single: true,
     ),
     r'bookReference': LinkSchema(
@@ -150,7 +156,7 @@ Id _userBookEntryGetId(UserBookEntry object) {
 }
 
 List<IsarLinkBase<dynamic>> _userBookEntryGetLinks(UserBookEntry object) {
-  return [object.bookNote, object.bookReference];
+  return [object.bookNote, object.finishedNote, object.bookReference];
 }
 
 void _userBookEntryAttach(
@@ -158,6 +164,8 @@ void _userBookEntryAttach(
   object.id = id;
   object.bookNote
       .attach(col, col.isar.collection<BookNotes>(), r'bookNote', id);
+  object.finishedNote.attach(
+      col, col.isar.collection<FinishedBookNote>(), r'finishedNote', id);
   object.bookReference
       .attach(col, col.isar.collection<Book>(), r'bookReference', id);
 }
@@ -686,9 +694,70 @@ extension UserBookEntryQueryLinks
   }
 
   QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
-      bookNoteIsNull() {
+      bookNoteLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'bookNote', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      bookNoteIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(r'bookNote', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      bookNoteIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'bookNote', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      bookNoteLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'bookNote', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      bookNoteLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'bookNote', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      bookNoteLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'bookNote', lower, includeLower, upper, includeUpper);
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      finishedNote(FilterQuery<FinishedBookNote> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'finishedNote');
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      finishedNoteIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'finishedNote', 0, true, 0, true);
     });
   }
 
