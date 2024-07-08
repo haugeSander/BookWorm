@@ -3,6 +3,7 @@ import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/finished_book_note.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/screens/library.dart';
+import 'package:book_worm/screens/stepper_page.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:book_worm/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late final FinishedBookNote? finalNote;
   late final Color color;
   late final bool isFinished;
-  File? _imageLoaded;
+  //File? _imageLoaded;
 
   @override
   void initState() {
@@ -520,7 +521,13 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Widget _buildActionButton(String text) {
     return CustomElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StepperPage(bookEntry: userData),
+            ));
+      },
       borderRadius: BorderRadius.circular(20),
       child: Text(
         text,

@@ -18,7 +18,6 @@ class FinishedBookNote {
   final bookDataReference = IsarLink<UserBookEntry>();
 
   FinishedBookNote({
-    required this.noteId,
     required this.timeEnded,
     required this.inThreeSentences,
     required this.impressions,

@@ -126,12 +126,12 @@ FinishedBookNote _finishedBookNoteDeserialize(
     howChangedMe: reader.readString(offsets[0]),
     impressions: reader.readString(offsets[1]),
     inThreeSentences: reader.readStringList(offsets[2]) ?? [],
-    noteId: id,
     rating: reader.readLong(offsets[3]),
     timeEnded: reader.readDateTime(offsets[4]),
     topThreeQuotes: reader.readStringList(offsets[5]) ?? [],
     whoShouldRead: reader.readString(offsets[6]),
   );
+  object.noteId = id;
   return object;
 }
 
