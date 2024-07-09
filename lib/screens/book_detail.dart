@@ -235,19 +235,20 @@ class _BookDetailPageState extends State<BookDetailPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Image'),
-          content: Text('Are you sure you want to delete this image?'),
+          title: const Text('Delete Image'),
+          content: const Text('Are you sure you want to delete this image?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Delete'),
+              child: const Text('Delete'),
               onPressed: () {
                 setState(() {
+                  File(userData.gallery[index]).delete();
                   userData.gallery.removeAt(index);
                   IsarService().updateUserDataEntry(userData);
                 });
