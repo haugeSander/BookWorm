@@ -28,6 +28,12 @@ class IsarService {
     isar.writeTxnSync<int>(() => isar.bookNotes.putSync(newNote));
   }
 
+  Future<void> updateBookSummary(Book book, String summary) async {
+    final isar = await db;
+    book.summary = summary;
+    isar.writeTxnSync<int>(() => isar.books.putSync(book));
+  }
+
   Stream<List<Book>> getAllBooks({String? search}) async* {
     final isar = await db;
     final query = isar.books
