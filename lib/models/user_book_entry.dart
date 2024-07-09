@@ -18,8 +18,8 @@ class UserBookEntry {
 
   List<String> gallery;
 
-  final bookNote = IsarLinks<BookNotes>();
-  final finishedNote = IsarLink<FinishedBookNote>();
+  var bookNote = IsarLinks<BookNotes>();
+  var finishedNote = IsarLink<FinishedBookNote>();
 
   @Backlink(to: 'userDataReference')
   final bookReference = IsarLink<Book>();

@@ -1,10 +1,13 @@
 import 'package:book_worm/screens/library.dart';
+import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/finished_book_note.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'dart:math' as math;
+
+import 'package:isar/isar.dart';
 
 class StepperPage extends StatefulWidget {
   final UserBookEntry bookEntry;
@@ -16,8 +19,8 @@ class StepperPage extends StatefulWidget {
 }
 
 class _StepperPageState extends State<StepperPage> {
-  late final UserBookEntry bookEntry;
-  late final Book book;
+  late UserBookEntry bookEntry;
+  late Book book;
   late DateTime dateFinished;
   late List<TextEditingController> controllers;
   late List<String> tags;
@@ -292,6 +295,7 @@ class _StepperPageState extends State<StepperPage> {
       title: const Text('Add a new tag'),
       content: TextField(
         controller: controller,
+        autofocus: true,
         decoration: const InputDecoration(hintText: "Enter tag name"),
         textCapitalization: TextCapitalization.words,
       ),
@@ -403,8 +407,9 @@ class _StepperPageState extends State<StepperPage> {
       topThreeQuotes: quoteList,
       rating: bookScore,
     );
-
-    // TODO: Save the note to your database or state management solution
+    bookEntry.finishedNote.value = note;
+    bookEntry.status = BookStatus.finished;
+    IsarService().updateUserDataEntry(bookEntry);
 
     // Navigate back to the previous screen
     Navigator.pop(context, note);
