@@ -4,6 +4,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/finished_book_note.dart';
 import 'package:book_worm/models/user_book_entry.dart';
+import 'dart:math' as math;
 
 class StepperPage extends StatefulWidget {
   final UserBookEntry bookEntry;
@@ -21,6 +22,7 @@ class _StepperPageState extends State<StepperPage> {
   late List<TextEditingController> controllers;
   late List<String> tags;
   int bookScore = 0;
+  bool showRatingBar = true;
   int currentStep = 0;
 
   @override
@@ -256,6 +258,8 @@ class _StepperPageState extends State<StepperPage> {
       children: [
         ...tags.map((tag) => Chip(
               label: Text(tag),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
               onDeleted: () {
                 setState(() {
                   tags.remove(tag);
@@ -264,6 +268,8 @@ class _StepperPageState extends State<StepperPage> {
             )),
         ActionChip(
           label: const Icon(Icons.add),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           onPressed: () async {
             final result = await showDialog<String>(
               context: context,
@@ -287,6 +293,7 @@ class _StepperPageState extends State<StepperPage> {
       content: TextField(
         controller: controller,
         decoration: const InputDecoration(hintText: "Enter tag name"),
+        textCapitalization: TextCapitalization.words,
       ),
       actions: [
         TextButton(
@@ -302,34 +309,60 @@ class _StepperPageState extends State<StepperPage> {
   }
 
   Widget _buildRatingBar() {
-    return Column(
-      children: [
-        RatingBar(
-          initialRating: bookScore.toDouble(),
-          direction: Axis.horizontal,
-          allowHalfRating: false,
-          itemCount: 5,
-          ratingWidget: RatingWidget(
-            full: const Icon(Icons.star, color: Colors.amber),
-            half: const Icon(Icons.star_half, color: Colors.amber),
-            empty: const Icon(Icons.star_border, color: Colors.amber),
+    return Center(
+      child: Column(
+        children: [
+          showRatingBar
+              ? RatingBar(
+                  initialRating: bookScore.toDouble(),
+                  direction: Axis.horizontal,
+                  allowHalfRating: false,
+                  itemCount: 5,
+                  ratingWidget: RatingWidget(
+                    full: const Icon(Icons.star, color: Colors.amber),
+                    half: const Icon(Icons.star_half, color: Colors.amber),
+                    empty: const Icon(Icons.star_border, color: Colors.amber),
+                  ),
+                  onRatingUpdate: (rating) {
+                    setState(() {
+                      bookScore = rating.toInt();
+                    });
+                  },
+                )
+              : Text(
+                  "Lifechanging indeed!",
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              showRatingBar ? "or maybe it was" : "or maybe it wasn't",
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ),
-          onRatingUpdate: (rating) {
-            setState(() {
-              bookScore = rating.toInt();
-            });
-          },
-        ),
-        const SizedBox(width: 16),
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              bookScore = 6;
-            });
-          },
-          child: const Text('Lifechanging'),
-        ),
-      ],
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                showRatingBar = !showRatingBar;
+                showRatingBar ? bookScore = 0 : bookScore = 6;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[200], // background
+              foregroundColor: Colors.white, // foreground
+            ),
+            child: Text(
+              showRatingBar ? 'Lifechanging' : 'Lifechanging!',
+              style: TextStyle(
+                  fontWeight:
+                      showRatingBar ? FontWeight.w300 : FontWeight.w800),
+            ),
+          ),
+          const SizedBox(
+            height: 10.0,
+          )
+        ],
+      ),
     );
   }
 
