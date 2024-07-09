@@ -120,21 +120,21 @@ class _StepperPageState extends State<StepperPage> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          _buildInputField("Impressions", controllers[3]),
+          _buildInputField("", controllers[3]),
           const SizedBox(height: 16),
           Text(
             "Who should read it?",
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          _buildInputField("Who should read", controllers[4]),
+          _buildInputField("", controllers[4]),
           const SizedBox(height: 16),
           Text(
             "Did the book change you, if so, how?",
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          _buildInputField("How it changed you", controllers[5]),
+          _buildInputField("", controllers[5]),
         ],
       ),
     );
@@ -148,7 +148,7 @@ class _StepperPageState extends State<StepperPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "From this book, what are your favorite 3 quotes?",
+            "From this book, what are your 3 favorite quotes?",
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
@@ -246,6 +246,7 @@ class _StepperPageState extends State<StepperPage> {
       ),
       maxLines: null,
       textCapitalization: TextCapitalization.sentences,
+      textInputAction: TextInputAction.next,
     );
   }
 
@@ -301,7 +302,7 @@ class _StepperPageState extends State<StepperPage> {
   }
 
   Widget _buildRatingBar() {
-    return Row(
+    return Column(
       children: [
         RatingBar(
           initialRating: bookScore.toDouble(),
