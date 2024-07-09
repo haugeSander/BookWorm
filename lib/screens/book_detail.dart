@@ -171,9 +171,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
             height: 100,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: userData.gallery!.length + 1,
+              itemCount: userData.gallery.length + 1,
               itemBuilder: (context, index) {
-                if (index < userData.gallery!.length) {
+                if (index < userData.gallery.length) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: GestureDetector(
@@ -181,14 +181,17 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         await showDialog(
                           context: context,
                           builder: (_) => ImageDialog(
-                            imagePath: userData.gallery![index],
+                            imagePath: userData.gallery[index],
                           ),
                         );
+                      },
+                      onLongPress: () {
+                        _showDeleteOption(context, index);
                       },
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(5),
                         child: Image.file(
-                          File(userData.gallery![index]),
+                          File(userData.gallery[index]),
                           height: 100,
                           width: 100,
                           fit: BoxFit.cover,
@@ -224,6 +227,36 @@ class _BookDetailPageState extends State<BookDetailPage> {
           )
         ],
       ),
+    );
+  }
+
+  void _showDeleteOption(BuildContext context, int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Image'),
+          content: Text('Are you sure you want to delete this image?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () {
+                setState(() {
+                  userData.gallery.removeAt(index);
+                  IsarService().updateUserDataEntry(userData);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -307,7 +340,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
           ),
           const SizedBox(
               height: 8.0), // Add some spacing between title and summary
-          Text(book.summary ?? "") // Using null-aware operator for cleaner code
+          Text(book.summary ?? ""),
+          const SizedBox(height: 8.0),
         ],
       ),
     );
