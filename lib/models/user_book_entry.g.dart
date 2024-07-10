@@ -32,6 +32,11 @@ const UserBookEntrySchema = CollectionSchema(
       name: r'status',
       type: IsarType.byte,
       enumMap: _UserBookEntrystatusEnumValueMap,
+    ),
+    r'timeStarted': PropertySchema(
+      id: 3,
+      name: r'timeStarted',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _userBookEntryEstimateSize,
@@ -93,6 +98,7 @@ void _userBookEntrySerialize(
   writer.writeDateTime(offsets[0], object.dateOfCurrentStatus);
   writer.writeStringList(offsets[1], object.gallery);
   writer.writeByte(offsets[2], object.status.index);
+  writer.writeDateTime(offsets[3], object.timeStarted);
 }
 
 UserBookEntry _userBookEntryDeserialize(
@@ -109,6 +115,7 @@ UserBookEntry _userBookEntryDeserialize(
             BookStatus.finished,
   );
   object.id = id;
+  object.timeStarted = reader.readDateTimeOrNull(offsets[3]);
   return object;
 }
 
@@ -126,6 +133,8 @@ P _userBookEntryDeserializeProp<P>(
     case 2:
       return (_UserBookEntrystatusValueEnumMap[reader.readByteOrNull(offset)] ??
           BookStatus.finished) as P;
+    case 3:
+      return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -656,6 +665,80 @@ extension UserBookEntryQueryFilter
       ));
     });
   }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      timeStartedIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'timeStarted',
+      ));
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      timeStartedIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'timeStarted',
+      ));
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      timeStartedEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'timeStarted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      timeStartedGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'timeStarted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      timeStartedLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'timeStarted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterFilterCondition>
+      timeStartedBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'timeStarted',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension UserBookEntryQueryObject
@@ -780,6 +863,19 @@ extension UserBookEntryQuerySortBy
       return query.addSortBy(r'status', Sort.desc);
     });
   }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterSortBy> sortByTimeStarted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timeStarted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterSortBy>
+      sortByTimeStartedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timeStarted', Sort.desc);
+    });
+  }
 }
 
 extension UserBookEntryQuerySortThenBy
@@ -821,6 +917,19 @@ extension UserBookEntryQuerySortThenBy
       return query.addSortBy(r'status', Sort.desc);
     });
   }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterSortBy> thenByTimeStarted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timeStarted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QAfterSortBy>
+      thenByTimeStartedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timeStarted', Sort.desc);
+    });
+  }
 }
 
 extension UserBookEntryQueryWhereDistinct
@@ -841,6 +950,13 @@ extension UserBookEntryQueryWhereDistinct
   QueryBuilder<UserBookEntry, UserBookEntry, QDistinct> distinctByStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'status');
+    });
+  }
+
+  QueryBuilder<UserBookEntry, UserBookEntry, QDistinct>
+      distinctByTimeStarted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'timeStarted');
     });
   }
 }
@@ -870,6 +986,13 @@ extension UserBookEntryQueryProperty
   QueryBuilder<UserBookEntry, BookStatus, QQueryOperations> statusProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'status');
+    });
+  }
+
+  QueryBuilder<UserBookEntry, DateTime?, QQueryOperations>
+      timeStartedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'timeStarted');
     });
   }
 }

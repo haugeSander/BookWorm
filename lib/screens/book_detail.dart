@@ -511,18 +511,31 @@ class _BookDetailPageState extends State<BookDetailPage> {
       elevation: 8.0,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
+        child: Column(
           children: [
-            Expanded(
-              flex: 3,
-              child: _buildCardViewText(),
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: _buildCardViewText(),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: _getCorrespondingIcon(userData.status),
+                ),
+              ],
             ),
-            Expanded(
-              flex: 2,
-              child: Column(
-                children: _buildRatingBar(),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              const Text(
+                'Score given',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-            ),
+              _buildRatingBar(),
+            ]),
           ],
         ),
       ),
@@ -532,7 +545,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   Widget _buildCardViewText() {
     final dateFormat = DateFormat('MMMM d, y');
     final formattedDate = userData.dateOfCurrentStatus != null
-        ? dateFormat.format(userData.dateOfCurrentStatus!)
+        ? dateFormat.format(userData.timeStarted!)
         : "";
 
     switch (userData.status) {
@@ -563,15 +576,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
         if (finalNote != null && isFinished) ...[
           Text(
               "Finished: ${DateFormat('MMMM d, y').format(finalNote!.timeEnded)}"),
-          const SizedBox(height: 10.0),
-          const Text(
-            'Score given',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 24,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
+          const SizedBox(height: 10.0)
         ],
       ],
     );
@@ -653,33 +658,29 @@ class _BookDetailPageState extends State<BookDetailPage> {
     );
   }
 
-  List<Widget> _buildRatingBar() {
-    return [
-      _getCorrespondingIcon(userData.status),
-      if (userData.status == BookStatus.finished && finalNote != null)
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: finalNote!.rating < 6
-              ? RatingBar(
-                  minRating: 1,
-                  maxRating: 5,
-                  initialRating: finalNote!.rating.toDouble(),
-                  ignoreGestures: true,
-                  ratingWidget: RatingWidget(
-                    full: const Icon(Icons.star, color: Colors.yellow),
-                    half: const Icon(Icons.star_half, color: Colors.yellow),
-                    empty: const Icon(Icons.star_border),
-                  ),
-                  allowHalfRating: false,
-                  itemSize: 20,
-                  onRatingUpdate: (_) {},
-                )
-              : const Chip(
-                  label: Text("Life-changing"),
-                  backgroundColor: Colors.teal,
-                ),
-        )
-    ];
+  Widget _buildRatingBar() {
+    return finalNote!.rating < 6
+        ? RatingBar(
+            minRating: 1,
+            maxRating: 5,
+            initialRating: finalNote!.rating.toDouble(),
+            ignoreGestures: true,
+            ratingWidget: RatingWidget(
+              full: const Icon(Icons.star, color: Colors.yellow),
+              half: const Icon(Icons.star_half, color: Colors.yellow),
+              empty: const Icon(Icons.star_border),
+            ),
+            allowHalfRating: false,
+            itemSize: 20,
+            onRatingUpdate: (_) {},
+          )
+        : Chip(
+            label: Text(
+              "Lifechanging",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            backgroundColor: Colors.teal,
+          );
   }
 
   Color _getCorrespondingColor(BookStatus status) {

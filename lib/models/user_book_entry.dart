@@ -14,6 +14,7 @@ class UserBookEntry {
   @enumerated
   BookStatus status;
 
+  DateTime? timeStarted;
   DateTime? dateOfCurrentStatus;
 
   List<String> gallery;
