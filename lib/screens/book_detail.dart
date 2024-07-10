@@ -420,10 +420,14 @@ class _BookDetailPageState extends State<BookDetailPage> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Image.file(
-              File(book.coverImage),
-              fit: BoxFit.cover,
-            ),
+            child: book.coverImage != ""
+                ? Image.file(
+                    File(book.coverImage),
+                    fit: BoxFit.cover,
+                  )
+                : Container(
+                    color: Colors.grey,
+                  ),
           ),
           Positioned(
             left: 8,
@@ -525,17 +529,22 @@ class _BookDetailPageState extends State<BookDetailPage> {
                 ),
               ],
             ),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              const Text(
-                'Score given',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w400,
-                ),
+            if (userData.status == BookStatus.finished) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  const Text(
+                    'Score given',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  _buildRatingBar(),
+                ],
               ),
-              _buildRatingBar(),
-            ]),
+            ],
           ],
         ),
       ),
@@ -545,7 +554,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   Widget _buildCardViewText() {
     final dateFormat = DateFormat('MMMM d, y');
     final formattedDate = userData.dateOfCurrentStatus != null
-        ? dateFormat.format(userData.timeStarted!)
+        ? dateFormat.format(userData.dateOfCurrentStatus!)
         : "";
 
     switch (userData.status) {
@@ -640,11 +649,15 @@ class _BookDetailPageState extends State<BookDetailPage> {
   Widget _buildActionButton(String text) {
     return CustomElevatedButton(
       onPressed: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => StepperPage(bookEntry: userData),
-            ));
+        if (text == "Finished?") {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StepperPage(bookEntry: userData),
+              ));
+        } else {
+          _openContinueDialog(context);
+        }
       },
       borderRadius: BorderRadius.circular(20),
       child: Text(
@@ -653,6 +666,74 @@ class _BookDetailPageState extends State<BookDetailPage> {
           color: Colors.white,
           fontSize: 15,
           fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openContinueDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'How are you enjoying the book?',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: IntrinsicHeight(
+            child: Column(
+              children: [
+                _buildOptionButton(
+                  context,
+                  'Reading',
+                  Icons.book,
+                  BookStatus.reading,
+                ),
+                const SizedBox(height: 12),
+                _buildOptionButton(
+                  context,
+                  'Listening',
+                  Icons.headphones,
+                  BookStatus.listening,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildOptionButton(
+    BuildContext context,
+    String label,
+    IconData icon,
+    BookStatus status,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          setState(() {
+            userData.status = status;
+            IsarService().updateUserDataEntry(userData);
+          });
+          Navigator.pop(context);
+        },
+        icon: Icon(icon),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
       ),
     );
@@ -675,11 +756,16 @@ class _BookDetailPageState extends State<BookDetailPage> {
             onRatingUpdate: (_) {},
           )
         : Chip(
-            label: Text(
+            label: const Text(
               "Lifechanging",
-              style: Theme.of(context).textTheme.titleMedium,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500),
             ),
-            backgroundColor: Colors.teal,
+            backgroundColor: Colors.blue[200],
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           );
   }
 

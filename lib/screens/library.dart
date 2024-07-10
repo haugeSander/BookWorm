@@ -81,13 +81,16 @@ class _LibraryPageState extends State<LibraryPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: (() async {
           final result = await openAddDialog(context);
+          File? newImage;
           if (result == null || result.isEmpty) return;
-          // getting a directory path for saving
-          final applicationDirectory = await getApplicationDocumentsDirectory();
-          final path = applicationDirectory.path;
-          // copy the file to a new path
-          final File newImage =
-              await _imageLoaded!.copy('$path/${result['name']}.jpg');
+          if (_imageLoaded != null) {
+            // getting a directory path for saving
+            final applicationDirectory =
+                await getApplicationDocumentsDirectory();
+            final path = applicationDirectory.path;
+            // copy the file to a new path
+            newImage = await _imageLoaded!.copy('$path/${result['name']}.jpg');
+          }
 
           final newUserDataBook = UserBookEntry(
               status: _dropdownValue,
@@ -97,7 +100,7 @@ class _LibraryPageState extends State<LibraryPage> {
           final newBook = Book(
               title: result['name']!,
               author: result['author']!,
-              coverImage: _imageLoaded == null ? "" : newImage.path);
+              coverImage: newImage == null ? "" : newImage.path);
 
           // Establish the link between the UserBookEntry and Book
           newUserDataBook.bookReference.value = newBook;
