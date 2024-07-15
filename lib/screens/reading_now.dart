@@ -295,6 +295,20 @@ class ReadingNowPage extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          const SizedBox(height: 4),
+                          if (book.userDataReference.value!
+                                  .dateOfCurrentStatus !=
+                              null)
+                            Text(
+                              'Started: ${DateFormat('MMMM d, y').format(book.userDataReference.value!.dateOfCurrentStatus!)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.blue,
+                                fontSize: 10,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                         ],
                       ),
                     ),
