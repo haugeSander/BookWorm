@@ -1,6 +1,6 @@
 import 'package:book_worm/screens/summary.dart';
 import 'package:book_worm/screens/library.dart';
-import 'package:book_worm/screens/reading_now.dart';
+import 'package:book_worm/screens/home.dart';
 import 'package:flutter/material.dart';
 
 class NavigationMenu extends StatefulWidget {
@@ -16,7 +16,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
   // List of pages to display for each bottom navigation bar item
   static final List<Widget> _pages = <Widget>[
     const LibraryPage(),
-    ReadingNowPage(),
+    HomePage(),
     const SummaryPage(),
   ];
 

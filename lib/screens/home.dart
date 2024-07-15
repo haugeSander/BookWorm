@@ -10,8 +10,8 @@ import 'package:intl/intl.dart';
 
 import '../services/isar_service.dart';
 
-class ReadingNowPage extends StatelessWidget {
-  ReadingNowPage({super.key});
+class HomePage extends StatelessWidget {
+  HomePage({super.key});
   DateTime? selectedDate;
   TextEditingController noteController = TextEditingController();
 

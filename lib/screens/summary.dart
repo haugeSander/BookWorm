@@ -19,9 +19,18 @@ class SummaryPage extends StatelessWidget {
       body: ListView(
         children: [
           const SizedBox(
-            height: 40,
+            height: 20,
           ),
-          _profileAndTitle(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0),
+            child: Text(
+              "Your summary",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 34,
+                  fontWeight: FontWeight.w400),
+            ),
+          ),
           const SizedBox(
             height: 40,
           ),
@@ -165,29 +174,6 @@ class SummaryPage extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  Center _profileAndTitle() {
-    return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(40.0),
-            child: const Image(
-              image: AssetImage('assets/images/mark_manson.jpg'),
-              width: 80.0,
-              height: 80.0,
-            ),
-          ),
-          const Text(
-            "Book worm",
-            style: TextStyle(
-                color: Colors.black, fontSize: 34, fontWeight: FontWeight.w400),
-          ),
-        ],
-      ),
     );
   }
 }
