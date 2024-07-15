@@ -5,8 +5,8 @@ import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class HomePage extends StatelessWidget {
-  HomePage({super.key});
+class SummaryPage extends StatelessWidget {
+  const SummaryPage({super.key});
 
   Future<List<BookNotes>> _getInfo() {
     return IsarService().getAllBookNotes();

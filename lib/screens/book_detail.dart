@@ -28,7 +28,6 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late final FinishedBookNote? finalNote;
   late final Color color;
   late final bool isFinished;
-  //File? _imageLoaded;
 
   @override
   void initState() {

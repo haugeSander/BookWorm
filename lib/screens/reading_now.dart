@@ -18,10 +18,24 @@ class ReadingNowPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar(),
       backgroundColor: Colors.white,
       body: ListView(
+        shrinkWrap: true,
         children: [
+          const SizedBox(
+            height: 50,
+          ),
+          _profileAndTitle(),
+          const SizedBox(
+            height: 50,
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'Reading now',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            ),
+          ),
           StreamBuilder<List<Book>>(
               stream: IsarService()
                   .getBooksOfStatus([BookStatus.reading, BookStatus.listening]),
@@ -284,9 +298,11 @@ class ReadingNowPage extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    _getCorrespondingIcon(book.userDataReference.value!),
-                    const SizedBox(width: 10),
+                    const Icon(
+                      Icons.note_add,
+                      size: 35,
+                    ),
+                    const SizedBox(width: 30),
                   ],
                 ),
               ),
@@ -467,6 +483,29 @@ class ReadingNowPage extends StatelessWidget {
       backgroundColor: Colors.white,
       elevation: 0.0,
       centerTitle: true,
+    );
+  }
+
+  Center _profileAndTitle() {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(40.0),
+            child: const Image(
+              image: AssetImage('assets/images/mark_manson.jpg'),
+              width: 80.0,
+              height: 80.0,
+            ),
+          ),
+          const Text(
+            "Book worm",
+            style: TextStyle(
+                color: Colors.black, fontSize: 34, fontWeight: FontWeight.w400),
+          ),
+        ],
+      ),
     );
   }
 }
