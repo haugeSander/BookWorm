@@ -23,7 +23,7 @@ class _StepperPageState extends State<StepperPage> {
   late Book book;
   late DateTime dateFinished;
   late List<TextEditingController> controllers;
-  late List<String> tags;
+  List<String> tags = [];
   int bookScore = 0;
   bool showRatingBar = true;
   int currentStep = 0;
@@ -35,7 +35,6 @@ class _StepperPageState extends State<StepperPage> {
     book = bookEntry.bookReference.value!;
     dateFinished = DateTime.now();
     controllers = List.generate(9, (_) => TextEditingController());
-    tags = [];
   }
 
   @override
@@ -405,6 +404,7 @@ class _StepperPageState extends State<StepperPage> {
       whoShouldRead: controllers[4].text,
       howChangedMe: controllers[5].text,
       topThreeQuotes: quoteList,
+      tags: tags,
       rating: bookScore,
     );
     bookEntry.finishedNote.value = note;

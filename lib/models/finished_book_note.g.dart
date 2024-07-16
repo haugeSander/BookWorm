@@ -37,18 +37,23 @@ const FinishedBookNoteSchema = CollectionSchema(
       name: r'rating',
       type: IsarType.long,
     ),
-    r'timeEnded': PropertySchema(
+    r'tags': PropertySchema(
       id: 4,
+      name: r'tags',
+      type: IsarType.stringList,
+    ),
+    r'timeEnded': PropertySchema(
+      id: 5,
       name: r'timeEnded',
       type: IsarType.dateTime,
     ),
     r'topThreeQuotes': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'topThreeQuotes',
       type: IsarType.stringList,
     ),
     r'whoShouldRead': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'whoShouldRead',
       type: IsarType.string,
     )
@@ -90,6 +95,13 @@ int _finishedBookNoteEstimateSize(
       bytesCount += value.length * 3;
     }
   }
+  bytesCount += 3 + object.tags.length * 3;
+  {
+    for (var i = 0; i < object.tags.length; i++) {
+      final value = object.tags[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.topThreeQuotes.length * 3;
   {
     for (var i = 0; i < object.topThreeQuotes.length; i++) {
@@ -111,9 +123,10 @@ void _finishedBookNoteSerialize(
   writer.writeString(offsets[1], object.impressions);
   writer.writeStringList(offsets[2], object.inThreeSentences);
   writer.writeLong(offsets[3], object.rating);
-  writer.writeDateTime(offsets[4], object.timeEnded);
-  writer.writeStringList(offsets[5], object.topThreeQuotes);
-  writer.writeString(offsets[6], object.whoShouldRead);
+  writer.writeStringList(offsets[4], object.tags);
+  writer.writeDateTime(offsets[5], object.timeEnded);
+  writer.writeStringList(offsets[6], object.topThreeQuotes);
+  writer.writeString(offsets[7], object.whoShouldRead);
 }
 
 FinishedBookNote _finishedBookNoteDeserialize(
@@ -127,9 +140,10 @@ FinishedBookNote _finishedBookNoteDeserialize(
     impressions: reader.readString(offsets[1]),
     inThreeSentences: reader.readStringList(offsets[2]) ?? [],
     rating: reader.readLong(offsets[3]),
-    timeEnded: reader.readDateTime(offsets[4]),
-    topThreeQuotes: reader.readStringList(offsets[5]) ?? [],
-    whoShouldRead: reader.readString(offsets[6]),
+    tags: reader.readStringList(offsets[4]) ?? [],
+    timeEnded: reader.readDateTime(offsets[5]),
+    topThreeQuotes: reader.readStringList(offsets[6]) ?? [],
+    whoShouldRead: reader.readString(offsets[7]),
   );
   object.noteId = id;
   return object;
@@ -151,10 +165,12 @@ P _finishedBookNoteDeserializeProp<P>(
     case 3:
       return (reader.readLong(offset)) as P;
     case 4:
-      return (reader.readDateTime(offset)) as P;
-    case 5:
       return (reader.readStringList(offset) ?? []) as P;
+    case 5:
+      return (reader.readDateTime(offset)) as P;
     case 6:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -870,6 +886,231 @@ extension FinishedBookNoteQueryFilter
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'tags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'tags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'tags',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'tags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'tags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'tags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'tags',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'tags',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'tags',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'tags',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'tags',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'tags',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'tags',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'tags',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'tags',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
       timeEndedEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1498,6 +1739,12 @@ extension FinishedBookNoteQueryWhereDistinct
     });
   }
 
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QDistinct> distinctByTags() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'tags');
+    });
+  }
+
   QueryBuilder<FinishedBookNote, FinishedBookNote, QDistinct>
       distinctByTimeEnded() {
     return QueryBuilder.apply(this, (query) {
@@ -1553,6 +1800,13 @@ extension FinishedBookNoteQueryProperty
   QueryBuilder<FinishedBookNote, int, QQueryOperations> ratingProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'rating');
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, List<String>, QQueryOperations>
+      tagsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'tags');
     });
   }
 

@@ -64,12 +64,20 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         const SizedBox(height: 16.0), // Add some spacing
                         _buildSummerySection(),
                         const SizedBox(height: 16.0), // Add some spacing
+                        _buildYourFindingsSection(),
+                        const SizedBox(height: 16.0), // Add some spacing
                         _buildGallerySection(),
                         const SizedBox(height: 16.0), // Add some spacing
                         _buildNotesSection(),
                         const SizedBox(height: 16.0), // Add some spacing
                       ]))))
     ]));
+  }
+
+  Widget _buildYourFindingsSection() {
+    return const Column(
+      children: [],
+    );
   }
 
   Widget _buildNotesSection() {
@@ -486,24 +494,60 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   Widget _buildTagSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        children: [
-          Chip(
+    var finishedNote = userData.finishedNote.value;
+
+    List<Widget> chips = [];
+
+    // Add the status chip
+    chips.add(
+      Chip(
+        label: Text(
+          userData.status.name.capitalize(),
+          style: const TextStyle(color: Colors.white),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: _getCorrespondingColor(userData.status)),
+        ),
+        backgroundColor: _getCorrespondingColor(userData.status),
+      ),
+    );
+
+    // Add tag chips if finishedNote is not null and has tags
+    if (finishedNote != null && finishedNote.tags.isNotEmpty) {
+      chips.addAll(
+        finishedNote.tags.map((tag) {
+          return Chip(
             label: Text(
-              userData.status.name.capitalize(),
+              tag.capitalize(),
               style: const TextStyle(color: Colors.white),
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: color),
+              side: BorderSide(color: _getColorForTag(tag)),
             ),
-            backgroundColor: color,
-          ),
-        ],
+            backgroundColor: _getColorForTag(tag),
+          );
+        }),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Wrap(
+        spacing: 8.0,
+        runSpacing: 4.0,
+        children: chips,
       ),
     );
+  }
+
+// Helper function to get a color for a tag (you can customize this)
+  Color _getColorForTag(String tag) {
+    // This is a simple hash function to generate a color
+    // You might want to replace this with a more sophisticated color selection method
+    final hash = tag.hashCode;
+    return Color((hash & 0xFFFFFF00) | 0xFF);
   }
 
   Widget _buildCardView() {
@@ -746,8 +790,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
             initialRating: finalNote!.rating.toDouble(),
             ignoreGestures: true,
             ratingWidget: RatingWidget(
-              full: const Icon(Icons.star, color: Colors.yellow),
-              half: const Icon(Icons.star_half, color: Colors.yellow),
+              full: const Icon(Icons.star, color: Colors.amber),
+              half: const Icon(Icons.star_half, color: Colors.amber),
               empty: const Icon(Icons.star_border),
             ),
             allowHalfRating: false,
