@@ -16,6 +16,8 @@ extension StringExtension on String {
   }
 }
 
+enum SortOption { title, author, dateAdded }
+
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
 
@@ -28,10 +30,14 @@ class _LibraryPageState extends State<LibraryPage> {
   late TextEditingController authorController;
   late TextEditingController imageController;
   late BookStatus _dropdownValue = BookStatus.added;
+  String search = "";
+  BookStatus? selectedStatus;
+  SortOption selectedSort = SortOption.dateAdded;
+  bool sortAscending = true;
+  bool showFilters = false;
 
   File? _imageLoaded;
   final picker = ImagePicker();
-  String search = ""; //for searching
 
   @override
   void initState() {
@@ -59,11 +65,17 @@ class _LibraryPageState extends State<LibraryPage> {
       body: ListView(
         children: [
           _searchField(),
+          if (showFilters) ...[
+            const SizedBox(height: 10),
+            _filterChips(),
+            const SizedBox(height: 10),
+            _sortChips(),
+          ],
           const SizedBox(
             height: 40,
           ),
           StreamBuilder<List<Book>>(
-              stream: IsarService().getAllBooks(search: search),
+              stream: _applyFiltersAndSort(IsarService().getAllBooks()),
               builder: ((context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
@@ -546,25 +558,13 @@ class _LibraryPageState extends State<LibraryPage> {
               padding: const EdgeInsets.all(12),
               child: SvgPicture.asset('assets/icons/Search.svg'),
             ),
-            suffixIcon: SizedBox(
-              width: 100,
-              child: IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const VerticalDivider(
-                      color: Colors.black,
-                      indent: 10,
-                      endIndent: 10,
-                      thickness: 0.1,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SvgPicture.asset('assets/icons/Filter.svg'),
-                    ),
-                  ],
-                ),
-              ),
+            suffixIcon: IconButton(
+              icon: SvgPicture.asset('assets/icons/Filter.svg'),
+              onPressed: () {
+                setState(() {
+                  showFilters = !showFilters;
+                });
+              },
             ),
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -578,6 +578,128 @@ class _LibraryPageState extends State<LibraryPage> {
     );
   }
 
+  Widget _filterChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: BookStatus.values.map((status) {
+            Color chipColor = _getCorrespondingColor(status);
+            Color lightChipColor = Color.lerp(chipColor, Colors.white, 0.7)!;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(
+                  status.toString().split('.').last.capitalize(),
+                  style: TextStyle(
+                    color: selectedStatus == status ? Colors.white : chipColor,
+                  ),
+                ),
+                selected: selectedStatus == status,
+                selectedColor: chipColor,
+                backgroundColor: lightChipColor,
+                onSelected: (bool selected) {
+                  setState(() {
+                    selectedStatus = selected ? status : null;
+                  });
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _sortChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: SortOption.values.map((sort) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(
+                  'Sort by ${sort.toString().split('.').last.capitalize()}',
+                  style: TextStyle(
+                    color: selectedSort == sort ? Colors.white : Colors.black,
+                  ),
+                ),
+                selected: selectedSort == sort,
+                selectedColor: Colors.blue,
+                backgroundColor: Colors.blue.withOpacity(0.1),
+                onSelected: (bool selected) {
+                  setState(() {
+                    if (selectedSort == sort) {
+                      sortAscending = !sortAscending;
+                    } else {
+                      selectedSort = sort;
+                      sortAscending = true;
+                    }
+                  });
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Stream<List<Book>> _applyFiltersAndSort(Stream<List<Book>> bookStream) {
+    return bookStream.map((books) {
+      List<Book> filteredBooks = books;
+
+      // Apply status filter
+      if (selectedStatus != null) {
+        filteredBooks = filteredBooks
+            .where((book) =>
+                book.userDataReference.value?.status == selectedStatus)
+            .toList();
+      }
+
+      // Apply search filter
+      if (search.isNotEmpty) {
+        filteredBooks = filteredBooks
+            .where((book) =>
+                book.title.toLowerCase().contains(search.toLowerCase()) ||
+                book.author.toLowerCase().contains(search.toLowerCase()))
+            .toList();
+      }
+
+      // Apply sorting
+      filteredBooks.sort((a, b) {
+        int compare;
+        switch (selectedSort) {
+          case SortOption.title:
+            compare = a.title.compareTo(b.title);
+            break;
+          case SortOption.author:
+            compare = a.author.compareTo(b.author);
+            break;
+          case SortOption.dateAdded:
+            compare = (a.userDataReference.value?.dateOfCurrentStatus ??
+                    DateTime.now())
+                .compareTo(b.userDataReference.value?.dateOfCurrentStatus ??
+                    DateTime.now());
+            break;
+        }
+        return sortAscending ? compare : -compare;
+      });
+
+      return filteredBooks;
+    });
+  }
+
   AppBar appBar() {
     return AppBar(
       title: const Text(
@@ -589,5 +711,20 @@ class _LibraryPageState extends State<LibraryPage> {
       elevation: 0.0,
       centerTitle: true,
     );
+  }
+
+  Color _getCorrespondingColor(BookStatus status) {
+    switch (status) {
+      case BookStatus.finished:
+        return Colors.green;
+      case BookStatus.reading:
+        return Colors.teal;
+      case BookStatus.listening:
+        return Colors.amber;
+      case BookStatus.dropped:
+        return Colors.red;
+      case BookStatus.added:
+        return Colors.black;
+    }
   }
 }
