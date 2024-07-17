@@ -588,37 +588,13 @@ class _BookDetailPageState extends State<BookDetailPage> {
     List<Widget> chips = [];
 
     // Add the status chip
-    chips.add(
-      Chip(
-        label: Text(
-          userData.status.name.capitalize(),
-          style: const TextStyle(color: Colors.white),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: _getCorrespondingColor(userData.status)),
-        ),
-        backgroundColor: _getCorrespondingColor(userData.status),
-      ),
-    );
+    chips.add(_buildChip(
+        userData.status.name, _getCorrespondingColor(userData.status)));
 
     // Add tag chips if finishedNote is not null and has tags
     if (finishedNote != null && finishedNote.tags.isNotEmpty) {
-      chips.addAll(
-        finishedNote.tags.map((tag) {
-          return Chip(
-            label: Text(
-              tag.capitalize(),
-              style: const TextStyle(color: Colors.white),
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: _getColorForTag(tag)),
-            ),
-            backgroundColor: _getColorForTag(tag),
-          );
-        }),
-      );
+      chips.addAll(finishedNote.tags
+          .map((tag) => _buildChip(tag, _getColorForTag(tag))));
     }
 
     return Padding(
@@ -631,12 +607,36 @@ class _BookDetailPageState extends State<BookDetailPage> {
     );
   }
 
-// Helper function to get a color for a tag (you can customize this)
+  Widget _buildChip(String label, Color backgroundColor) {
+    final textColor = _getContrastingTextColor(backgroundColor);
+    return Chip(
+      label: Text(
+        label.capitalize(),
+        style: TextStyle(color: textColor),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: backgroundColor),
+      ),
+      backgroundColor: backgroundColor,
+    );
+  }
+
   Color _getColorForTag(String tag) {
-    // This is a simple hash function to generate a color
-    // You might want to replace this with a more sophisticated color selection method
     final hash = tag.hashCode;
-    return Color((hash & 0xFFFFFF00) | 0xFF);
+    final hue = (hash % 360).toDouble();
+    return HSLColor.fromAHSL(1.0, hue, 0.7, 0.5).toColor();
+  }
+
+  Color _getContrastingTextColor(Color backgroundColor) {
+    // Calculate the relative luminance of the background color
+    double luminance = (0.299 * backgroundColor.red +
+            0.587 * backgroundColor.green +
+            0.114 * backgroundColor.blue) /
+        255;
+
+    // Choose white for dark backgrounds and black for light backgrounds
+    return luminance > 0.5 ? Colors.black : Colors.white;
   }
 
   Widget _buildCardView() {
