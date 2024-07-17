@@ -75,8 +75,112 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   Widget _buildYourFindingsSection() {
-    return const Column(
-      children: [],
+    return finalNote != null
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  "Your findings",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 20.0,
+                  ),
+                ),
+              ),
+              if (finalNote!.inThreeSentences.isNotEmpty)
+                _inThreeSentencesCard(),
+              if (finalNote!.impressions.isNotEmpty) _impressionsCard(),
+              if (finalNote!.howChangedMe.isNotEmpty) _whoShouldReadCard(),
+            ],
+          )
+        : const SizedBox();
+  }
+
+  Card _whoShouldReadCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            children: [
+              const Text(
+                "🎓 Who Should Read It?",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18.0,
+                ),
+              ),
+              const SizedBox(height: 12.0),
+              Text(finalNote!.whoShouldRead),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Card _impressionsCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            children: [
+              const Text(
+                "🎨 Impressions",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18.0,
+                ),
+              ),
+              const SizedBox(height: 12.0),
+              Text(finalNote!.impressions),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Card _inThreeSentencesCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(
+              child: Text(
+                "🚀 The Book in 3 Sentences",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18.0,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12.0),
+            ...finalNote!.inThreeSentences.asMap().entries.map(
+                  (entry) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${entry.key + 1}. ",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Expanded(
+                          child: Text(entry.value),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+          ],
+        ),
+      ),
     );
   }
 
