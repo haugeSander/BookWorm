@@ -60,17 +60,17 @@ class _BookDetailPageState extends State<BookDetailPage> {
                           .start, // This aligns all children to the start
                       children: [
                         _buildTagSection(),
-                        const SizedBox(height: 16.0), // Add some spacing
+                        const SizedBox(height: 24.0), // Add some spacing
                         _buildCardView(),
-                        const SizedBox(height: 16.0), // Add some spacing
-                        _buildSummerySection(),
-                        const SizedBox(height: 16.0), // Add some spacing
+                        const SizedBox(height: 24.0), // Add some spacing
+                        _buildSummarySection(),
+                        const SizedBox(height: 24.0), // Add some spacing
                         _buildYourFindingsSection(),
-                        const SizedBox(height: 16.0), // Add some spacing
+                        const SizedBox(height: 24.0), // Add some spacing
                         _buildGallerySection(),
-                        const SizedBox(height: 16.0), // Add some spacing
+                        const SizedBox(height: 24.0), // Add some spacing
                         _buildNotesSection(),
-                        const SizedBox(height: 16.0), // Add some spacing
+                        const SizedBox(height: 24.0), // Add some spacing
                       ]))))
     ]));
   }
@@ -86,8 +86,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
           child: Text(
             "Your Findings",
             style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 22.0,
+              fontWeight: FontWeight.w500,
+              fontSize: 20.0,
             ),
           ),
         ),
@@ -119,6 +119,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Card _buildCard({required String title, required Widget content}) {
     return Card(
+      color: Colors.white,
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -333,7 +334,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Widget _buildGallerySection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -352,28 +353,25 @@ class _BookDetailPageState extends State<BookDetailPage> {
               itemCount: userData.gallery.length + 1,
               itemBuilder: (context, index) {
                 if (index < userData.gallery.length) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: GestureDetector(
-                      onTap: () async {
-                        await showDialog(
-                          context: context,
-                          builder: (_) => ImageDialog(
-                            imagePath: userData.gallery[index],
-                          ),
-                        );
-                      },
-                      onLongPress: () {
-                        _showDeleteOption(context, index);
-                      },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: Image.file(
-                          File(userData.gallery[index]),
-                          height: 100,
-                          width: 100,
-                          fit: BoxFit.cover,
+                  return GestureDetector(
+                    onTap: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (_) => ImageDialog(
+                          imagePath: userData.gallery[index],
                         ),
+                      );
+                    },
+                    onLongPress: () {
+                      _showDeleteOption(context, index);
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Image.file(
+                        File(userData.gallery[index]),
+                        height: 100,
+                        width: 100,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   );
@@ -492,9 +490,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
     await IsarService().updateUserDataEntry(userData);
   }
 
-  Widget _buildSummerySection() {
+  Widget _buildSummarySection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -680,7 +678,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Wrap(
         spacing: 8.0,
         runSpacing: 4.0,
@@ -722,83 +720,99 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   Widget _buildCardView() {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      elevation: 8.0,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: _buildCardViewText(),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: _getCorrespondingIcon(userData.status),
-                ),
-              ],
-            ),
-            if (userData.status == BookStatus.finished) ...[
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        elevation: 8.0,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: Column(
+            children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const Text(
-                    'Score given',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w400,
-                    ),
+                  Expanded(
+                    flex: 3,
+                    child: _buildCardViewText(),
                   ),
-                  _buildRatingBar(),
+                  Expanded(
+                    flex: 2,
+                    child: _getCorrespondingIcon(userData.status),
+                  ),
                 ],
               ),
+              if (userData.status == BookStatus.finished) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const Text(
+                      'Score given',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    _buildRatingBar(),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildCardViewText() {
-    final dateFormat = DateFormat('MMMM d, y');
-    final formattedDate = userData.dateOfCurrentStatus != null
+    final dateFormat = DateFormat('MMM d, y');
+    final formattedCurrentStatusDate = userData.dateOfCurrentStatus != null
         ? dateFormat.format(userData.dateOfCurrentStatus!)
+        : "";
+    final formattedStartDate = userData.timeStarted != null
+        ? dateFormat.format(userData.timeStarted!)
         : "";
 
     switch (userData.status) {
       case BookStatus.finished:
-        return _buildFinishedText(formattedDate);
+        return _buildFinishedText(formattedStartDate);
       case BookStatus.dropped:
-        return _buildDroppedText(formattedDate);
+        return _buildDroppedText(formattedCurrentStatusDate);
       case BookStatus.added:
-        return _buildAddedText(formattedDate);
+        return _buildAddedText(formattedCurrentStatusDate);
       default:
-        return _buildStartedText(formattedDate);
+        return _buildStartedText(formattedCurrentStatusDate);
     }
   }
 
   Widget _buildFinishedText(String startDate) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Book finished",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
+        const Center(
+          child: Text(
+            "Book finished",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         const SizedBox(height: 10.0),
-        Text("Started: $startDate"),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Text("Started: $startDate"),
+        ),
         if (finalNote != null && isFinished) ...[
-          Text(
-              "Finished: ${DateFormat('MMMM d, y').format(finalNote!.timeEnded)}"),
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Text(
+              "Finished: ${DateFormat('MMMM d, y').format(finalNote!.timeEnded)}",
+            ),
+          ),
           const SizedBox(height: 10.0)
         ],
       ],
@@ -807,55 +821,73 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   Widget _buildDroppedText(String stopDate) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Book dropped",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
+        const Center(
+          child: Text(
+            "Book dropped",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         const SizedBox(height: 10.0),
-        Text("Stopped: $stopDate"),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Text("Stopped: $stopDate"),
+        ),
         const SizedBox(height: 10.0),
-        _buildActionButton("Continue?"),
+        Center(child: _buildActionButton("Continue?")),
       ],
     );
   }
 
   Widget _buildAddedText(String addedDate) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Book not started",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
+        const Center(
+          child: Text(
+            "Book not started",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        Text("Added: $addedDate"),
-        _buildActionButton("Started?"),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Text("Added: $addedDate"),
+        ),
+        Center(child: _buildActionButton("Started?")),
       ],
     );
   }
 
   Widget _buildStartedText(String startDate) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Book started",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
+        const Center(
+          child: Text(
+            "Book started",
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         const SizedBox(height: 10.0),
-        Text("Started: $startDate"),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Text("Started: $startDate"),
+        ),
         const SizedBox(height: 10.0),
-        _buildActionButton("Finished?"),
+        Center(child: _buildActionButton("Finished?")),
       ],
     );
   }
