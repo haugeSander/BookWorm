@@ -444,6 +444,9 @@ class _LibraryPageState extends State<LibraryPage> {
                   ),
                 );
               },
+              onLongPress: () {
+                _showDeleteOption(context, book);
+              },
               child: Container(
                 height: 100,
                 decoration: BoxDecoration(
@@ -518,6 +521,52 @@ class _LibraryPageState extends State<LibraryPage> {
           },
         ),
       ],
+    );
+  }
+
+  void _showDeleteOption(BuildContext context, Book bookToRemove) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Book'),
+          content: const Text(
+              'Are you sure you want to delete this book? \nIt is non-reversible, and all corresponding data will be removed!'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () async {
+                // Close the dialog
+                Navigator.of(context).pop();
+
+                // Perform the delete operation
+                bool success = await IsarService().deleteBook(bookToRemove);
+
+                if (success) {
+                  // If the delete was successful, update the state
+                  setState(() {});
+
+                  // Show a success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Book deleted successfully')),
+                  );
+                } else {
+                  // Show an error message if the delete failed
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to delete the book')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

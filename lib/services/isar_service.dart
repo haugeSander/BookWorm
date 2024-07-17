@@ -84,6 +84,44 @@ class IsarService {
     return isar.bookNotes.where(sort: Sort.asc).findAll();
   }
 
+  Future<bool> deleteBook(Book bookToDelete) async {
+    final isar = await db;
+
+    // Load all necessary data outside the transaction
+    final userBookEntry = bookToDelete.userDataReference.value;
+    List<BookNotes> bookNotes = [];
+    FinishedBookNote? finishedBookNote;
+
+    if (userBookEntry != null) {
+      bookNotes = await isar.bookNotes
+          .filter()
+          .bookReference((q) => q.idEqualTo(userBookEntry.id))
+          .findAll();
+      finishedBookNote = userBookEntry.finishedNote.value;
+    }
+
+    // Perform all deletions in a single transaction
+    return await isar.writeTxn(() async {
+      if (userBookEntry != null) {
+        // Delete all associated BookNotes
+        for (var note in bookNotes) {
+          await isar.bookNotes.delete(note.noteId);
+        }
+
+        // Delete the FinishedBookNote if it exists
+        if (finishedBookNote != null) {
+          await isar.finishedBookNotes.delete(finishedBookNote.noteId);
+        }
+
+        // Delete the UserBookEntry
+        await isar.userBookEntrys.delete(userBookEntry.id);
+      }
+
+      // Finally, delete the book
+      return await isar.books.delete(bookToDelete.bookId);
+    });
+  }
+
   Future<void> cleanDb() async {
     final isar = await db;
     await isar.writeTxn(() => isar.clear());
