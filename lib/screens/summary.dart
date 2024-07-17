@@ -109,70 +109,95 @@ class SummaryPage extends StatelessWidget {
 
   Future<Map<String, String>?> _noteDialog(BuildContext context,
       AsyncSnapshot<List<BookNotes>> snapshot, BookNotes note) {
+    bool isEditing = false;
+    TextEditingController editingController =
+        TextEditingController(text: note.noteContent);
+
     return showDialog<Map<String, String>>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            note.bookReference.value!.bookReference.value!.title,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-            textAlign: TextAlign.center,
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Note:",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  note.noteContent,
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_today,
-                        size: 16, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Noted on ${DateFormat('MMMM d, y').format(note.timeOfNote)}",
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+            title: Text(
+              note.bookReference.value!.bookReference.value!.title,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Note:",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 8),
+                  isEditing
+                      ? TextField(
+                          controller: editingController,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                        )
+                      : Text(
+                          note.noteContent,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today,
+                          size: 16, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Noted on ${DateFormat('MMMM d, y').format(note.timeOfNote)}",
+                        style:
+                            const TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Close"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Implement edit functionality
-                Navigator.of(context).pop();
-              },
-              child: const Text("Edit"),
-            ),
-          ],
-        );
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Close"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (isEditing) {
+                    // Save the edited note
+                    note.noteContent = editingController.text;
+                    IsarService().updateBookNote(note).then((_) {
+                      Navigator.of(context).pop();
+                    });
+                  } else {
+                    // Enter editing mode
+                    setState(() {
+                      isEditing = true;
+                    });
+                  }
+                },
+                child: Text(isEditing ? "Save" : "Edit"),
+              ),
+            ],
+          );
+        });
       },
     );
   }

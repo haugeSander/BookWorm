@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:book_worm/models/book.dart';
+import 'package:book_worm/models/book_notes.dart';
 import 'package:book_worm/models/finished_book_note.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/screens/library.dart';
@@ -182,9 +183,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
               fontSize: 20.0,
             ),
           ),
-          const SizedBox(height: 8), // Small gap between title and list
+          const SizedBox(height: 8),
           ListView.separated(
-            padding: EdgeInsets.zero, // Remove default padding
+            padding: EdgeInsets.zero,
             itemCount: userData.bookNote.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -192,7 +193,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
             itemBuilder: (context, index) {
               final note = userData.bookNote.elementAt(index);
               return GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  _showEditNoteDialog(context, note);
+                },
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -246,6 +249,85 @@ class _BookDetailPageState extends State<BookDetailPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showEditNoteDialog(BuildContext context, BookNotes note) {
+    bool isEditing = false;
+    TextEditingController editingController =
+        TextEditingController(text: note.noteContent);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              "Edit Note",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Noted on ${DateFormat('MMMM d, y').format(note.timeOfNote)}",
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 16),
+                  isEditing
+                      ? TextField(
+                          controller: editingController,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                        )
+                      : Text(
+                          note.noteContent,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Close"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (isEditing) {
+                    // Save the edited note
+                    note.noteContent = editingController.text;
+                    IsarService().updateBookNote(note).then((_) {
+                      Navigator.of(context).pop();
+                      // Refresh the page to show updated note
+                      setState(() {});
+                    });
+                  } else {
+                    // Enter editing mode
+                    setState(() {
+                      isEditing = true;
+                    });
+                  }
+                },
+                child: Text(isEditing ? "Save" : "Edit"),
+              ),
+            ],
+          );
+        });
+      },
     );
   }
 
