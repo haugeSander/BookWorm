@@ -75,112 +75,97 @@ class _BookDetailPageState extends State<BookDetailPage> {
   }
 
   Widget _buildYourFindingsSection() {
-    return finalNote != null
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  "Your findings",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 20.0,
-                  ),
-                ),
-              ),
-              if (finalNote!.inThreeSentences.isNotEmpty)
-                _inThreeSentencesCard(),
-              if (finalNote!.impressions.isNotEmpty) _impressionsCard(),
-              if (finalNote!.howChangedMe.isNotEmpty) _whoShouldReadCard(),
-            ],
-          )
-        : const SizedBox();
-  }
+    if (finalNote == null) return const SizedBox();
 
-  Card _whoShouldReadCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            children: [
-              const Text(
-                "🎓 Who Should Read It?",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18.0,
-                ),
-              ),
-              const SizedBox(height: 12.0),
-              Text(finalNote!.whoShouldRead),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Text(
+            "Your Findings",
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 22.0,
+            ),
           ),
         ),
-      ),
+        if (finalNote!.inThreeSentences.isNotEmpty)
+          _buildCard(
+            title: "🚀 The Book in 3 Sentences",
+            content: _buildNumberedList(finalNote!.inThreeSentences),
+          ),
+        if (finalNote!.impressions.isNotEmpty)
+          _buildCard(
+            title: "🎨 Impressions",
+            content: Text(finalNote!.impressions),
+          ),
+        if (finalNote!.whoShouldRead.isNotEmpty)
+          _buildCard(
+            title: "🎓 Who Should Read It?",
+            content: Text(finalNote!.whoShouldRead),
+          ),
+        if (finalNote!.topThreeQuotes.isNotEmpty)
+          _buildCard(
+            title: "✍️ My Top 3 Quotes",
+            content: _buildNumberedList(
+              finalNote!.topThreeQuotes.map((quote) => "\"$quote\"").toList(),
+            ),
+          ),
+      ],
     );
   }
 
-  Card _impressionsCard() {
+  Card _buildCard({required String title, required Widget content}) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            children: [
-              const Text(
-                "🎨 Impressions",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18.0,
-                ),
-              ),
-              const SizedBox(height: 12.0),
-              Text(finalNote!.impressions),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Card _inThreeSentencesCard() {
-    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
+            Center(
               child: Text(
-                "🚀 The Book in 3 Sentences",
-                style: TextStyle(
+                title,
+                style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 18.0,
                 ),
               ),
             ),
-            const SizedBox(height: 12.0),
-            ...finalNote!.inThreeSentences.asMap().entries.map(
-                  (entry) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "${entry.key + 1}. ",
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Expanded(
-                          child: Text(entry.value),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+            const SizedBox(height: 16.0),
+            content,
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildNumberedList(List<String> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: items.asMap().entries.map((entry) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 24,
+                child: Text(
+                  "${entry.key + 1}.",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(entry.value),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 
