@@ -29,6 +29,11 @@ class IsarService {
         () => isar.finishedBookNotes.putSync(finishedBookNote));
   }
 
+  Future<void> updateBookEntry(Book book) async {
+    final isar = await db;
+    isar.writeTxnSync<int>(() => isar.books.putSync(book));
+  }
+
   Future<void> updateUserDataEntry(UserBookEntry newUserBookEntry) async {
     final isar = await db;
     isar.writeTxnSync<int>(() => isar.userBookEntrys.putSync(newUserBookEntry));

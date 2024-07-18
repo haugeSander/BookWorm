@@ -4,6 +4,7 @@ import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/book_notes.dart';
 import 'package:book_worm/models/finished_book_note.dart';
 import 'package:book_worm/models/user_book_entry.dart';
+import 'package:book_worm/screens/edit_findings.dart';
 import 'package:book_worm/screens/library.dart';
 import 'package:book_worm/screens/stepper_page.dart';
 import 'package:book_worm/services/isar_service.dart';
@@ -24,6 +25,73 @@ class BookDetailPage extends StatefulWidget {
   _BookDetailPageState createState() => _BookDetailPageState();
 }
 
+class EditableBookState {
+  String title;
+  String author;
+  String summary;
+  // Add other editable properties
+
+  EditableBookState.fromBook(Book book)
+      : title = book.title,
+        author = book.author,
+        summary = book.summary ?? '';
+
+  void applyToBook(Book book) {
+    book.title = title;
+    book.author = author;
+    book.summary = summary;
+    // Apply other properties
+  }
+}
+
+class EditableUserDataState {
+  BookStatus status;
+  DateTime? dateOfCurrentStatus;
+  DateTime? timeStarted;
+  // Add other editable properties
+
+  EditableUserDataState.fromUserData(UserBookEntry userData)
+      : status = userData.status,
+        dateOfCurrentStatus = userData.dateOfCurrentStatus,
+        timeStarted = userData.timeStarted;
+
+  void applyToUserData(UserBookEntry userData) {
+    userData.status = status;
+    userData.dateOfCurrentStatus = dateOfCurrentStatus;
+    userData.timeStarted = timeStarted;
+    // Apply other properties
+  }
+}
+
+class EditableFinishedBookNoteState {
+  DateTime timeEnded;
+  int rating;
+  List<String> inThreeSentences;
+  String impressions;
+  String whoShouldRead;
+  List<String> topThreeQuotes;
+  List<String> tags;
+
+  EditableFinishedBookNoteState.fromFinishedBookNote(FinishedBookNote note)
+      : timeEnded = note.timeEnded,
+        rating = note.rating,
+        inThreeSentences = List.from(note.inThreeSentences),
+        impressions = note.impressions,
+        whoShouldRead = note.whoShouldRead,
+        topThreeQuotes = List.from(note.topThreeQuotes),
+        tags = List.from(note.tags);
+
+  void applyToFinishedBookNote(FinishedBookNote note) {
+    note.timeEnded = timeEnded;
+    note.rating = rating;
+    note.inThreeSentences = inThreeSentences;
+    note.impressions = impressions;
+    note.whoShouldRead = whoShouldRead;
+    note.topThreeQuotes = topThreeQuotes;
+    note.tags = tags;
+  }
+}
+
 class _BookDetailPageState extends State<BookDetailPage> {
   late final Book book;
   late final UserBookEntry userData;
@@ -35,6 +103,14 @@ class _BookDetailPageState extends State<BookDetailPage> {
   Timer? _fabTimer;
   final ScrollController _scrollController = ScrollController();
 
+  late EditableBookState editableBook;
+  late EditableUserDataState editableUserData;
+  EditableFinishedBookNoteState? editableFinishedBookNote;
+
+  EditableBookState? oldEditableBook;
+  EditableUserDataState? oldEditableUserData;
+  EditableFinishedBookNoteState? oldEditableFinishedBookNote;
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +118,14 @@ class _BookDetailPageState extends State<BookDetailPage> {
     userData = book.userDataReference.value!;
     isFinished = userData.status == BookStatus.finished;
     finalNote = userData.finishedNote.value;
+
+    editableBook = EditableBookState.fromBook(book);
+    editableUserData = EditableUserDataState.fromUserData(userData);
+    if (finalNote != null) {
+      editableFinishedBookNote =
+          EditableFinishedBookNoteState.fromFinishedBookNote(finalNote!);
+    }
+
     color = _getCorrespondingColor(userData.status);
     _resetFabTimer();
     _scrollController.addListener(_onScroll);
@@ -57,60 +141,76 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        _buildHeader(context),
-        const SizedBox(height: 8.0),
-        Expanded(
-            child: SingleChildScrollView(
-                controller: _scrollController,
-                child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment
-                            .start, // This aligns all children to the start
-                        children: [
-                          _buildTagSection(),
-                          const SizedBox(height: 24.0), // Add some spacing
-                          _buildCardView(),
-                          const SizedBox(height: 24.0), // Add some spacing
-                          _buildSummarySection(),
-                          const SizedBox(height: 24.0), // Add some spacing
-                          _buildYourFindingsSection(),
-                          const SizedBox(height: 24.0), // Add some spacing
-                          _buildGallerySection(),
-                          const SizedBox(height: 24.0), // Add some spacing
-                          _buildNotesSection(),
-                          const SizedBox(height: 55.0), // Add some spacing
-                        ]))))
-      ]),
-      floatingActionButton: _isFabVisible
-          ? (_isEditMode
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    FloatingActionButton(
-                      onPressed: _discardChanges,
-                      backgroundColor: Colors.red,
-                      child: const Icon(Icons.close),
-                    ),
-                    const SizedBox(width: 16),
-                    FloatingActionButton(
-                      onPressed: _saveChanges,
-                      backgroundColor: Colors.green,
-                      child: const Icon(Icons.check),
-                    ),
-                  ],
-                )
-              : FloatingActionButton(
-                  onPressed: _toggleEditMode,
-                  child: const Icon(Icons.edit),
-                ))
-          : null,
+    return PopScope(
+      canPop: !_isEditMode,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        setState(() {
+          _isEditMode = false;
+        });
+      },
+      child: Scaffold(
+        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _buildHeader(context),
+          const SizedBox(height: 8.0),
+          Expanded(
+              child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment
+                              .start, // This aligns all children to the start
+                          children: [
+                            _buildTagSection(),
+                            const SizedBox(height: 24.0), // Add some spacing
+                            _buildCardView(),
+                            const SizedBox(height: 24.0), // Add some spacing
+                            _buildSummarySection(),
+                            const SizedBox(height: 24.0), // Add some spacing
+                            _buildYourFindingsSection(),
+                            const SizedBox(height: 24.0), // Add some spacing
+                            _buildGallerySection(),
+                            const SizedBox(height: 24.0), // Add some spacing
+                            _buildNotesSection(),
+                            const SizedBox(height: 55.0), // Add some spacing
+                          ]))))
+        ]),
+        floatingActionButton: _isFabVisible
+            ? (_isEditMode
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FloatingActionButton(
+                        onPressed: _discardChanges,
+                        backgroundColor: Colors.red,
+                        child: const Icon(Icons.close),
+                      ),
+                      const SizedBox(width: 16),
+                      FloatingActionButton(
+                        onPressed: _saveChanges,
+                        backgroundColor: Colors.green,
+                        child: const Icon(Icons.check),
+                      ),
+                    ],
+                  )
+                : FloatingActionButton(
+                    onPressed: _toggleEditMode,
+                    child: const Icon(Icons.edit),
+                  ))
+            : null,
+      ),
     );
   }
 
   void _toggleEditMode() {
+    oldEditableBook = EditableBookState.fromBook(book);
+    oldEditableUserData = EditableUserDataState.fromUserData(userData);
+    oldEditableFinishedBookNote = finalNote != null
+        ? EditableFinishedBookNoteState.fromFinishedBookNote(finalNote!)
+        : null;
     setState(() {
       _isEditMode = true;
     });
@@ -120,7 +220,9 @@ class _BookDetailPageState extends State<BookDetailPage> {
   void _discardChanges() {
     setState(() {
       _isEditMode = false;
-      // Reset any temporary changes here
+      editableBook = oldEditableBook!;
+      editableUserData = oldEditableUserData!;
+      editableFinishedBookNote = oldEditableFinishedBookNote;
     });
     _resetFabTimer();
   }
@@ -128,7 +230,19 @@ class _BookDetailPageState extends State<BookDetailPage> {
   void _saveChanges() {
     setState(() {
       _isEditMode = false;
-      // Save changes to the database here
+      // Apply changes to the original objects
+      editableBook.applyToBook(book);
+      editableUserData.applyToUserData(userData);
+      if (editableFinishedBookNote != null && finalNote != null) {
+        editableFinishedBookNote!.applyToFinishedBookNote(finalNote!);
+      }
+
+      // Save changes to the database
+      IsarService().updateBookEntry(book);
+      IsarService().updateUserDataEntry(userData);
+      if (finalNote != null) {
+        IsarService().saveFinalBookNote(finalNote!);
+      }
     });
     _resetFabTimer();
   }
@@ -176,13 +290,24 @@ class _BookDetailPageState extends State<BookDetailPage> {
               ),
               if (_isEditMode)
                 IconButton(
-                    onPressed: () {
-                      _openSummaryDialog();
-                    },
-                    icon: const Icon(
-                      Icons.edit,
-                      size: 20,
-                    ))
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    _discardChanges();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => EditFindingsPage(
+                          book: book,
+                          finalNote: finalNote!,
+                          onSave: (updatedNote) {
+                            setState(() {
+                              userData.finishedNote.value = updatedNote;
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
         ),
