@@ -925,7 +925,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    _buildRatingBar(),
+                    if (finalNote != null) _buildRatingBar(),
                   ],
                 ),
               ],
@@ -961,27 +961,52 @@ class _BookDetailPageState extends State<BookDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Center(
-          child: Text(
-            "Book finished",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        Center(
+          child: _isEditMode
+              ? TextButton(
+                  onPressed: _openStatusChangeDialog,
+                  child: const Text(
+                    "Book finished",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              : const Text(
+                  "Book finished",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
         const SizedBox(height: 10.0),
         Padding(
           padding: const EdgeInsets.only(left: 16.0),
-          child: Text("Started: $startDate"),
+          child: _isEditMode
+              ? TextButton(
+                  onPressed: () =>
+                      _openDatePicker(userData.timeStarted, 'Started'),
+                  child: Text("Started: $startDate"),
+                )
+              : Text("Started: $startDate"),
         ),
         if (finalNote != null && isFinished) ...[
           Padding(
             padding: const EdgeInsets.only(left: 16.0),
-            child: Text(
-              "Finished: ${DateFormat('MMMM d, y').format(finalNote!.timeEnded)}",
-            ),
+            child: _isEditMode
+                ? TextButton(
+                    onPressed: () =>
+                        _openDatePicker(finalNote!.timeEnded, 'Finished'),
+                    child: Text(
+                      "Finished: ${DateFormat('MMMM d, y').format(finalNote!.timeEnded)}",
+                    ),
+                  )
+                : Text(
+                    "Finished: ${DateFormat('MMMM d, y').format(finalNote!.timeEnded)}",
+                  ),
           ),
           const SizedBox(height: 10.0)
         ],
@@ -993,20 +1018,37 @@ class _BookDetailPageState extends State<BookDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Center(
-          child: Text(
-            "Book dropped",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        Center(
+          child: _isEditMode
+              ? TextButton(
+                  onPressed: _openStatusChangeDialog,
+                  child: const Text(
+                    "Book dropped",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              : const Text(
+                  "Book dropped",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
         const SizedBox(height: 10.0),
         Padding(
           padding: const EdgeInsets.only(left: 16.0),
-          child: Text("Stopped: $stopDate"),
+          child: _isEditMode
+              ? TextButton(
+                  onPressed: () =>
+                      _openDatePicker(userData.dateOfCurrentStatus, 'Stopped'),
+                  child: Text("Stopped: $stopDate"),
+                )
+              : Text("Stopped: $stopDate"),
         ),
         const SizedBox(height: 10.0),
         Center(child: _buildActionButton("Continue?")),
@@ -1018,19 +1060,36 @@ class _BookDetailPageState extends State<BookDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Center(
-          child: Text(
-            "Book not started",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        Center(
+          child: _isEditMode
+              ? TextButton(
+                  onPressed: _openStatusChangeDialog,
+                  child: const Text(
+                    "Book not started",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              : const Text(
+                  "Book not started",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
         Padding(
           padding: const EdgeInsets.only(left: 16.0),
-          child: Text("Added: $addedDate"),
+          child: _isEditMode
+              ? TextButton(
+                  onPressed: () =>
+                      _openDatePicker(userData.dateOfCurrentStatus, 'Added'),
+                  child: Text("Added: $addedDate"),
+                )
+              : Text("Added: $addedDate"),
         ),
         Center(child: _buildActionButton("Started?")),
       ],
@@ -1041,25 +1100,92 @@ class _BookDetailPageState extends State<BookDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Center(
-          child: Text(
-            "Book started",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        Center(
+          child: _isEditMode
+              ? TextButton(
+                  onPressed: _openStatusChangeDialog,
+                  child: const Text(
+                    "Book started",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              : const Text(
+                  "Book started",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
         const SizedBox(height: 10.0),
         Padding(
           padding: const EdgeInsets.only(left: 16.0),
-          child: Text("Started: $startDate"),
+          child: _isEditMode
+              ? TextButton(
+                  onPressed: () =>
+                      _openDatePicker(userData.dateOfCurrentStatus, 'Started'),
+                  child: Text("Started: $startDate"),
+                )
+              : Text("Started: $startDate"),
         ),
         const SizedBox(height: 10.0),
         Center(child: _buildActionButton("Finished?")),
       ],
     );
+  }
+
+  void _openStatusChangeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Change Book Status'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: BookStatus.values.map((status) {
+              return ListTile(
+                title: Text(status.name.capitalize()),
+                onTap: () {
+                  setState(() {
+                    userData.status = status;
+                  });
+                  Navigator.of(context).pop();
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
+  void _openDatePicker(DateTime? initialDate, String dateType) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        switch (dateType) {
+          case 'Started':
+            userData.timeStarted = picked;
+            break;
+          case 'Finished':
+            finalNote?.timeEnded = picked;
+            break;
+          case 'Stopped':
+          case 'Added':
+            userData.dateOfCurrentStatus = picked;
+            break;
+        }
+      });
+    }
   }
 
   Widget _buildActionButton(String text) {
@@ -1161,7 +1287,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
             minRating: 1,
             maxRating: 5,
             initialRating: finalNote!.rating.toDouble(),
-            ignoreGestures: true,
+            ignoreGestures: !_isEditMode,
             ratingWidget: RatingWidget(
               full: const Icon(Icons.star, color: Colors.amber),
               half: const Icon(Icons.star_half, color: Colors.amber),
