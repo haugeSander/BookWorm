@@ -12,7 +12,7 @@ class FinishedBookNote {
   String whoShouldRead;
   String howChangedMe;
   List<String> topThreeQuotes;
-  List<String> tags;
+  List<String> tags = List.empty(growable: true);
   int rating;
 
   @Backlink(to: "finishedNote")

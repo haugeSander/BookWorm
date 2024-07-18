@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/book_notes.dart';
@@ -29,6 +30,10 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late final FinishedBookNote? finalNote;
   late final Color color;
   late final bool isFinished;
+  bool _isEditMode = false;
+  bool _isFabVisible = true;
+  Timer? _fabTimer;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -38,41 +43,118 @@ class _BookDetailPageState extends State<BookDetailPage> {
     isFinished = userData.status == BookStatus.finished;
     finalNote = userData.finishedNote.value;
     color = _getCorrespondingColor(userData.status);
+    _resetFabTimer();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _fabTimer?.cancel();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _buildHeader(context),
-      const SizedBox(height: 8.0),
-      Expanded(
-          child: SingleChildScrollView(
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment
-                          .start, // This aligns all children to the start
-                      children: [
-                        _buildTagSection(),
-                        const SizedBox(height: 24.0), // Add some spacing
-                        _buildCardView(),
-                        const SizedBox(height: 24.0), // Add some spacing
-                        _buildSummarySection(),
-                        const SizedBox(height: 24.0), // Add some spacing
-                        _buildYourFindingsSection(),
-                        const SizedBox(height: 24.0), // Add some spacing
-                        _buildGallerySection(),
-                        const SizedBox(height: 24.0), // Add some spacing
-                        _buildNotesSection(),
-                        const SizedBox(height: 24.0), // Add some spacing
-                      ]))))
-    ]));
+      body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _buildHeader(context),
+        const SizedBox(height: 8.0),
+        Expanded(
+            child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment
+                            .start, // This aligns all children to the start
+                        children: [
+                          _buildTagSection(),
+                          const SizedBox(height: 24.0), // Add some spacing
+                          _buildCardView(),
+                          const SizedBox(height: 24.0), // Add some spacing
+                          _buildSummarySection(),
+                          const SizedBox(height: 24.0), // Add some spacing
+                          _buildYourFindingsSection(),
+                          const SizedBox(height: 24.0), // Add some spacing
+                          _buildGallerySection(),
+                          const SizedBox(height: 24.0), // Add some spacing
+                          _buildNotesSection(),
+                          const SizedBox(height: 55.0), // Add some spacing
+                        ]))))
+      ]),
+      floatingActionButton: _isFabVisible
+          ? (_isEditMode
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FloatingActionButton(
+                      onPressed: _discardChanges,
+                      backgroundColor: Colors.red,
+                      child: const Icon(Icons.close),
+                    ),
+                    const SizedBox(width: 16),
+                    FloatingActionButton(
+                      onPressed: _saveChanges,
+                      backgroundColor: Colors.green,
+                      child: const Icon(Icons.check),
+                    ),
+                  ],
+                )
+              : FloatingActionButton(
+                  onPressed: _toggleEditMode,
+                  child: const Icon(Icons.edit),
+                ))
+          : null,
+    );
+  }
+
+  void _toggleEditMode() {
+    setState(() {
+      _isEditMode = true;
+    });
+    _resetFabTimer();
+  }
+
+  void _discardChanges() {
+    setState(() {
+      _isEditMode = false;
+      // Reset any temporary changes here
+    });
+    _resetFabTimer();
+  }
+
+  void _saveChanges() {
+    setState(() {
+      _isEditMode = false;
+      // Save changes to the database here
+    });
+    _resetFabTimer();
+  }
+
+  void _showFab() {
+    if (!_isFabVisible) {
+      setState(() {
+        _isFabVisible = true;
+      });
+    }
+    _resetFabTimer();
+  }
+
+  void _onScroll() {
+    _showFab();
+  }
+
+  void _hideFab() {
+    setState(() {
+      _isFabVisible = false;
+    });
+  }
+
+  void _resetFabTimer() {
+    _fabTimer?.cancel();
+    _fabTimer = Timer(const Duration(seconds: 2), _hideFab);
   }
 
   Widget _buildYourFindingsSection() {
@@ -81,14 +163,27 @@ class _BookDetailPageState extends State<BookDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            "Your Findings",
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 20.0,
-            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            children: [
+              const Text(
+                "Your Findings",
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 20.0,
+                ),
+              ),
+              if (_isEditMode)
+                IconButton(
+                    onPressed: () {
+                      _openSummaryDialog();
+                    },
+                    icon: const Icon(
+                      Icons.edit,
+                      size: 20,
+                    ))
+            ],
           ),
         ),
         if (finalNote!.inThreeSentences.isNotEmpty)
@@ -505,14 +600,15 @@ class _BookDetailPageState extends State<BookDetailPage> {
                   fontSize: 20.0,
                 ),
               ),
-              IconButton(
-                  onPressed: () {
-                    _openSummaryDialog();
-                  },
-                  icon: const Icon(
-                    Icons.edit,
-                    size: 20,
-                  ))
+              if (_isEditMode)
+                IconButton(
+                    onPressed: () {
+                      _openSummaryDialog();
+                    },
+                    icon: const Icon(
+                      Icons.edit,
+                      size: 20,
+                    ))
             ],
           ),
           const SizedBox(
@@ -652,10 +748,12 @@ class _BookDetailPageState extends State<BookDetailPage> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.arrow_back),
-              iconSize: 40,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+                icon: const Icon(Icons.arrow_back),
+                iconSize: 40,
+                onPressed: () {
+                  _discardChanges();
+                  Navigator.of(context).pop();
+                }),
           ],
         ),
       ),
@@ -669,12 +767,30 @@ class _BookDetailPageState extends State<BookDetailPage> {
 
     // Add the status chip
     chips.add(_buildChip(
-        userData.status.name, _getCorrespondingColor(userData.status)));
+      userData.status.name,
+      _getCorrespondingColor(userData.status),
+      isStatus: true,
+    ));
 
     // Add tag chips if finishedNote is not null and has tags
     if (finishedNote != null && finishedNote.tags.isNotEmpty) {
-      chips.addAll(finishedNote.tags
-          .map((tag) => _buildChip(tag, _getColorForTag(tag))));
+      chips.addAll(finishedNote.tags.map((tag) => _buildChip(
+            tag,
+            _getColorForTag(tag),
+            onDeleted: _isEditMode ? () => _removeTag(tag) : null,
+          )));
+    }
+
+    // Add the "add tag" button in edit mode
+    if (_isEditMode) {
+      chips.add(
+        ActionChip(
+          label: const Icon(Icons.add),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          onPressed: _addNewTag,
+        ),
+      );
     }
 
     return Padding(
@@ -687,7 +803,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
     );
   }
 
-  Widget _buildChip(String label, Color backgroundColor) {
+  Widget _buildChip(String label, Color backgroundColor,
+      {VoidCallback? onDeleted, bool isStatus = false}) {
     final textColor = _getContrastingTextColor(backgroundColor);
     return Chip(
       label: Text(
@@ -699,6 +816,59 @@ class _BookDetailPageState extends State<BookDetailPage> {
         side: BorderSide(color: backgroundColor),
       ),
       backgroundColor: backgroundColor,
+      onDeleted: isStatus ? null : onDeleted,
+      deleteIconColor: textColor,
+    );
+  }
+
+  void _removeTag(String tag) {
+    setState(() {
+      if (userData.finishedNote.value != null) {
+        List<String> updatedTags =
+            List<String>.from(userData.finishedNote.value!.tags);
+        updatedTags.remove(tag);
+        userData.finishedNote.value!.tags = updatedTags;
+      }
+    });
+  }
+
+  void _addNewTag() async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => _buildAddTagDialog(),
+    );
+    if (result != null && result.isNotEmpty) {
+      setState(() {
+        if (userData.finishedNote.value != null) {
+          List<String> updatedTags =
+              List<String>.from(userData.finishedNote.value!.tags);
+          updatedTags.add(result);
+          userData.finishedNote.value!.tags = updatedTags;
+        }
+      });
+    }
+  }
+
+  Widget _buildAddTagDialog() {
+    final controller = TextEditingController();
+    return AlertDialog(
+      title: const Text('Add a new tag'),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        decoration: const InputDecoration(hintText: "Enter tag name"),
+        textCapitalization: TextCapitalization.words,
+      ),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        TextButton(
+          child: const Text('Add'),
+          onPressed: () => Navigator.of(context).pop(controller.text),
+        ),
+      ],
     );
   }
 
