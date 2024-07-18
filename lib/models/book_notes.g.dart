@@ -22,8 +22,19 @@ const BookNotesSchema = CollectionSchema(
       name: r'noteContent',
       type: IsarType.string,
     ),
-    r'timeOfNote': PropertySchema(
+    r'noteNumber': PropertySchema(
       id: 1,
+      name: r'noteNumber',
+      type: IsarType.long,
+    ),
+    r'statusWhenNoted': PropertySchema(
+      id: 2,
+      name: r'statusWhenNoted',
+      type: IsarType.byte,
+      enumMap: _BookNotesstatusWhenNotedEnumValueMap,
+    ),
+    r'timeOfNote': PropertySchema(
+      id: 3,
       name: r'timeOfNote',
       type: IsarType.dateTime,
     )
@@ -67,7 +78,9 @@ void _bookNotesSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.noteContent);
-  writer.writeDateTime(offsets[1], object.timeOfNote);
+  writer.writeLong(offsets[1], object.noteNumber);
+  writer.writeByte(offsets[2], object.statusWhenNoted.index);
+  writer.writeDateTime(offsets[3], object.timeOfNote);
 }
 
 BookNotes _bookNotesDeserialize(
@@ -78,7 +91,11 @@ BookNotes _bookNotesDeserialize(
 ) {
   final object = BookNotes(
     noteContent: reader.readString(offsets[0]),
-    timeOfNote: reader.readDateTime(offsets[1]),
+    noteNumber: reader.readLong(offsets[1]),
+    statusWhenNoted: _BookNotesstatusWhenNotedValueEnumMap[
+            reader.readByteOrNull(offsets[2])] ??
+        BookStatus.finished,
+    timeOfNote: reader.readDateTime(offsets[3]),
   );
   object.noteId = id;
   return object;
@@ -94,11 +111,32 @@ P _bookNotesDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
+      return (reader.readLong(offset)) as P;
+    case 2:
+      return (_BookNotesstatusWhenNotedValueEnumMap[
+              reader.readByteOrNull(offset)] ??
+          BookStatus.finished) as P;
+    case 3:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
+
+const _BookNotesstatusWhenNotedEnumValueMap = {
+  'finished': 0,
+  'reading': 1,
+  'listening': 2,
+  'added': 3,
+  'dropped': 4,
+};
+const _BookNotesstatusWhenNotedValueEnumMap = {
+  0: BookStatus.finished,
+  1: BookStatus.reading,
+  2: BookStatus.listening,
+  3: BookStatus.added,
+  4: BookStatus.dropped,
+};
 
 Id _bookNotesGetId(BookNotes object) {
   return object.noteId;
@@ -384,6 +422,116 @@ extension BookNotesQueryFilter
     });
   }
 
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> noteNumberEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'noteNumber',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
+      noteNumberGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'noteNumber',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> noteNumberLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'noteNumber',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> noteNumberBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'noteNumber',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
+      statusWhenNotedEqualTo(BookStatus value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'statusWhenNoted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
+      statusWhenNotedGreaterThan(
+    BookStatus value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'statusWhenNoted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
+      statusWhenNotedLessThan(
+    BookStatus value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'statusWhenNoted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition>
+      statusWhenNotedBetween(
+    BookStatus lower,
+    BookStatus upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'statusWhenNoted',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<BookNotes, BookNotes, QAfterFilterCondition> timeOfNoteEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -472,6 +620,30 @@ extension BookNotesQuerySortBy on QueryBuilder<BookNotes, BookNotes, QSortBy> {
     });
   }
 
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByNoteNumber() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'noteNumber', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByNoteNumberDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'noteNumber', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByStatusWhenNoted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'statusWhenNoted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByStatusWhenNotedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'statusWhenNoted', Sort.desc);
+    });
+  }
+
   QueryBuilder<BookNotes, BookNotes, QAfterSortBy> sortByTimeOfNote() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timeOfNote', Sort.asc);
@@ -511,6 +683,30 @@ extension BookNotesQuerySortThenBy
     });
   }
 
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByNoteNumber() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'noteNumber', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByNoteNumberDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'noteNumber', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByStatusWhenNoted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'statusWhenNoted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByStatusWhenNotedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'statusWhenNoted', Sort.desc);
+    });
+  }
+
   QueryBuilder<BookNotes, BookNotes, QAfterSortBy> thenByTimeOfNote() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timeOfNote', Sort.asc);
@@ -533,6 +729,18 @@ extension BookNotesQueryWhereDistinct
     });
   }
 
+  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByNoteNumber() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'noteNumber');
+    });
+  }
+
+  QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByStatusWhenNoted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'statusWhenNoted');
+    });
+  }
+
   QueryBuilder<BookNotes, BookNotes, QDistinct> distinctByTimeOfNote() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'timeOfNote');
@@ -551,6 +759,19 @@ extension BookNotesQueryProperty
   QueryBuilder<BookNotes, String, QQueryOperations> noteContentProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'noteContent');
+    });
+  }
+
+  QueryBuilder<BookNotes, int, QQueryOperations> noteNumberProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'noteNumber');
+    });
+  }
+
+  QueryBuilder<BookNotes, BookStatus, QQueryOperations>
+      statusWhenNotedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'statusWhenNoted');
     });
   }
 

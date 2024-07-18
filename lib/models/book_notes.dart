@@ -8,6 +8,9 @@ class BookNotes {
   Id noteId = Isar.autoIncrement;
   DateTime timeOfNote;
   String noteContent;
+  int noteNumber;
+  @enumerated
+  BookStatus statusWhenNoted;
 
   @Backlink(to: 'bookNote')
   final bookReference = IsarLink<UserBookEntry>();
@@ -15,5 +18,7 @@ class BookNotes {
   BookNotes({
     required this.timeOfNote,
     required this.noteContent,
+    required this.noteNumber,
+    required this.statusWhenNoted,
   });
 }

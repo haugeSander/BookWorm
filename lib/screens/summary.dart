@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:book_worm/models/book_notes.dart';
+import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
 class SummaryPage extends StatelessWidget {
@@ -68,43 +70,121 @@ class SummaryPage extends StatelessWidget {
 
   SizedBox _recentNoteScroll() {
     return SizedBox(
-        height: 120,
-        child: FutureBuilder(
-          future: _getInfo(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No books found'));
-            } else {
-              return ListView.separated(
-                itemCount: snapshot.data!.length,
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.only(left: 20, right: 20),
-                separatorBuilder: (context, index) => const SizedBox(
-                  width: 25,
-                ),
-                itemBuilder: (BuildContext context, int index) {
-                  return GestureDetector(
-                      onTap: () {
-                        _noteDialog(context, snapshot, snapshot.data![index]);
-                      },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: Image.file(
-                            File(snapshot.data![index].bookReference.value!
-                                .bookReference.value!.coverImage),
-                            height: 100,
-                            width: 100,
-                            fit: BoxFit.fill),
-                      ));
-                },
-              );
-            }
-          },
-        ));
+      height: 120,
+      child: FutureBuilder(
+        future: _getInfo(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No notes found'));
+          } else {
+            return ListView.separated(
+              itemCount: snapshot.data!.length,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              separatorBuilder: (context, index) => const SizedBox(width: 25),
+              itemBuilder: (BuildContext context, int index) {
+                final bookNote = snapshot.data![index];
+                final userData = bookNote.bookReference.value;
+                final book = userData!.bookReference.value;
+                final bookStatus = bookNote.statusWhenNoted;
+                final noteNumber = index + 1; // Assuming 1-based indexing
+
+                return GestureDetector(
+                  onTap: () {
+                    _noteDialog(context, snapshot, bookNote);
+                  },
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Main circle with status color and icon
+                      Container(
+                        width: 85,
+                        height: 85,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _getCorrespondingColor(bookStatus),
+                        ),
+                      ),
+                      // Status icon
+                      Positioned(
+                        top: 25, // Adjust this value for desired top padding
+                        child: _getCorrespondingIcon(bookStatus),
+                      ),
+                      // Note number
+                      Positioned(
+                        bottom: 40,
+                        child: Text(
+                          '$noteNumber',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      // Book cover image
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: book!.coverImage.isNotEmpty
+                              ? Image.file(
+                                  File(book.coverImage),
+                                  height: 40,
+                                  width: 40,
+                                  fit: BoxFit.cover,
+                                )
+                              : const SizedBox(
+                                  height: 40,
+                                  width: 40,
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Color _getCorrespondingColor(BookStatus status) {
+    switch (status) {
+      case BookStatus.finished:
+        return Colors.lightGreen;
+      case BookStatus.reading:
+        return Colors.blueAccent;
+      case BookStatus.listening:
+        return Colors.amber;
+      case BookStatus.dropped:
+        return Colors.orange;
+      case BookStatus.added:
+        return Colors.teal;
+    }
+  }
+
+  Widget _getCorrespondingIcon(BookStatus status) {
+    switch (status) {
+      case BookStatus.finished:
+        return const Icon(Icons.check, size: 30.0);
+      case BookStatus.reading:
+        return SvgPicture.asset("assets/icons/reading_icon.svg",
+            width: 30.0, height: 30.0);
+      case BookStatus.listening:
+        return const Icon(Icons.headphones, size: 30);
+      case BookStatus.dropped:
+        return const Icon(Icons.block_outlined, size: 30);
+      case BookStatus.added:
+        return SvgPicture.asset("assets/icons/added_icon.svg",
+            width: 30.0, height: 30.0);
+    }
   }
 
   Future<Map<String, String>?> _noteDialog(BuildContext context,

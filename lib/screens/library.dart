@@ -247,7 +247,7 @@ class _LibraryPageState extends State<LibraryPage> {
         SizedBox(
           width: double.infinity,
           child: TextField(
-            textCapitalization: TextCapitalization.sentences,
+            textCapitalization: TextCapitalization.words,
             maxLines: 1,
             decoration: const InputDecoration(
               contentPadding: EdgeInsets.symmetric(

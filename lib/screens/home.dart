@@ -438,6 +438,7 @@ class HomePage extends StatelessWidget {
                   TextField(
                     controller: noteController,
                     maxLines: 5,
+                    textCapitalization: TextCapitalization.sentences,
                     decoration: InputDecoration(
                       hintText: 'Enter your note here...',
                       border: OutlineInputBorder(
@@ -463,9 +464,10 @@ class HomePage extends StatelessWidget {
                 onPressed: () {
                   if (selectedDate != null && noteController.text.isNotEmpty) {
                     final newNote = BookNotes(
-                      timeOfNote: selectedDate!,
-                      noteContent: noteController.text,
-                    );
+                        timeOfNote: selectedDate!,
+                        noteContent: noteController.text,
+                        noteNumber: book.bookNote.length + 1,
+                        statusWhenNoted: book.status);
                     newNote.bookReference.value = book;
                     IsarService().saveBookNote(newNote);
                     Navigator.of(context).pop();
