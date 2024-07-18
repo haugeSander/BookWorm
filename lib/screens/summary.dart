@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:book_worm/models/book_notes.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/services/isar_service.dart';
+import 'package:book_worm/widgets/book_summary_presentation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -63,6 +64,8 @@ class SummaryPage extends StatelessWidget {
                   fontWeight: FontWeight.w200),
             ),
           ),
+          const SizedBox(height: 20),
+          const BookSummary(), // Add this line
         ],
       ),
     );
