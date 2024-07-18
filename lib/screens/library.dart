@@ -105,14 +105,17 @@ class _LibraryPageState extends State<LibraryPage> {
           }
 
           final newUserDataBook = UserBookEntry(
-              status: _dropdownValue,
-              dateOfCurrentStatus:
-                  _dropdownValue == BookStatus.added ? DateTime.now() : null);
+              status: _dropdownValue, dateOfCurrentStatus: DateTime.now());
 
           final newBook = Book(
               title: result['name']!,
               author: result['author']!,
               coverImage: newImage == null ? "" : newImage.path);
+
+          if (_dropdownValue == BookStatus.listening ||
+              _dropdownValue == BookStatus.reading) {
+            newUserDataBook.timeStarted = DateTime.now();
+          }
 
           // Establish the link between the UserBookEntry and Book
           newUserDataBook.bookReference.value = newBook;
