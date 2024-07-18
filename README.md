@@ -29,13 +29,14 @@ These must be in place to use the project.
 
 Step-by-step instructions on how to install and get the project running.
 
-$ git clone https://github.com/username/repository.git
-$ cd repository
-$ flutter pub get
-$ flutter run
-
+```bash
+git clone https://github.com/username/repository.git
+cd repository
+flutter pub get
+flutter run
+```
 ## Project structure
-
+```text
 book_worm/
 │
 ├── android/             # Android specific files and configurations
@@ -73,6 +74,7 @@ book_worm/
 ├── README.md            # Project readme file
 ├── .gitignore           # Git ignore file
 └── ...
+```
 
 ## License
 
