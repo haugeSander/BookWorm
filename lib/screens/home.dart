@@ -2,10 +2,9 @@ import 'dart:io';
 
 import 'package:book_worm/models/book_notes.dart';
 import 'package:book_worm/models/user_book_entry.dart';
-import 'package:book_worm/screens/library.dart';
+import 'package:book_worm/screens/user_and_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm/models/book.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
 import '../services/isar_service.dart';
@@ -25,7 +24,7 @@ class HomePage extends StatelessWidget {
           const SizedBox(
             height: 50,
           ),
-          _profileAndTitle(),
+          _profileAndTitle(context),
           const SizedBox(
             height: 50,
           ),
@@ -330,17 +329,26 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Center _profileAndTitle() {
+  Widget _profileAndTitle(BuildContext context) {
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(40.0),
-            child: const Image(
-              image: AssetImage('assets/images/mark_manson.jpg'),
-              width: 80.0,
-              height: 80.0,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const UserSettingsPage()),
+              );
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(40.0),
+              child: const Image(
+                image: AssetImage('assets/images/mark_manson.jpg'),
+                width: 80.0,
+                height: 80.0,
+              ),
             ),
           ),
           const Text(
