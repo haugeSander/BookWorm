@@ -1,3 +1,4 @@
+import 'package:book_worm/screens/edit_user.dart';
 import 'package:flutter/material.dart';
 
 class UserSettingsPage extends StatelessWidget {
@@ -15,7 +16,10 @@ class UserSettingsPage extends StatelessWidget {
             leading: const Icon(Icons.person),
             title: const Text('Edit Profile'),
             onTap: () {
-              // TODO: Implement edit profile functionality
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (BuildContext context) => const EditUserPage()));
             },
           ),
           ListTile(
@@ -44,13 +48,6 @@ class UserSettingsPage extends StatelessWidget {
             title: const Text('Help and Support'),
             onTap: () {
               // TODO: Implement help and support functionality
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.exit_to_app),
-            title: const Text('Log Out'),
-            onTap: () {
-              // TODO: Implement log out functionality
             },
           ),
         ],

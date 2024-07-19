@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:book_worm/models/book_notes.dart';
+import 'package:book_worm/models/user.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/screens/user_and_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm/models/book.dart';
 import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
 
 import '../services/isar_service.dart';
 
@@ -342,13 +344,31 @@ class HomePage extends StatelessWidget {
                     builder: (context) => const UserSettingsPage()),
               );
             },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(40.0),
-              child: const Image(
-                image: AssetImage('assets/images/mark_manson.jpg'),
-                width: 80.0,
-                height: 80.0,
-              ),
+            child: FutureBuilder<User?>(
+              future: IsarService().getUser().then((future) => future),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return const Icon(Icons.error);
+                } else {
+                  final user = snapshot.data;
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(40.0),
+                    child: user?.profileImage != null &&
+                            user!.profileImage!.isNotEmpty
+                        ? Image.asset(
+                            user.profileImage!,
+                            width: 80.0,
+                            height: 80.0,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.person, size: 80.0),
+                          )
+                        : const Icon(Icons.person, size: 80.0),
+                  );
+                }
+              },
             ),
           ),
           const Text(
