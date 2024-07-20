@@ -5,9 +5,6 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/finished_book_note.dart';
 import 'package:book_worm/models/user_book_entry.dart';
-import 'dart:math' as math;
-
-import 'package:isar/isar.dart';
 
 class StepperPage extends StatefulWidget {
   final UserBookEntry bookEntry;

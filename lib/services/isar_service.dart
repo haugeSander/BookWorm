@@ -1,6 +1,7 @@
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/book_notes.dart';
 import 'package:book_worm/models/finished_book_note.dart';
+import 'package:book_worm/models/user.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -139,6 +140,26 @@ class IsarService {
     await isar.writeTxn(() => isar.clear());
   }
 
+  Future<User?> getUser() async {
+    final isar = await db;
+    return isar.users.get(0);
+  }
+
+  Future<void> updateUser(User updatedUser) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      final existingUser = await isar.users.get(0);
+      if (existingUser != null) {
+        existingUser
+          ..username = updatedUser.username
+          ..firstName = updatedUser.firstName
+          ..lastName = updatedUser.lastName
+          ..biography = updatedUser.biography;
+        await isar.users.put(existingUser);
+      }
+    });
+  }
+
   Future<Isar> openDB() async {
     final dir = await getApplicationDocumentsDirectory();
 
@@ -147,7 +168,8 @@ class IsarService {
         BookSchema,
         UserBookEntrySchema,
         BookNotesSchema,
-        FinishedBookNoteSchema
+        FinishedBookNoteSchema,
+        UserSchema
       ], directory: dir.path, maxSizeMiB: 1024, inspector: true);
     }
 
