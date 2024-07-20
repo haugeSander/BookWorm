@@ -99,6 +99,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
   late final Color color;
   late final bool isFinished;
   bool _isEditMode = false;
+  bool _somethingChanged = false;
   bool _isFabVisible = true;
   Timer? _fabTimer;
   final ScrollController _scrollController = ScrollController();
@@ -220,9 +221,6 @@ class _BookDetailPageState extends State<BookDetailPage> {
   void _discardChanges() {
     setState(() {
       _isEditMode = false;
-      editableBook = oldEditableBook!;
-      editableUserData = oldEditableUserData!;
-      editableFinishedBookNote = oldEditableFinishedBookNote;
     });
     _resetFabTimer();
   }
@@ -291,8 +289,44 @@ class _BookDetailPageState extends State<BookDetailPage> {
               if (_isEditMode)
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    _discardChanges();
+                  onPressed: () async {
+                    // Make this an async function
+                    if (_somethingChanged) {
+                      final result = await showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("Save changes?"),
+                              content: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop('save');
+                                      },
+                                      child: const Text("Save")),
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop('discard');
+                                      },
+                                      child: const Text("Discard"))
+                                ],
+                              ),
+                            );
+                          });
+
+                      if (result == 'save') {
+                        _saveChanges();
+                      } else if (result == 'discard') {
+                        _discardChanges();
+                      } else {
+                        // User dismissed the dialog without choosing
+                        return; // Don't proceed to editing if the user cancels
+                      }
+                    }
+
+                    _isEditMode = false;
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => EditFindingsPage(
@@ -787,7 +821,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  IsarService().updateBookSummary(book, summaryController.text);
+                  editableBook.summary = summaryController.text;
+                  _somethingChanged = true;
                 });
                 Navigator.of(context).pop();
               },
