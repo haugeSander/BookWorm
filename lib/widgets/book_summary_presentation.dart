@@ -10,7 +10,6 @@ class BookSummary extends StatefulWidget {
 
 class _BookSummaryState extends State<BookSummary> {
   late PageController _pageController;
-  int _currentPage = 0;
 
   @override
   void initState() {
@@ -37,7 +36,7 @@ class _BookSummaryState extends State<BookSummary> {
               controller: _pageController,
               onPageChanged: (int page) {
                 setState(() {
-                  _currentPage = page ~/ 2; // Integer division by 2
+// Integer division by 2
                 });
               },
               children: [

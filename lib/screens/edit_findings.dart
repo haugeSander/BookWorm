@@ -8,11 +8,11 @@ class EditFindingsPage extends StatefulWidget {
   final Function(FinishedBookNote) onSave;
 
   const EditFindingsPage({
-    Key? key,
+    super.key,
     required this.book,
     required this.finalNote,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   _EditFindingsPageState createState() => _EditFindingsPageState();

@@ -145,6 +145,11 @@ class IsarService {
     return isar.users.get(0);
   }
 
+  Future<Book?> getBook(Id bookId) async {
+    final isar = await db;
+    return isar.books.get(bookId);
+  }
+
   Future<void> updateUser(User updatedUser) async {
     final isar = await db;
     await isar.writeTxn(() async {

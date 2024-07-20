@@ -7,7 +7,6 @@ import 'package:book_worm/screens/user_and_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm/models/book.dart';
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
 
 import '../services/isar_service.dart';
 
