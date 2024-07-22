@@ -37,7 +37,15 @@ class IsarService {
 
   Future<void> updateUserDataEntry(UserBookEntry newUserBookEntry) async {
     final isar = await db;
-    isar.writeTxnSync<int>(() => isar.userBookEntrys.putSync(newUserBookEntry));
+    await isar.writeTxn(() async {
+      // Update UserBookEntry
+      await isar.userBookEntrys.put(newUserBookEntry);
+
+      // Update FinishedBookNote if it exists
+      if (newUserBookEntry.finishedNote.value != null) {
+        await isar.finishedBookNotes.put(newUserBookEntry.finishedNote.value!);
+      }
+    });
   }
 
   Future<void> updateBookSummary(Book book, String summary) async {
@@ -108,7 +116,7 @@ class IsarService {
     if (userBookEntry != null) {
       bookNotes = await isar.bookNotes
           .filter()
-          .bookReference((q) => q.idEqualTo(userBookEntry.id))
+          .bookReference((q) => q.bookIdEqualTo(userBookEntry.bookId))
           .findAll();
       finishedBookNote = userBookEntry.finishedNote.value;
     }
@@ -123,11 +131,11 @@ class IsarService {
 
         // Delete the FinishedBookNote if it exists
         if (finishedBookNote != null) {
-          await isar.finishedBookNotes.delete(finishedBookNote.noteId);
+          await isar.finishedBookNotes.delete(finishedBookNote.bookId);
         }
 
         // Delete the UserBookEntry
-        await isar.userBookEntrys.delete(userBookEntry.id);
+        await isar.userBookEntrys.delete(userBookEntry.bookId);
       }
 
       // Finally, delete the book

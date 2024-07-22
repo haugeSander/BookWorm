@@ -99,14 +99,15 @@ class _LibraryPageState extends State<LibraryPage> {
             // copy the file to a new path
             newImage = await _imageLoaded!.copy('$path/${result['name']}.jpg');
           }
-
-          final newUserDataBook = UserBookEntry(
-              status: _dropdownValue, dateOfCurrentStatus: DateTime.now());
-
           final newBook = Book(
               title: result['name']!,
               author: result['author']!,
               coverImage: newImage == null ? "" : newImage.path);
+
+          final newUserDataBook = UserBookEntry(
+              bookId: newBook.bookId,
+              status: _dropdownValue,
+              dateOfCurrentStatus: DateTime.now());
 
           if (_dropdownValue == BookStatus.listening ||
               _dropdownValue == BookStatus.reading) {

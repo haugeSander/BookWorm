@@ -5,7 +5,7 @@ part 'finished_book_note.g.dart';
 
 @Collection()
 class FinishedBookNote {
-  Id noteId = Isar.autoIncrement;
+  Id bookId;
   DateTime timeEnded;
   List<String> inThreeSentences;
   String impressions;
@@ -19,6 +19,7 @@ class FinishedBookNote {
   final bookDataReference = IsarLink<UserBookEntry>();
 
   FinishedBookNote({
+    required this.bookId,
     required this.timeEnded,
     required this.inThreeSentences,
     required this.impressions,

@@ -39,11 +39,9 @@ class BookDetailState extends ChangeNotifier {
 
   void saveChanges() {
     isEditMode = false;
+    userData.finishedNote.value = finalNote;
     IsarService().updateBookEntry(book);
     IsarService().updateUserDataEntry(userData);
-    if (finalNote != null) {
-      IsarService().saveFinalBookNote(finalNote!);
-    }
     notifyListeners();
   }
 

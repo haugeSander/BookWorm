@@ -395,6 +395,7 @@ class _StepperPageState extends State<StepperPage> {
 
     // Create a FinishedBookNote object
     final note = FinishedBookNote(
+      bookId: book.bookId,
       timeEnded: dateFinished,
       inThreeSentences: inThreeSentences,
       impressions: controllers[3].text,
@@ -405,7 +406,9 @@ class _StepperPageState extends State<StepperPage> {
       rating: bookScore,
     );
     bookEntry.finishedNote.value = note;
+    note.bookDataReference.value = bookEntry;
     bookEntry.status = BookStatus.finished;
+    IsarService().saveFinalBookNote(note);
     IsarService().updateUserDataEntry(bookEntry);
 
     // Navigate back to the previous screen

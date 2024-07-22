@@ -25,6 +25,7 @@ class _EditFindingsPageState extends State<EditFindingsPage> {
   void initState() {
     super.initState();
     _editedNote = FinishedBookNote(
+        bookId: widget.book.bookId,
         timeEnded: widget.finalNote.timeEnded,
         rating: widget.finalNote.rating,
         inThreeSentences: List.from(widget.finalNote.inThreeSentences),

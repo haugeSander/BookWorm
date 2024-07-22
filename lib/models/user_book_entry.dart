@@ -9,7 +9,7 @@ enum BookStatus { finished, reading, listening, added, dropped }
 
 @Collection()
 class UserBookEntry {
-  Id id = Isar.autoIncrement;
+  Id bookId;
 
   @enumerated
   BookStatus status;
@@ -26,6 +26,7 @@ class UserBookEntry {
   final bookReference = IsarLink<Book>();
 
   UserBookEntry({
+    required this.bookId,
     required this.status,
     this.dateOfCurrentStatus,
     List<String> gallery = const [],
