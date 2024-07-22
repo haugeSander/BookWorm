@@ -12,7 +12,7 @@ class FinishedBookNote {
   String whoShouldRead;
   String howChangedMe;
   List<String> topThreeQuotes;
-  List<String> tags = List.empty(growable: true);
+  List<String> tags;
   int rating;
 
   @Backlink(to: "finishedNote")
@@ -26,7 +26,7 @@ class FinishedBookNote {
     required this.whoShouldRead,
     required this.howChangedMe,
     required this.topThreeQuotes,
-    required this.tags,
+    List<String>? tags,
     required this.rating,
-  });
+  }) : tags = tags ?? [];
 }

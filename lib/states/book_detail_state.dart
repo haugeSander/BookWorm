@@ -10,9 +10,9 @@ import 'package:book_worm/models/finished_book_note.dart';
 import 'package:flutter_svg/svg.dart';
 
 class BookDetailState extends ChangeNotifier {
-  final Book book;
-  final UserBookEntry userData;
-  final FinishedBookNote? finalNote;
+  Book book;
+  UserBookEntry userData;
+  FinishedBookNote? finalNote;
   bool isEditMode = false;
   bool somethingChanged = false;
 
@@ -80,14 +80,16 @@ class BookDetailState extends ChangeNotifier {
 
   void addTag(String tag) {
     if (finalNote != null) {
-      finalNote!.tags.add(tag);
+      var updatedTags = List<String>.from(finalNote!.tags)..add(tag);
+      finalNote!.tags = updatedTags;
       notifyListeners();
     }
   }
 
   void removeTag(String tag) {
     if (finalNote != null) {
-      finalNote!.tags.remove(tag);
+      var updatedTags = List<String>.from(finalNote!.tags)..remove(tag);
+      finalNote!.tags = updatedTags;
       notifyListeners();
     }
   }
