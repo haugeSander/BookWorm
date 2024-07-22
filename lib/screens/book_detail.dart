@@ -21,12 +21,30 @@ class BookDetailPage extends StatelessWidget {
           body: const CustomScrollView(
             slivers: [
               SliverToBoxAdapter(child: BookDetailHeader()),
-              SliverToBoxAdapter(child: BookDetailTag()),
-              SliverToBoxAdapter(child: BookDetailUserCard()),
-              SliverToBoxAdapter(child: BookDetailSummary()),
-              SliverToBoxAdapter(child: BookDetailFindings()),
-              SliverToBoxAdapter(child: BookDetailGallery()),
-              SliverToBoxAdapter(child: BookDetailNotes()),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                sliver: SliverToBoxAdapter(child: BookDetailTag()),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                sliver: SliverToBoxAdapter(child: BookDetailUserCard()),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                sliver: SliverToBoxAdapter(child: BookDetailSummary()),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                sliver: SliverToBoxAdapter(child: BookDetailFindings()),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                sliver: SliverToBoxAdapter(child: BookDetailGallery()),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.only(top: 8.0, bottom: 55),
+                sliver: SliverToBoxAdapter(child: BookDetailNotes()),
+              ),
             ],
           ),
           floatingActionButton: EditModeButton(state: state),
