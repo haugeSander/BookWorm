@@ -62,7 +62,7 @@ const FinishedBookNoteSchema = CollectionSchema(
   serialize: _finishedBookNoteSerialize,
   deserialize: _finishedBookNoteDeserialize,
   deserializeProp: _finishedBookNoteDeserializeProp,
-  idName: r'noteId',
+  idName: r'bookId',
   indexes: {},
   links: {
     r'bookDataReference': LinkSchema(
@@ -136,6 +136,7 @@ FinishedBookNote _finishedBookNoteDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = FinishedBookNote(
+    bookId: id,
     howChangedMe: reader.readString(offsets[0]),
     impressions: reader.readString(offsets[1]),
     inThreeSentences: reader.readStringList(offsets[2]) ?? [],
@@ -145,7 +146,6 @@ FinishedBookNote _finishedBookNoteDeserialize(
     topThreeQuotes: reader.readStringList(offsets[6]) ?? [],
     whoShouldRead: reader.readString(offsets[7]),
   );
-  object.noteId = id;
   return object;
 }
 
@@ -178,7 +178,7 @@ P _finishedBookNoteDeserializeProp<P>(
 }
 
 Id _finishedBookNoteGetId(FinishedBookNote object) {
-  return object.noteId;
+  return object.bookId;
 }
 
 List<IsarLinkBase<dynamic>> _finishedBookNoteGetLinks(FinishedBookNote object) {
@@ -187,14 +187,14 @@ List<IsarLinkBase<dynamic>> _finishedBookNoteGetLinks(FinishedBookNote object) {
 
 void _finishedBookNoteAttach(
     IsarCollection<dynamic> col, Id id, FinishedBookNote object) {
-  object.noteId = id;
+  object.bookId = id;
   object.bookDataReference.attach(
       col, col.isar.collection<UserBookEntry>(), r'bookDataReference', id);
 }
 
 extension FinishedBookNoteQueryWhereSort
     on QueryBuilder<FinishedBookNote, FinishedBookNote, QWhere> {
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterWhere> anyNoteId() {
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterWhere> anyBookId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
@@ -204,68 +204,68 @@ extension FinishedBookNoteQueryWhereSort
 extension FinishedBookNoteQueryWhere
     on QueryBuilder<FinishedBookNote, FinishedBookNote, QWhereClause> {
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterWhereClause>
-      noteIdEqualTo(Id noteId) {
+      bookIdEqualTo(Id bookId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: noteId,
-        upper: noteId,
+        lower: bookId,
+        upper: bookId,
       ));
     });
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterWhereClause>
-      noteIdNotEqualTo(Id noteId) {
+      bookIdNotEqualTo(Id bookId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(
-              IdWhereClause.lessThan(upper: noteId, includeUpper: false),
+              IdWhereClause.lessThan(upper: bookId, includeUpper: false),
             )
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: noteId, includeLower: false),
+              IdWhereClause.greaterThan(lower: bookId, includeLower: false),
             );
       } else {
         return query
             .addWhereClause(
-              IdWhereClause.greaterThan(lower: noteId, includeLower: false),
+              IdWhereClause.greaterThan(lower: bookId, includeLower: false),
             )
             .addWhereClause(
-              IdWhereClause.lessThan(upper: noteId, includeUpper: false),
+              IdWhereClause.lessThan(upper: bookId, includeUpper: false),
             );
       }
     });
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterWhereClause>
-      noteIdGreaterThan(Id noteId, {bool include = false}) {
+      bookIdGreaterThan(Id bookId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: noteId, includeLower: include),
+        IdWhereClause.greaterThan(lower: bookId, includeLower: include),
       );
     });
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterWhereClause>
-      noteIdLessThan(Id noteId, {bool include = false}) {
+      bookIdLessThan(Id bookId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IdWhereClause.lessThan(upper: noteId, includeUpper: include),
+        IdWhereClause.lessThan(upper: bookId, includeUpper: include),
       );
     });
   }
 
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterWhereClause>
-      noteIdBetween(
-    Id lowerNoteId,
-    Id upperNoteId, {
+      bookIdBetween(
+    Id lowerBookId,
+    Id upperBookId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
-        lower: lowerNoteId,
+        lower: lowerBookId,
         includeLower: includeLower,
-        upper: upperNoteId,
+        upper: upperBookId,
         includeUpper: includeUpper,
       ));
     });
@@ -274,6 +274,62 @@ extension FinishedBookNoteQueryWhere
 
 extension FinishedBookNoteQueryFilter
     on QueryBuilder<FinishedBookNote, FinishedBookNote, QFilterCondition> {
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      bookIdEqualTo(Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'bookId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      bookIdGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'bookId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      bookIdLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'bookId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      bookIdBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'bookId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
       howChangedMeEqualTo(
     String value, {
@@ -770,62 +826,6 @@ extension FinishedBookNoteQueryFilter
         upper,
         includeUpper,
       );
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      noteIdEqualTo(Id value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'noteId',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      noteIdGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'noteId',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      noteIdLessThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'noteId',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
-      noteIdBetween(
-    Id lower,
-    Id upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'noteId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
     });
   }
 
@@ -1625,6 +1625,20 @@ extension FinishedBookNoteQuerySortBy
 extension FinishedBookNoteQuerySortThenBy
     on QueryBuilder<FinishedBookNote, FinishedBookNote, QSortThenBy> {
   QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
+      thenByBookId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bookId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
+      thenByBookIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'bookId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
       thenByHowChangedMe() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'howChangedMe', Sort.asc);
@@ -1649,20 +1663,6 @@ extension FinishedBookNoteQuerySortThenBy
       thenByImpressionsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'impressions', Sort.desc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      thenByNoteId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'noteId', Sort.asc);
-    });
-  }
-
-  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterSortBy>
-      thenByNoteIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'noteId', Sort.desc);
     });
   }
 
@@ -1770,9 +1770,9 @@ extension FinishedBookNoteQueryWhereDistinct
 
 extension FinishedBookNoteQueryProperty
     on QueryBuilder<FinishedBookNote, FinishedBookNote, QQueryProperty> {
-  QueryBuilder<FinishedBookNote, int, QQueryOperations> noteIdProperty() {
+  QueryBuilder<FinishedBookNote, int, QQueryOperations> bookIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'noteId');
+      return query.addPropertyName(r'bookId');
     });
   }
 

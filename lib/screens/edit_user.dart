@@ -3,7 +3,7 @@ import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 
 class EditUserPage extends StatefulWidget {
-  const EditUserPage({Key? key}) : super(key: key);
+  const EditUserPage({super.key});
 
   @override
   _EditUserPageState createState() => _EditUserPageState();

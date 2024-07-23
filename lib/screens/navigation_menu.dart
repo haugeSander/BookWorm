@@ -4,7 +4,7 @@ import 'package:book_worm/screens/home.dart';
 import 'package:flutter/material.dart';
 
 class NavigationMenu extends StatefulWidget {
-  const NavigationMenu({Key? key}) : super(key: key);
+  const NavigationMenu({super.key});
 
   @override
   _NavigationMenuState createState() => _NavigationMenuState();

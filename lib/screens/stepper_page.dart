@@ -1,5 +1,5 @@
-import 'package:book_worm/screens/library.dart';
 import 'package:book_worm/services/isar_service.dart';
+import 'package:book_worm/utility/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:book_worm/models/book.dart';
@@ -9,7 +9,7 @@ import 'package:book_worm/models/user_book_entry.dart';
 class StepperPage extends StatefulWidget {
   final UserBookEntry bookEntry;
 
-  const StepperPage({Key? key, required this.bookEntry}) : super(key: key);
+  const StepperPage({super.key, required this.bookEntry});
 
   @override
   State<StepperPage> createState() => _StepperPageState();
@@ -395,6 +395,7 @@ class _StepperPageState extends State<StepperPage> {
 
     // Create a FinishedBookNote object
     final note = FinishedBookNote(
+      bookId: book.bookId,
       timeEnded: dateFinished,
       inThreeSentences: inThreeSentences,
       impressions: controllers[3].text,
@@ -405,7 +406,9 @@ class _StepperPageState extends State<StepperPage> {
       rating: bookScore,
     );
     bookEntry.finishedNote.value = note;
+    note.bookDataReference.value = bookEntry;
     bookEntry.status = BookStatus.finished;
+    IsarService().saveFinalBookNote(note);
     IsarService().updateUserDataEntry(bookEntry);
 
     // Navigate back to the previous screen

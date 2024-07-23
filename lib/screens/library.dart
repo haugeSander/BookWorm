@@ -4,17 +4,13 @@ import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/screens/book_detail.dart';
 import 'package:book_worm/services/isar_service.dart';
+import 'package:book_worm/states/book_detail_state.dart';
+import 'package:book_worm/utility/string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-
-// Add this extension method to capitalize the first letter of a string
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
-  }
-}
+import 'package:provider/provider.dart';
 
 enum SortOption { title, author, dateAdded }
 
@@ -103,14 +99,15 @@ class _LibraryPageState extends State<LibraryPage> {
             // copy the file to a new path
             newImage = await _imageLoaded!.copy('$path/${result['name']}.jpg');
           }
-
-          final newUserDataBook = UserBookEntry(
-              status: _dropdownValue, dateOfCurrentStatus: DateTime.now());
-
           final newBook = Book(
               title: result['name']!,
               author: result['author']!,
               coverImage: newImage == null ? "" : newImage.path);
+
+          final newUserDataBook = UserBookEntry(
+              bookId: newBook.bookId,
+              status: _dropdownValue,
+              dateOfCurrentStatus: DateTime.now());
 
           if (_dropdownValue == BookStatus.listening ||
               _dropdownValue == BookStatus.reading) {
@@ -443,7 +440,14 @@ class _LibraryPageState extends State<LibraryPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => BookDetailPage(book: book),
+                    builder: (context) => ChangeNotifierProvider(
+                      create: (context) => BookDetailState(
+                          book: book,
+                          userData: book.userDataReference.value!,
+                          finalNote:
+                              book.userDataReference.value!.finishedNote.value),
+                      child: const BookDetailPage(),
+                    ),
                   ),
                 );
               },
