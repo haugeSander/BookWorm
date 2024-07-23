@@ -150,14 +150,14 @@ class BookDetailUserCard extends StatelessWidget {
                   onPressed: () => _openStatusChangeDialog(context, state),
                   child: const Text(
                     "Book not started",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                 )
               : const Text(
                   "Book not started",
                   style: TextStyle(
                       color: Colors.black,
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.w600),
                 ),
         ),
