@@ -364,19 +364,15 @@ class HomePage extends StatelessWidget {
                 } else {
                   final user = snapshot.data;
                   return ClipRRect(
-                    borderRadius: BorderRadius.circular(40.0),
-                    child: user?.profileImage != null &&
-                            user!.profileImage!.isNotEmpty
-                        ? Image.file(
-                            File(user.profileImage!),
-                            width: 80.0,
-                            height: 80.0,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.person, size: 80.0),
-                          )
-                        : const Icon(Icons.person, size: 80.0),
-                  );
+                      borderRadius: BorderRadius.circular(40.0),
+                      child: Image.file(
+                        File(user!.profileImage!),
+                        width: 80.0,
+                        height: 80.0,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.person, size: 80.0),
+                      ));
                 }
               },
             ),
