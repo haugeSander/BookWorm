@@ -168,7 +168,12 @@ class IsarService {
           ..firstName = updatedUser.firstName
           ..lastName = updatedUser.lastName
           ..biography = updatedUser.biography;
+        if (existingUser.profileImage != null) {
+          existingUser.profileImage = updatedUser.profileImage;
+        }
         await isar.users.put(existingUser);
+      } else {
+          await isar.users.put(updatedUser);
       }
     });
   }

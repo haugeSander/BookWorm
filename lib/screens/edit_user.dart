@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:book_worm/models/user.dart';
 import 'package:book_worm/services/isar_service.dart';
+import 'package:book_worm/widgets/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class EditUserPage extends StatefulWidget {
   const EditUserPage({super.key});
@@ -17,6 +21,7 @@ class _EditUserPageState extends State<EditUserPage> {
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _biographyController;
+  File? _imageLoaded;
 
   @override
   void initState() {
@@ -57,6 +62,12 @@ class _EditUserPageState extends State<EditUserPage> {
         lastName: _lastNameController.text,
         biography: _biographyController.text,
       );
+      final applicationDirectory = await getApplicationDocumentsDirectory();
+      final path = applicationDirectory.path;
+      File? newImage =
+          await _imageLoaded!.copy('$path/${_usernameController.text}.jpg');
+      updatedUser.profileImage = newImage.path;
+
       await _isarService.updateUser(updatedUser);
       Navigator.pop(context);
     }
@@ -84,8 +95,10 @@ class _EditUserPageState extends State<EditUserPage> {
               _buildInputField("Biography", _biographyController, 3),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement image picking functionality
+                onPressed: () async {
+                  ImagePickerHelper(onImagePicked: (file) {
+                    _imageLoaded = File(file.path);
+                  }).showImagePickerOptions(context);
                 },
                 child: const Text('Change Profile Picture'),
               ),
