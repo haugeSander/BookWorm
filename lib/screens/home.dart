@@ -197,7 +197,7 @@ class HomePage extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                content: Container(
+                content: SizedBox(
                   width: double.maxFinite,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -367,8 +367,8 @@ class HomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(40.0),
                     child: user?.profileImage != null &&
                             user!.profileImage!.isNotEmpty
-                        ? Image.asset(
-                            user.profileImage!,
+                        ? Image.file(
+                            File(user.profileImage!),
                             width: 80.0,
                             height: 80.0,
                             fit: BoxFit.cover,

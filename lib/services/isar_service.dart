@@ -150,7 +150,7 @@ class IsarService {
 
   Future<User?> getUser() async {
     final isar = await db;
-    return isar.users.get(0);
+    return isar.users.get(1);
   }
 
   Future<Book?> getBook(Id bookId) async {

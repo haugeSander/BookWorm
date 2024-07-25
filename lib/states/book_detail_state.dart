@@ -80,7 +80,7 @@ class BookDetailState extends ChangeNotifier {
 
   void addTag(String tag) {
     if (finalNote != null) {
-      var updatedTags = List<String>.from(finalNote!.tags)..add(tag);
+      var updatedTags = List<String>.from(finalNote!.tags!)..add(tag);
       finalNote!.tags = updatedTags;
       notifyListeners();
     }
@@ -88,7 +88,7 @@ class BookDetailState extends ChangeNotifier {
 
   void removeTag(String tag) {
     if (finalNote != null) {
-      var updatedTags = List<String>.from(finalNote!.tags)..remove(tag);
+      var updatedTags = List<String>.from(finalNote!.tags!)..remove(tag);
       finalNote!.tags = updatedTags;
       notifyListeners();
     }
