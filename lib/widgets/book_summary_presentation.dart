@@ -1,3 +1,5 @@
+import 'package:book_worm/models/user.dart';
+import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -10,9 +12,16 @@ class BookSummary extends StatefulWidget {
 
 class _BookSummaryState extends State<BookSummary> {
   late PageController _pageController;
+  User? user;
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      user = await IsarService().getUser();
+      setState(() {
+      });
+    });
+
     super.initState();
     _pageController = PageController(viewportFraction: 1);
   }
@@ -23,7 +32,6 @@ class _BookSummaryState extends State<BookSummary> {
     super.dispose();
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -36,7 +44,6 @@ class _BookSummaryState extends State<BookSummary> {
               controller: _pageController,
               onPageChanged: (int page) {
                 setState(() {
-// Integer division by 2
                 });
               },
               children: [
@@ -85,28 +92,28 @@ class _BookSummaryState extends State<BookSummary> {
 
   Widget _buildCoverPage() {
     return _buildPageContainer(
-      const Column(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Book worm',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'by Sander H.',
-            style: TextStyle(
+            'by ${user != null ? user!.firstName : "Unknown"}',
+            style: const TextStyle(
               fontSize: 16,
               fontStyle: FontStyle.italic,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'A book enthusiast on a journey through countless pages, always eager to learn and explore new worlds.',
-            style: TextStyle(fontSize: 14),
+            user != null && user!.biography != null ? user!.biography! : 'Unknowing book expert and lover...',
+            style: const TextStyle(fontSize: 14),
           ),
         ],
       ),

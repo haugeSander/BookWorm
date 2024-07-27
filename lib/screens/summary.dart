@@ -65,7 +65,7 @@ class SummaryPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const BookSummary(), // Add this line
+          BookSummary(),
         ],
       ),
     );

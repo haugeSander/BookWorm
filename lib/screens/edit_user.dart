@@ -98,6 +98,7 @@ class _EditUserPageState extends State<EditUserPage> {
                 onPressed: () async {
                   ImagePickerHelper(onImagePicked: (file) {
                     _imageLoaded = File(file.path);
+                    const SnackBar(content: Text("Successfully loaded image"),);
                   }).showImagePickerOptions(context);
                 },
                 child: const Text('Change Profile Picture'),
