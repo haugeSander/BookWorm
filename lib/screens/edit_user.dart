@@ -86,13 +86,13 @@ class _EditUserPageState extends State<EditUserPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildInputField("Username", _usernameController, 1),
+              _buildInputField("Username", _usernameController, 1, TextCapitalization.words),
               const SizedBox(height: 16),
-              _buildInputField("First Name", _firstNameController, 1),
+              _buildInputField("First Name", _firstNameController, 1, TextCapitalization.words),
               const SizedBox(height: 16),
-              _buildInputField("Last name", _lastNameController, 1),
+              _buildInputField("Last name", _lastNameController, 1, TextCapitalization.words),
               const SizedBox(height: 16),
-              _buildInputField("Biography", _biographyController, 3),
+              _buildInputField("Biography", _biographyController, 3, TextCapitalization.sentences),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
@@ -116,7 +116,7 @@ class _EditUserPageState extends State<EditUserPage> {
   }
 
   Widget _buildInputField(
-      String label, TextEditingController controller, int maxLines) {
+      String label, TextEditingController controller, int maxLines, TextCapitalization captitalizationType) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -131,7 +131,7 @@ class _EditUserPageState extends State<EditUserPage> {
         SizedBox(
           width: double.infinity,
           child: TextField(
-            textCapitalization: TextCapitalization.words,
+            textCapitalization: captitalizationType,
             maxLines: maxLines,
             decoration: const InputDecoration(
               contentPadding: EdgeInsets.symmetric(
