@@ -75,6 +75,11 @@ class IsarService {
     }
   }
 
+  Future<List<UserBookEntry>> getAllUserData() async {
+    final isar = await db;
+    return await isar.userBookEntrys.where(sort: Sort.asc).findAll();
+  }
+
   Stream<List<Book>> getBooksOfStatus(List<BookStatus> statusList) async* {
     final isar = await db;
 
