@@ -94,7 +94,7 @@ class SummaryPage extends StatelessWidget {
                 final userData = bookNote.bookReference.value;
                 final book = userData!.bookReference.value;
                 final bookStatus = bookNote.statusWhenNoted;
-                final noteNumber = index + 1; // Assuming 1-based indexing
+                final noteNumber = bookNote.noteNumber;
 
                 return GestureDetector(
                   onTap: () {

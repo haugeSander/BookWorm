@@ -114,7 +114,26 @@ class IsarService {
     if (noteToRemove != null) {
       final isar = await db;
       return await isar.writeTxn(() async {
-        return await isar.bookNotes.delete(noteToRemove.noteId);
+        // Load the associated UserBookEntry
+        await noteToRemove.bookReference.load();
+        final userBookEntry = noteToRemove.bookReference.value;
+        if (userBookEntry == null) return false;
+
+        // Delete the note
+        bool deleted = await isar.bookNotes.delete(noteToRemove.noteId);
+        if (!deleted) return false;
+
+        // Reindex the remaining notes
+        await userBookEntry.bookNote.load();
+        final remainingNotes = userBookEntry.bookNote.toList();
+        remainingNotes.sort((a, b) => a.timeOfNote.compareTo(b.timeOfNote));
+
+        for (int i = 0; i < remainingNotes.length; i++) {
+          remainingNotes[i].noteNumber = i + 1;
+          await isar.bookNotes.put(remainingNotes[i]);
+        }
+
+        return true;
       });
     }
     return false;
@@ -188,7 +207,7 @@ class IsarService {
         }
         await isar.users.put(existingUser);
       } else {
-          await isar.users.put(updatedUser);
+        await isar.users.put(updatedUser);
       }
     });
   }
