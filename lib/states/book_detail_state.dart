@@ -119,6 +119,7 @@ class BookDetailState extends ChangeNotifier {
 
   void deleteNote(BookNotes noteToRemove) {
     userData.bookNote.remove(noteToRemove);
+    IsarService().deleteNote(noteToRemove);
     notifyListeners();
   }
 

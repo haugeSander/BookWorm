@@ -1,4 +1,5 @@
 import 'package:book_worm/models/book_notes.dart';
+import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:book_worm/states/book_detail_state.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,9 @@ class BookDetailNotes extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     _showEditNoteDialog(context, note);
+                  },
+                  onLongPress: () {
+                    _showDeleteNoteDialog(context, state, note);
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -169,6 +173,32 @@ class BookDetailNotes extends StatelessWidget {
             ],
           );
         });
+      },
+    );
+  }
+
+  void _showDeleteNoteDialog(
+      BuildContext context, BookDetailState state, BookNotes note) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Note'),
+          content: const Text('Are you sure you want to delete this note?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                state.deleteNote(note);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
       },
     );
   }

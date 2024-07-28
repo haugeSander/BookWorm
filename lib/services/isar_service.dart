@@ -110,6 +110,16 @@ class IsarService {
     return isar.bookNotes.where(sort: Sort.asc).findAll();
   }
 
+  Future<bool> deleteNote(BookNotes? noteToRemove) async {
+    if (noteToRemove != null) {
+      final isar = await db;
+      return await isar.writeTxn(() async {
+        return await isar.bookNotes.delete(noteToRemove.noteId);
+      });
+    }
+    return false;
+  }
+
   Future<bool> deleteBook(Book bookToDelete) async {
     final isar = await db;
 
