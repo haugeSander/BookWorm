@@ -17,28 +17,38 @@ const UserSchema = CollectionSchema(
   name: r'User',
   id: -7838171048429979076,
   properties: {
-    r'biography': PropertySchema(
+    r'achieveBy': PropertySchema(
       id: 0,
+      name: r'achieveBy',
+      type: IsarType.dateTime,
+    ),
+    r'biography': PropertySchema(
+      id: 1,
       name: r'biography',
       type: IsarType.string,
     ),
     r'firstName': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'firstName',
       type: IsarType.string,
     ),
     r'lastName': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'lastName',
       type: IsarType.string,
     ),
     r'profileImage': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'profileImage',
       type: IsarType.string,
     ),
+    r'readingGoal': PropertySchema(
+      id: 5,
+      name: r'readingGoal',
+      type: IsarType.long,
+    ),
     r'username': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'username',
       type: IsarType.string,
     )
@@ -102,11 +112,13 @@ void _userSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.biography);
-  writer.writeString(offsets[1], object.firstName);
-  writer.writeString(offsets[2], object.lastName);
-  writer.writeString(offsets[3], object.profileImage);
-  writer.writeString(offsets[4], object.username);
+  writer.writeDateTime(offsets[0], object.achieveBy);
+  writer.writeString(offsets[1], object.biography);
+  writer.writeString(offsets[2], object.firstName);
+  writer.writeString(offsets[3], object.lastName);
+  writer.writeString(offsets[4], object.profileImage);
+  writer.writeLong(offsets[5], object.readingGoal);
+  writer.writeString(offsets[6], object.username);
 }
 
 User _userDeserialize(
@@ -116,12 +128,14 @@ User _userDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = User(
-    biography: reader.readStringOrNull(offsets[0]),
-    firstName: reader.readStringOrNull(offsets[1]),
-    lastName: reader.readStringOrNull(offsets[2]),
-    profileImage: reader.readStringOrNull(offsets[3]),
-    username: reader.readStringOrNull(offsets[4]),
+    biography: reader.readStringOrNull(offsets[1]),
+    firstName: reader.readStringOrNull(offsets[2]),
+    lastName: reader.readStringOrNull(offsets[3]),
+    profileImage: reader.readStringOrNull(offsets[4]),
+    username: reader.readStringOrNull(offsets[6]),
   );
+  object.achieveBy = reader.readDateTime(offsets[0]);
+  object.readingGoal = reader.readLong(offsets[5]);
   object.userId = id;
   return object;
 }
@@ -134,7 +148,7 @@ P _userDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
@@ -142,6 +156,10 @@ P _userDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -236,6 +254,59 @@ extension UserQueryWhere on QueryBuilder<User, User, QWhereClause> {
 }
 
 extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
+  QueryBuilder<User, User, QAfterFilterCondition> achieveByEqualTo(
+      DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'achieveBy',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> achieveByGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'achieveBy',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> achieveByLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'achieveBy',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> achieveByBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'achieveBy',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<User, User, QAfterFilterCondition> biographyIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -819,6 +890,59 @@ extension UserQueryFilter on QueryBuilder<User, User, QFilterCondition> {
     });
   }
 
+  QueryBuilder<User, User, QAfterFilterCondition> readingGoalEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'readingGoal',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> readingGoalGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'readingGoal',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> readingGoalLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'readingGoal',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<User, User, QAfterFilterCondition> readingGoalBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'readingGoal',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<User, User, QAfterFilterCondition> userIdEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1022,6 +1146,18 @@ extension UserQueryObject on QueryBuilder<User, User, QFilterCondition> {}
 extension UserQueryLinks on QueryBuilder<User, User, QFilterCondition> {}
 
 extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
+  QueryBuilder<User, User, QAfterSortBy> sortByAchieveBy() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'achieveBy', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByAchieveByDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'achieveBy', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> sortByBiography() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'biography', Sort.asc);
@@ -1070,6 +1206,18 @@ extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
     });
   }
 
+  QueryBuilder<User, User, QAfterSortBy> sortByReadingGoal() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'readingGoal', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> sortByReadingGoalDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'readingGoal', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> sortByUsername() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'username', Sort.asc);
@@ -1084,6 +1232,18 @@ extension UserQuerySortBy on QueryBuilder<User, User, QSortBy> {
 }
 
 extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
+  QueryBuilder<User, User, QAfterSortBy> thenByAchieveBy() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'achieveBy', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByAchieveByDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'achieveBy', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> thenByBiography() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'biography', Sort.asc);
@@ -1132,6 +1292,18 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
     });
   }
 
+  QueryBuilder<User, User, QAfterSortBy> thenByReadingGoal() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'readingGoal', Sort.asc);
+    });
+  }
+
+  QueryBuilder<User, User, QAfterSortBy> thenByReadingGoalDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'readingGoal', Sort.desc);
+    });
+  }
+
   QueryBuilder<User, User, QAfterSortBy> thenByUserId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'userId', Sort.asc);
@@ -1158,6 +1330,12 @@ extension UserQuerySortThenBy on QueryBuilder<User, User, QSortThenBy> {
 }
 
 extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
+  QueryBuilder<User, User, QDistinct> distinctByAchieveBy() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'achieveBy');
+    });
+  }
+
   QueryBuilder<User, User, QDistinct> distinctByBiography(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1186,6 +1364,12 @@ extension UserQueryWhereDistinct on QueryBuilder<User, User, QDistinct> {
     });
   }
 
+  QueryBuilder<User, User, QDistinct> distinctByReadingGoal() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'readingGoal');
+    });
+  }
+
   QueryBuilder<User, User, QDistinct> distinctByUsername(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1198,6 +1382,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
   QueryBuilder<User, int, QQueryOperations> userIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'userId');
+    });
+  }
+
+  QueryBuilder<User, DateTime, QQueryOperations> achieveByProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'achieveBy');
     });
   }
 
@@ -1222,6 +1412,12 @@ extension UserQueryProperty on QueryBuilder<User, User, QQueryProperty> {
   QueryBuilder<User, String?, QQueryOperations> profileImageProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'profileImage');
+    });
+  }
+
+  QueryBuilder<User, int, QQueryOperations> readingGoalProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'readingGoal');
     });
   }
 

@@ -10,6 +10,8 @@ class User {
   String? lastName;
   String? biography;
   String? profileImage;
+  int readingGoal = 0;
+  DateTime achieveBy = DateTime.now().add(const Duration(days: 30));
 
   User(
       {this.username,
