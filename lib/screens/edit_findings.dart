@@ -32,7 +32,7 @@ class _EditFindingsPageState extends State<EditFindingsPage> {
         impressions: widget.finalNote.impressions,
         whoShouldRead: widget.finalNote.whoShouldRead,
         topThreeQuotes: List.from(widget.finalNote.topThreeQuotes),
-        tags: List.from(widget.finalNote.tags),
+        tags: List.from(widget.finalNote.tags!),
         howChangedMe: widget.finalNote.howChangedMe);
   }
 

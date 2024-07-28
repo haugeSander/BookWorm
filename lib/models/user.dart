@@ -4,7 +4,7 @@ part 'user.g.dart';
 
 @Collection()
 class User {
-  Id userId = Isar.autoIncrement;
+  Id userId = 1;
   String? username;
   String? firstName;
   String? lastName;

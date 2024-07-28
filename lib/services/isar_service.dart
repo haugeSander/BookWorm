@@ -75,6 +75,11 @@ class IsarService {
     }
   }
 
+  Future<List<UserBookEntry>> getAllUserData() async {
+    final isar = await db;
+    return await isar.userBookEntrys.where(sort: Sort.asc).findAll();
+  }
+
   Stream<List<Book>> getBooksOfStatus(List<BookStatus> statusList) async* {
     final isar = await db;
 
@@ -150,7 +155,7 @@ class IsarService {
 
   Future<User?> getUser() async {
     final isar = await db;
-    return isar.users.get(0);
+    return isar.users.get(1);
   }
 
   Future<Book?> getBook(Id bookId) async {
@@ -168,7 +173,12 @@ class IsarService {
           ..firstName = updatedUser.firstName
           ..lastName = updatedUser.lastName
           ..biography = updatedUser.biography;
+        if (existingUser.profileImage != null) {
+          existingUser.profileImage = updatedUser.profileImage;
+        }
         await isar.users.put(existingUser);
+      } else {
+          await isar.users.put(updatedUser);
       }
     });
   }

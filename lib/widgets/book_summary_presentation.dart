@@ -1,3 +1,6 @@
+import 'package:book_worm/models/user.dart';
+import 'package:book_worm/models/user_book_entry.dart';
+import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -10,9 +13,17 @@ class BookSummary extends StatefulWidget {
 
 class _BookSummaryState extends State<BookSummary> {
   late PageController _pageController;
+  User? user;
+  List<UserBookEntry>? userData;
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      user = await IsarService().getUser();
+      userData = await IsarService().getAllUserData();
+      setState(() {});
+    });
+
     super.initState();
     _pageController = PageController(viewportFraction: 1);
   }
@@ -24,7 +35,6 @@ class _BookSummaryState extends State<BookSummary> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -35,16 +45,12 @@ class _BookSummaryState extends State<BookSummary> {
             child: PageView(
               controller: _pageController,
               onPageChanged: (int page) {
-                setState(() {
-// Integer division by 2
-                });
+                setState(() {});
               },
               children: [
                 _buildCoverPage(),
                 _buildChapterOnePage(),
                 _buildChapterTwoPage(),
-                _buildChapterThreePage(),
-                _buildChapterFourPage(),
                 _buildBackCoverPage(),
               ],
             ),
@@ -85,28 +91,30 @@ class _BookSummaryState extends State<BookSummary> {
 
   Widget _buildCoverPage() {
     return _buildPageContainer(
-      const Column(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Book worm',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'by Sander H.',
-            style: TextStyle(
+            'by ${user != null ? user!.firstName : "Unknown"}',
+            style: const TextStyle(
               fontSize: 16,
               fontStyle: FontStyle.italic,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'A book enthusiast on a journey through countless pages, always eager to learn and explore new worlds.',
-            style: TextStyle(fontSize: 14),
+            user != null && user!.biography != null
+                ? user!.biography!
+                : 'Unknowing book expert and lover...',
+            style: const TextStyle(fontSize: 14),
           ),
         ],
       ),
@@ -133,30 +141,19 @@ class _BookSummaryState extends State<BookSummary> {
             ),
           ),
           const SizedBox(height: 16),
-          FutureBuilder<Map<String, dynamic>>(
-            future: _getStatistics(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else if (!snapshot.hasData) {
-                return const Text('No data available');
-              } else {
-                final stats = snapshot.data!;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Total books: ${stats['totalBooks']}'),
-                    Text('Books in progress: ${stats['booksInProgress']}'),
-                    Text('Finished books: ${stats['finishedBooks']}'),
-                    Text(
-                        'Average rating: ${stats['averageRating'].toStringAsFixed(1)}'),
-                  ],
-                );
-              }
-            },
-          ),
+          Builder(builder: (context) {
+            var statistics = _getStatistics();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Total books: ${statistics['totalBooks']}'),
+                Text('Books in progress: ${statistics['booksInProgress']}'),
+                Text('Finished books: ${statistics['finishedBooks']}'),
+                Text(
+                    'Average rating: ${statistics['averageRating'].toStringAsFixed(1)}'),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -169,58 +166,6 @@ class _BookSummaryState extends State<BookSummary> {
         children: [
           Text(
             'Chapter 2',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            'Your reading habits',
-            style: TextStyle(
-              fontSize: 16,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text('Add more statistics or information here'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChapterThreePage() {
-    return _buildPageContainer(
-      const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Chapter 3',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            'Your favorite genres',
-            style: TextStyle(
-              fontSize: 16,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text('Add genre statistics or information here'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChapterFourPage() {
-    return _buildPageContainer(
-      const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Chapter 4',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -254,12 +199,37 @@ class _BookSummaryState extends State<BookSummary> {
     );
   }
 
-  Future<Map<String, dynamic>> _getStatistics() async {
-    return {
-      'totalBooks': 1,
-      'booksInProgress': 2,
-      'finishedBooks': 2,
-      'averageRating': 4,
-    };
+  Map<String, dynamic> _getStatistics() {
+    if (userData != null) {
+      double averageRating = 0;
+      int finishedBooks = 0;
+      int booksInProgress = 0;
+
+      for (var entry in userData!) {
+        if (entry.finishedNote.value != null &&
+            entry.status == BookStatus.finished) {
+          averageRating += entry.finishedNote.value!.rating;
+          finishedBooks++;
+        } else if (entry.status == BookStatus.reading ||
+            entry.status == BookStatus.listening) {
+          booksInProgress++;
+        }
+      }
+      averageRating = averageRating / finishedBooks;
+
+      return {
+        'totalBooks': userData!.length,
+        'booksInProgress': booksInProgress,
+        'finishedBooks': finishedBooks.toInt(),
+        'averageRating': averageRating,
+      };
+    } else {
+      return {
+        'totalBooks': 0,
+        'booksInProgress': 0,
+        'finishedBooks': 0,
+        'averageRating': 0,
+      };
+    }
   }
 }
