@@ -21,4 +21,15 @@ class BookNotes {
     required this.noteNumber,
     required this.statusWhenNoted,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'noteId': noteId,
+      'timeOfNote': timeOfNote.toIso8601String(),
+      'noteContent': noteContent,
+      'noteNumber': noteNumber,
+      'statusWhenNoted': statusWhenNoted.index,
+      'bookReferenceId': bookReference.value?.bookId,
+    };
+  }
 }

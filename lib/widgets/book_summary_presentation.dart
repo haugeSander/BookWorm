@@ -1,5 +1,4 @@
 import 'package:book_worm/models/user.dart';
-import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/screens/settings_pages/edit_goals.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';

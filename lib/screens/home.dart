@@ -121,7 +121,7 @@ class HomePage extends StatelessWidget {
                             builder: (BuildContext context) =>
                                 const LibraryPage()));
                   },
-                  child: const Text('See All')),
+                  child: const Text('See All', style: TextStyle(color: Colors.blue),)),
             ],
           ),
         ),
@@ -150,49 +150,83 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildBookCard(BuildContext context, Book book) {
-    return GestureDetector(
-      onTap: () => _openAddNote(context, book.userDataReference.value!),
-      child: Card(
-        margin: const EdgeInsets.only(left: 16, right: 8, bottom: 16),
-        child: SizedBox(
-          width: 140,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(4)),
-                child: book.coverImage.isEmpty
-                    ? Container(
-                        height: 120,
-                        color: Colors.grey[200],
-                        child: const Icon(Icons.book, size: 50))
-                    : Image.file(File(book.coverImage),
-                        height: 120, width: double.infinity, fit: BoxFit.cover),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(book.title,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis),
-                    Text(book.author,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                  ],
+Widget _buildBookCard(BuildContext context, Book book) {
+  return GestureDetector(
+    onTap: () => _openAddNote(context, book.userDataReference.value!),
+    child: Stack(
+      children: [
+        Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.only(left: 16, right: 8, bottom: 16),
+          child: SizedBox(
+            width: 140,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: book.coverImage.isEmpty
+                      ? Container(
+                          height: 120,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.book, size: 50, color: Colors.grey))
+                      : Image.file(
+                          File(book.coverImage),
+                          height: 120,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        book.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        book.author,
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+        Positioned(
+          right: 0,
+          bottom: 20,
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: const BoxDecoration(
+              color: Colors.blue,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.note_add,
+              size: 20,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   Future _openAddNote(BuildContext context, UserBookEntry book) {
     DateTime? selectedDate;

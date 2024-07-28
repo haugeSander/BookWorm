@@ -29,4 +29,19 @@ class FinishedBookNote {
     List<String>? tags,
     required this.rating,
   }) : tags = tags ?? [];
+
+  Map<String, dynamic> toJson() {
+    return {
+      'bookId': bookId,
+      'timeEnded': timeEnded.toIso8601String(),
+      'inThreeSentences': inThreeSentences,
+      'impressions': impressions,
+      'whoShouldRead': whoShouldRead,
+      'howChangedMe': howChangedMe,
+      'topThreeQuotes': topThreeQuotes,
+      'tags': tags,
+      'rating': rating,
+      'bookDataReferenceId': bookDataReference.value?.bookId,
+    };
+  }
 }

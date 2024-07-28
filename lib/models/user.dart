@@ -19,4 +19,17 @@ class User {
       this.lastName,
       this.biography,
       this.profileImage});
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'username': username,
+      'firstName': firstName,
+      'lastName': lastName,
+      'biography': biography,
+      'profileImage': profileImage,
+      'readingGoal': readingGoal,
+      'achieveBy': achieveBy.toIso8601String(),
+    };
+  }
 }

@@ -19,4 +19,15 @@ class Book {
     required this.coverImage,
     this.summary,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'bookId': bookId,
+      'title': title,
+      'author': author,
+      'coverImage': coverImage,
+      'summary': summary,
+      'userDataReferenceId': userDataReference.value?.bookId,
+    };
+  }
 }

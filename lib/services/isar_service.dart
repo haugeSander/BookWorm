@@ -4,6 +4,7 @@ import 'package:book_worm/models/finished_book_note.dart';
 import 'package:book_worm/models/user.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:isar/isar.dart';
+import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 
 class IsarService {
@@ -240,6 +241,176 @@ class IsarService {
         await isar.users.put(existingUser);
       } else {
         await isar.users.put(updatedUser);
+      }
+    });
+  }
+
+  Future<String> exportToJson(List<String> selectedCollections) async {
+    Map<String, dynamic> exportData = {};
+
+    final isar = await db;
+
+    if (selectedCollections.contains('BookNotes')) {
+      final bookNotes = await isar.bookNotes.where().findAll();
+      exportData['BookNotes'] = bookNotes.map((note) => note.toJson()).toList();
+    }
+
+    if (selectedCollections.contains('Book')) {
+      final books = await isar.books.where().findAll();
+      exportData['Book'] = books.map((book) => book.toJson()).toList();
+    }
+
+    if (selectedCollections.contains('FinishedBookNote')) {
+      final finishedNotes = await isar.finishedBookNotes.where().findAll();
+      exportData['FinishedBookNote'] =
+          finishedNotes.map((note) => note.toJson()).toList();
+    }
+
+    if (selectedCollections.contains('UserBookEntry')) {
+      final userEntries = await isar.userBookEntrys.where().findAll();
+      exportData['UserBookEntry'] =
+          userEntries.map((entry) => entry.toJson()).toList();
+    }
+
+    if (selectedCollections.contains('User')) {
+      final users = await isar.users.where().findAll();
+      exportData['User'] = users.map((user) => user.toJson()).toList();
+    }
+
+    return jsonEncode(exportData);
+  }
+
+  Future<void> importFromJson(String jsonString) async {
+    final Map<String, dynamic> importData = jsonDecode(jsonString);
+
+    final isar = await db;
+
+    await isar.writeTxn(() async {
+      // Import BookNotes
+      if (importData.containsKey('BookNotes')) {
+        for (var noteData in importData['BookNotes']) {
+          final note = BookNotes(
+            timeOfNote: DateTime.parse(noteData['timeOfNote']),
+            noteContent: noteData['noteContent'],
+            noteNumber: noteData['noteNumber'],
+            statusWhenNoted: BookStatus.values[noteData['statusWhenNoted']],
+          )..noteId = noteData['noteId'];
+          await isar.bookNotes.put(note);
+        }
+      }
+
+      // Import Books
+      if (importData.containsKey('Book')) {
+        for (var bookData in importData['Book']) {
+          final book = Book(
+            title: bookData['title'],
+            author: bookData['author'],
+            coverImage: bookData['coverImage'],
+            summary: bookData['summary'],
+          )..bookId = bookData['bookId'];
+          await isar.books.put(book);
+        }
+      }
+
+      // Import FinishedBookNotes
+      if (importData.containsKey('FinishedBookNote')) {
+        for (var noteData in importData['FinishedBookNote']) {
+          final note = FinishedBookNote(
+            bookId: noteData['bookId'],
+            timeEnded: DateTime.parse(noteData['timeEnded']),
+            inThreeSentences: List<String>.from(noteData['inThreeSentences']),
+            impressions: noteData['impressions'],
+            whoShouldRead: noteData['whoShouldRead'],
+            howChangedMe: noteData['howChangedMe'],
+            topThreeQuotes: List<String>.from(noteData['topThreeQuotes']),
+            tags: noteData['tags'] != null
+                ? List<String>.from(noteData['tags'])
+                : null,
+            rating: noteData['rating'],
+          );
+          await isar.finishedBookNotes.put(note);
+        }
+      }
+
+      // Import UserBookEntries
+      if (importData.containsKey('UserBookEntry')) {
+        for (var entryData in importData['UserBookEntry']) {
+          final entry = UserBookEntry(
+            bookId: entryData['bookId'],
+            status: BookStatus.values[entryData['status']],
+            dateOfCurrentStatus: entryData['dateOfCurrentStatus'] != null
+                ? DateTime.parse(entryData['dateOfCurrentStatus'])
+                : null,
+            gallery: List<String>.from(entryData['gallery']),
+          )..timeStarted = entryData['timeStarted'] != null
+              ? DateTime.parse(entryData['timeStarted'])
+              : null;
+          await isar.userBookEntrys.put(entry);
+        }
+      }
+
+      // Import Users
+      if (importData.containsKey('User')) {
+        for (var userData in importData['User']) {
+          final user = User(
+            username: userData['username'],
+            firstName: userData['firstName'],
+            lastName: userData['lastName'],
+            biography: userData['biography'],
+            profileImage: userData['profileImage'],
+          )
+            ..userId = userData['userId']
+            ..readingGoal = userData['readingGoal']
+            ..achieveBy = DateTime.parse(userData['achieveBy']);
+          await isar.users.put(user);
+        }
+      }
+    });
+
+    // Establish links after all objects are created
+    await isar.writeTxn(() async {
+      if (importData.containsKey('BookNotes')) {
+        for (var noteData in importData['BookNotes']) {
+          if (noteData['bookReferenceId'] != null) {
+            final note = await isar.bookNotes.get(noteData['noteId']);
+            final book =
+                await isar.userBookEntrys.get(noteData['bookReferenceId']);
+            if (note != null && book != null) {
+              note.bookReference.value = book;
+              await isar.bookNotes.put(note);
+            }
+          }
+        }
+      }
+
+      if (importData.containsKey('UserBookEntry')) {
+        for (var entryData in importData['UserBookEntry']) {
+          final entry = await isar.userBookEntrys.get(entryData['bookId']);
+          if (entry != null) {
+            if (entryData['bookNoteIds'] != null) {
+              for (var noteId in entryData['bookNoteIds']) {
+                final note = await isar.bookNotes.get(noteId);
+                if (note != null) {
+                  entry.bookNote.add(note);
+                }
+              }
+            }
+            if (entryData['finishedNoteId'] != null) {
+              final finishedNote =
+                  await isar.finishedBookNotes.get(entryData['finishedNoteId']);
+              if (finishedNote != null) {
+                entry.finishedNote.value = finishedNote;
+              }
+            }
+            if (entryData['bookReferenceId'] != null) {
+              final book = await isar.books.get(entryData['bookReferenceId']);
+              if (book != null) {
+                entry.bookReference.value = book;
+              }
+            }
+            await isar.userBookEntrys.put(entry);
+          }
+        }
       }
     });
   }

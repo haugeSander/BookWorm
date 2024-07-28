@@ -1,5 +1,7 @@
 import 'package:book_worm/screens/settings_pages/edit_goals.dart';
 import 'package:book_worm/screens/settings_pages/edit_user.dart';
+import 'package:book_worm/screens/settings_pages/export.dart';
+import 'package:book_worm/screens/settings_pages/help.dart';
 import 'package:book_worm/screens/settings_pages/privacy_and_security_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -49,6 +51,28 @@ class UserSettingsPage extends StatelessWidget {
                         MaterialPageRoute(
                             builder: (BuildContext context) =>
                                 const PrivacySecurityPage()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.help),
+                  title: const Text('Help'),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                const HelpPage()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.import_export),
+                  title: const Text('Data Transfer'),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                const DataTransferPage()));
                   },
                 ),
               ],

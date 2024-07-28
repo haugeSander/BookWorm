@@ -1,5 +1,4 @@
 import 'package:book_worm/models/book_notes.dart';
-import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:book_worm/states/book_detail_state.dart';
 import 'package:flutter/material.dart';

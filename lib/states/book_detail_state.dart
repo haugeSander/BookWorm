@@ -3,11 +3,13 @@ import 'dart:io';
 
 import 'package:book_worm/models/book_notes.dart';
 import 'package:book_worm/services/isar_service.dart';
+import 'package:book_worm/widgets/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm/models/book.dart';
 import 'package:book_worm/models/user_book_entry.dart';
 import 'package:book_worm/models/finished_book_note.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:path_provider/path_provider.dart';
 
 class BookDetailState extends ChangeNotifier {
   Book book;
@@ -130,6 +132,25 @@ class BookDetailState extends ChangeNotifier {
     }
   }
 
+  void updateCoverImage(BuildContext context) {
+    ImagePickerHelper(onImagePicked: (file) async {
+      try {
+        final applicationDirectory = await getApplicationDocumentsDirectory();
+        final path = applicationDirectory.path;
+        final fileName =
+            '${book.title}-${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final File newImage = await file.copy('$path/$fileName');
+        book.coverImage = newImage.path;
+        IsarService().saveBook(book, userData);
+        notifyListeners();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save image: $e')),
+        );
+      }
+    }).showImagePickerOptions(context);
+  }
+
   void updateFinalNote(FinishedBookNote updatedNote) {
     IsarService().saveFinalBookNote(updatedNote);
   }
@@ -207,6 +228,7 @@ class BookDetailState extends ChangeNotifier {
   }
 
   navigateBack(BuildContext context) {
+    isEditMode = false;
     Navigator.pop(context);
   }
 }

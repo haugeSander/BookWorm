@@ -31,4 +31,17 @@ class UserBookEntry {
     this.dateOfCurrentStatus,
     List<String> gallery = const [],
   }) : gallery = List<String>.from(gallery);
+
+  Map<String, dynamic> toJson() {
+    return {
+      'bookId': bookId,
+      'status': status.index,
+      'timeStarted': timeStarted?.toIso8601String(),
+      'dateOfCurrentStatus': dateOfCurrentStatus?.toIso8601String(),
+      'gallery': gallery,
+      'bookNoteIds': bookNote.map((note) => note.noteId).toList(),
+      'finishedNoteId': finishedNote.value?.bookId,
+      'bookReferenceId': bookReference.value?.bookId,
+    };
+  }
 }

@@ -9,19 +9,36 @@ class EditModeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return state.isEditMode
-        ? Row(
+        ? Column(
             mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              FloatingActionButton(
-                onPressed: state.discardChanges,
-                backgroundColor: Colors.red,
-                child: const Icon(Icons.close),
-              ),
-              const SizedBox(width: 16),
-              FloatingActionButton(
-                onPressed: state.saveChanges,
-                backgroundColor: Colors.green,
-                child: const Icon(Icons.check),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FloatingActionButton(
+                    onPressed: state.discardChanges,
+                    backgroundColor: Colors.red,
+                    child: const Icon(Icons.close),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    children: [
+                      FloatingActionButton(
+                        onPressed: () => state.updateCoverImage(context),
+                        backgroundColor: Colors.blue,
+                        child: const Icon(Icons.image),
+                      ),
+                      const SizedBox(height: 16),
+                      FloatingActionButton(
+                        onPressed: state.saveChanges,
+                        backgroundColor: Colors.green,
+                        child: const Icon(Icons.check),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           )
