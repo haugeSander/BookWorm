@@ -354,28 +354,7 @@ class HomePage extends StatelessWidget {
                     builder: (context) => const UserSettingsPage()),
               );
             },
-            child: FutureBuilder<User?>(
-              future: IsarService().getUser().then((future) => future),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return const Icon(Icons.error);
-                } else {
-                  final user = snapshot.data;
-                  return ClipRRect(
-                      borderRadius: BorderRadius.circular(40.0),
-                      child: Image.file(
-                        File(user!.profileImage!),
-                        width: 80.0,
-                        height: 80.0,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.person, size: 80.0),
-                      ));
-                }
-              },
-            ),
+            child: _loadProfileImage(),
           ),
           const Text(
             "Book worm",
@@ -384,6 +363,49 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  FutureBuilder<User?> _loadProfileImage() {
+    return FutureBuilder<User?>(
+      future: IsarService().getUser().then((future) => future),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return const Icon(Icons.error);
+        } else {
+          final user = snapshot.data;
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(40.0),
+            child: _buildProfileImage(user?.profileImage),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildProfileImage(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) {
+      return const Icon(Icons.person, size: 80.0);
+    }
+
+    return Image.file(
+      File(imagePath),
+      width: 80.0,
+      height: 80.0,
+      fit: BoxFit.cover,
+      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+        if (wasSynchronouslyLoaded) return child;
+        return AnimatedOpacity(
+          opacity: frame == null ? 0 : 1,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          child: child,
+        );
+      },
+      errorBuilder: (context, error, stackTrace) =>
+          const Icon(Icons.person, size: 80.0),
     );
   }
 }
