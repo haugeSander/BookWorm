@@ -35,8 +35,8 @@ class BookDetailTag extends StatelessWidget {
     ));
 
     // Add tag chips if finishedNote is not null and has tags
-    if (finishedNote != null && finishedNote.tags.isNotEmpty) {
-      chips.addAll(finishedNote.tags.map((tag) => _buildChip(
+    if (finishedNote != null && finishedNote.tags!.isNotEmpty) {
+      chips.addAll(finishedNote.tags!.map((tag) => _buildChip(
             tag,
             _getColorForTag(tag),
             onDeleted: state.isEditMode ? () => state.removeTag(tag) : null,

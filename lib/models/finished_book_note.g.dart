@@ -95,11 +95,16 @@ int _finishedBookNoteEstimateSize(
       bytesCount += value.length * 3;
     }
   }
-  bytesCount += 3 + object.tags.length * 3;
   {
-    for (var i = 0; i < object.tags.length; i++) {
-      final value = object.tags[i];
-      bytesCount += value.length * 3;
+    final list = object.tags;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += value.length * 3;
+        }
+      }
     }
   }
   bytesCount += 3 + object.topThreeQuotes.length * 3;
@@ -141,7 +146,7 @@ FinishedBookNote _finishedBookNoteDeserialize(
     impressions: reader.readString(offsets[1]),
     inThreeSentences: reader.readStringList(offsets[2]) ?? [],
     rating: reader.readLong(offsets[3]),
-    tags: reader.readStringList(offsets[4]) ?? [],
+    tags: reader.readStringList(offsets[4]),
     timeEnded: reader.readDateTime(offsets[5]),
     topThreeQuotes: reader.readStringList(offsets[6]) ?? [],
     whoShouldRead: reader.readString(offsets[7]),
@@ -165,7 +170,7 @@ P _finishedBookNoteDeserializeProp<P>(
     case 3:
       return (reader.readLong(offset)) as P;
     case 4:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readStringList(offset)) as P;
     case 5:
       return (reader.readDateTime(offset)) as P;
     case 6:
@@ -881,6 +886,24 @@ extension FinishedBookNoteQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'tags',
+      ));
+    });
+  }
+
+  QueryBuilder<FinishedBookNote, FinishedBookNote, QAfterFilterCondition>
+      tagsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'tags',
       ));
     });
   }
@@ -1803,7 +1826,7 @@ extension FinishedBookNoteQueryProperty
     });
   }
 
-  QueryBuilder<FinishedBookNote, List<String>, QQueryOperations>
+  QueryBuilder<FinishedBookNote, List<String>?, QQueryOperations>
       tagsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'tags');

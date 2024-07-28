@@ -180,137 +180,148 @@ class HomePage extends StatelessWidget {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: const Text(
-              'Add Note',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    book.bookReference.value!.title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.blue,
-                    ),
+          return Center(
+            child: SingleChildScrollView(
+              child: AlertDialog(
+                insetPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: const Text(
+                  'Add Note',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Date of Note:",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  textAlign: TextAlign.center,
+                ),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        book.bookReference.value!.title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Date of Note:",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      InkWell(
+                        onTap: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: selectedDate ?? DateTime.now(),
+                            firstDate: DateTime(2017, 9, 7),
+                            lastDate: DateTime.now(),
+                          );
+                          if (picked != null && picked != selectedDate) {
+                            setState(() {
+                              selectedDate = picked;
+                            });
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                selectedDate == null
+                                    ? 'Select Date'
+                                    : DateFormat('MMMM d, y')
+                                        .format(selectedDate!),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: selectedDate == null
+                                      ? Colors.grey
+                                      : Colors.black,
+                                ),
+                              ),
+                              const Icon(Icons.calendar_today,
+                                  color: Colors.blue),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Note:",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: noteController,
+                        maxLines: 5,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your note here...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide:
+                                const BorderSide(color: Colors.blue, width: 2),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  InkWell(
-                    onTap: () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate ?? DateTime.now(),
-                        firstDate: DateTime(2017, 9, 7),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null && picked != selectedDate) {
-                        setState(() {
-                          selectedDate = picked;
-                        });
+                ),
+                actions: [
+                  TextButton(
+                    child: const Text('Cancel'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  ElevatedButton(
+                    child: const Text('Add Note'),
+                    onPressed: () {
+                      if (selectedDate != null &&
+                          noteController.text.isNotEmpty) {
+                        final newNote = BookNotes(
+                            timeOfNote: selectedDate!,
+                            noteContent: noteController.text,
+                            noteNumber: book.bookNote.length + 1,
+                            statusWhenNoted: book.status);
+                        newNote.bookReference.value = book;
+                        IsarService().saveBookNote(newNote);
+                        Navigator.of(context).pop();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text('Please select a date and enter a note.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
                       }
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8, horizontal: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            selectedDate == null
-                                ? 'Select Date'
-                                : DateFormat('MMMM d, y').format(selectedDate!),
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: selectedDate == null
-                                  ? Colors.grey
-                                  : Colors.black,
-                            ),
-                          ),
-                          const Icon(Icons.calendar_today, color: Colors.blue),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Note:",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: noteController,
-                    maxLines: 5,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your note here...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2),
-                      ),
-                    ),
                   ),
                 ],
               ),
             ),
-            actions: [
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              ElevatedButton(
-                child: const Text('Add Note'),
-                onPressed: () {
-                  if (selectedDate != null && noteController.text.isNotEmpty) {
-                    final newNote = BookNotes(
-                        timeOfNote: selectedDate!,
-                        noteContent: noteController.text,
-                        noteNumber: book.bookNote.length + 1,
-                        statusWhenNoted: book.status);
-                    newNote.bookReference.value = book;
-                    IsarService().saveBookNote(newNote);
-                    Navigator.of(context).pop();
-                  } else {
-                    // Show an error message if date is not selected or note is empty
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please select a date and enter a note.'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-              ),
-            ],
           );
         },
       ),
@@ -353,19 +364,15 @@ class HomePage extends StatelessWidget {
                 } else {
                   final user = snapshot.data;
                   return ClipRRect(
-                    borderRadius: BorderRadius.circular(40.0),
-                    child: user?.profileImage != null &&
-                            user!.profileImage!.isNotEmpty
-                        ? Image.asset(
-                            user.profileImage!,
-                            width: 80.0,
-                            height: 80.0,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.person, size: 80.0),
-                          )
-                        : const Icon(Icons.person, size: 80.0),
-                  );
+                      borderRadius: BorderRadius.circular(40.0),
+                      child: Image.file(
+                        File(user!.profileImage!),
+                        width: 80.0,
+                        height: 80.0,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.person, size: 80.0),
+                      ));
                 }
               },
             ),
