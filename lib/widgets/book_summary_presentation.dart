@@ -1,7 +1,9 @@
 import 'package:book_worm/models/user.dart';
 import 'package:book_worm/models/user_book_entry.dart';
+import 'package:book_worm/screens/settings_pages/edit_goals.dart';
 import 'package:book_worm/services/isar_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class BookSummary extends StatefulWidget {
@@ -91,32 +93,74 @@ class _BookSummaryState extends State<BookSummary> {
 
   Widget _buildCoverPage() {
     return _buildPageContainer(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Book worm',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+      Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.blue[50]!, Colors.blue[100]!],
+          ),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'by ${user != null ? user!.firstName : "Unknown"}',
-            style: const TextStyle(
-              fontSize: 16,
-              fontStyle: FontStyle.italic,
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Image.asset(
+                  'assets/icons/book_worm_logo.png',
+                  width: 40,
+                  height: 40,
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Book Worm',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            user != null && user!.biography != null
-                ? user!.biography!
-                : 'Unknowing book expert and lover...',
-            style: const TextStyle(fontSize: 14),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'by ${user != null ? user!.firstName : "Unknown"}',
+              style: TextStyle(
+                fontSize: 16,
+                fontStyle: FontStyle.italic,
+                color: Colors.blue[700],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                user != null && user!.biography != null
+                    ? user!.biography!
+                    : 'Unknowing book expert and lover...',
+                style: TextStyle(fontSize: 14, color: Colors.blue[800]),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -127,30 +171,43 @@ class _BookSummaryState extends State<BookSummary> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Chapter 1',
+            'Chapter 1: Your Reading Journey',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Text(
-            'Your statistics',
-            style: TextStyle(
-              fontSize: 16,
-              fontStyle: FontStyle.italic,
             ),
           ),
           const SizedBox(height: 16),
           Builder(builder: (context) {
             var statistics = _getStatistics();
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Text('Total books: ${statistics['totalBooks']}'),
-                Text('Books in progress: ${statistics['booksInProgress']}'),
-                Text('Finished books: ${statistics['finishedBooks']}'),
-                Text(
-                    'Average rating: ${statistics['averageRating'].toStringAsFixed(1)}'),
+                _buildCompactStatCard(
+                  icon: Icons.book,
+                  title: 'Total',
+                  value: statistics['totalBooks'].toString(),
+                  color: Colors.blue,
+                ),
+                _buildCompactStatCard(
+                  icon: Icons.hourglass_empty,
+                  title: 'In Progress',
+                  value: statistics['booksInProgress'].toString(),
+                  color: Colors.orange,
+                ),
+                _buildCompactStatCard(
+                  icon: Icons.check_circle,
+                  title: 'Finished',
+                  value: statistics['finishedBooks'].toString(),
+                  color: Colors.green,
+                ),
+                _buildCompactStatCard(
+                  icon: Icons.star,
+                  title: 'Avg. Rating',
+                  value: statistics['averageRating'].toStringAsFixed(1),
+                  color: Colors.purple,
+                ),
               ],
             );
           }),
@@ -159,41 +216,193 @@ class _BookSummaryState extends State<BookSummary> {
     );
   }
 
-  Widget _buildChapterTwoPage() {
-    return _buildPageContainer(
-      const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildCompactStatCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return SizedBox(
+      width: 80,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Icon(icon, size: 24, color: color),
+          const SizedBox(height: 4),
           Text(
-            'Chapter 2',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            'Your reading goals',
+            value,
             style: TextStyle(
               fontSize: 16,
-              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
           ),
-          SizedBox(height: 16),
-          Text('Add reading goals or achievements here'),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
   }
 
+  Widget _buildChapterTwoPage() {
+    Map<String, dynamic> stats = _getStatistics();
+
+    int readingGoal = user?.readingGoal ?? 0;
+    DateTime? achieveBy = user?.achieveBy;
+
+    // Calculate progress
+    double progress =
+        readingGoal > 0 ? stats['finishedBooks'] / readingGoal : 0;
+    progress = progress.clamp(0.0, 1.0);
+
+    // Calculate days remaining
+    int daysRemaining = 0;
+    if (achieveBy != null) {
+      daysRemaining = achieveBy.difference(DateTime.now()).inDays;
+      daysRemaining = daysRemaining < 0 ? 0 : daysRemaining;
+    }
+
+    return _buildPageContainer(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Chapter 2: Reading Goals',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 8,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    progress == 1.0
+                        ? Colors.green
+                        : Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${(progress * 100).toInt()}%',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 16,
+            children: [
+              _buildCompactInfoChip(
+                icon: Icons.book,
+                label: '${stats['finishedBooks']} / $readingGoal books',
+              ),
+              _buildCompactInfoChip(
+                icon: Icons.calendar_today,
+                label: achieveBy != null
+                    ? '$daysRemaining days left'
+                    : 'No deadline',
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const EditGoals()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              minimumSize: Size.zero,
+            ),
+            child: const Text('Edit Goals'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactInfoChip(
+      {required IconData icon, required String label}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: Colors.grey[600]),
+        const SizedBox(width: 4),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[800])),
+      ],
+    );
+  }
+
   Widget _buildBackCoverPage() {
     return _buildPageContainer(
-      const Center(
-        child: Text(
-          'Thank you for reading!',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.brown[100],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.brown[200]!),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Thank you for reading!',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.brown,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Your literary journey awaits',
+              style: TextStyle(
+                fontSize: 16,
+                fontStyle: FontStyle.italic,
+                color: Colors.brown,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.brown[300]!),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    DateFormat('MMMM d, y').format(DateTime.now()),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.brown[600],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Icon(
+                    Icons.book,
+                    size: 40,
+                    color: Colors.brown[400],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
