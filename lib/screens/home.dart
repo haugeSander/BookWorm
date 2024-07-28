@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:book_worm/models/book_notes.dart';
 import 'package:book_worm/models/user.dart';
 import 'package:book_worm/models/user_book_entry.dart';
+import 'package:book_worm/screens/library.dart';
 import 'package:book_worm/screens/user_and_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:book_worm/models/book.dart';
@@ -18,40 +19,19 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: ListView(
-        shrinkWrap: true,
-        children: [
-          const SizedBox(
-            height: 50,
-          ),
-          _profileAndTitle(context),
-          const SizedBox(
-            height: 50,
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              'Reading now',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+      backgroundColor: Colors.grey[100],
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(vertical: 30.0),
+              sliver: SliverToBoxAdapter(child: _profileAndTitle(context)),
             ),
-          ),
-          StreamBuilder<List<Book>>(
-              stream: IsarService()
-                  .getBooksOfStatus([BookStatus.reading, BookStatus.listening]),
-              builder: ((context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No books found'));
-                } else {
-                  return _bookList(snapshot.data!);
-                }
-              })),
-          const SizedBox(
-            height: 40,
-          ),
-        ],
+            SliverToBoxAdapter(child: _buildWelcomeSection()),
+            SliverToBoxAdapter(child: _buildQuickStats()),
+            SliverToBoxAdapter(child: _buildReadingNowSection(context)),
+          ],
+        ),
       ),
     );
   }
@@ -60,115 +40,157 @@ class HomePage extends StatelessWidget {
     Navigator.of(context).pop();
   }
 
-  Widget _bookList(List<Book> books) {
+  Widget _buildQuickStats() {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: IsarService().getStatistics(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData) {
+          return const Center(child: Text('No data available'));
+        } else {
+          final stats = snapshot.data!;
+          return Card(
+            margin: const EdgeInsets.all(16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem(Icons.book, stats['totalBooks'].toString(),
+                      'Total Books'),
+                  _buildStatItem(Icons.auto_stories,
+                      stats['booksInProgress'].toString(), 'In Progress'),
+                  _buildStatItem(
+                      Icons.done, stats['finishedBooks'].toString(), 'Finished')
+                ],
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildStatItem(IconData icon, String value, String label) {
+    return Column(
+      children: [
+        Icon(icon, size: 30, color: Colors.blue),
+        const SizedBox(height: 8),
+        Text(value,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+      ],
+    );
+  }
+
+  Widget _buildWelcomeSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: FutureBuilder<User?>(
+        future: IsarService().getUser(),
+        builder: (context, snapshot) {
+          final userName = snapshot.data?.firstName ?? 'Book Lover';
+          return Text(
+            'Welcome back, $userName!',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w200),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildReadingNowSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          height: 20,
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Reading Now',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                const LibraryPage()));
+                  },
+                  child: const Text('See All')),
+            ],
+          ),
         ),
-        ListView.separated(
-          itemCount: books.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          separatorBuilder: (context, index) => const SizedBox(height: 15),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          itemBuilder: (context, index) {
-            final book = books[index];
-            return GestureDetector(
-              onTap: () {
-                _openAddNote(context, books[index].userDataReference.value!);
-              },
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 1,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
+        SizedBox(
+          height: 200,
+          child: StreamBuilder<List<Book>>(
+            stream: IsarService()
+                .getBooksOfStatus([BookStatus.reading, BookStatus.listening]),
+            builder: ((context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('No books found'));
+              } else {
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) =>
+                      _buildBookCard(context, snapshot.data![index]),
+                );
+              }
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBookCard(BuildContext context, Book book) {
+    return GestureDetector(
+      onTap: () => _openAddNote(context, book.userDataReference.value!),
+      child: Card(
+        margin: const EdgeInsets.only(left: 16, right: 8, bottom: 16),
+        child: SizedBox(
+          width: 140,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(4)),
+                child: book.coverImage.isEmpty
+                    ? Container(
+                        height: 120,
+                        color: Colors.grey[200],
+                        child: const Icon(Icons.book, size: 50))
+                    : Image.file(File(book.coverImage),
+                        height: 120, width: double.infinity, fit: BoxFit.cover),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        bottomLeft: Radius.circular(10),
-                      ),
-                      child: book.coverImage.isEmpty
-                          ? Container(
-                              width: 80,
-                              color: Colors.grey[200],
-                              child: const Center(child: Text('No image')),
-                            )
-                          : Image.file(
-                              File(book.coverImage),
-                              width: 80,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            book.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                              fontSize: 16,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            book.author,
-                            style: const TextStyle(
-                              color: Color(0xff7B6F72),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          if (book.userDataReference.value!
-                                  .dateOfCurrentStatus !=
-                              null)
-                            Text(
-                              'Started: ${DateFormat('MMMM d, y').format(book.userDataReference.value!.dateOfCurrentStatus!)}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.blue,
-                                fontSize: 10,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        ],
-                      ),
-                    ),
-                    const Icon(
-                      Icons.note_add,
-                      size: 35,
-                    ),
-                    const SizedBox(width: 30),
+                    Text(book.title,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis),
+                    Text(book.author,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
-            );
-          },
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 
@@ -328,19 +350,6 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  AppBar appBar() {
-    return AppBar(
-      title: const Text(
-        'Reading now',
-        style: TextStyle(
-            color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      backgroundColor: Colors.white,
-      elevation: 0.0,
-      centerTitle: true,
-    );
-  }
-
   Widget _profileAndTitle(BuildContext context) {
     return Center(
       child: Row(
@@ -359,7 +368,7 @@ class HomePage extends StatelessWidget {
           const Text(
             "Book worm",
             style: TextStyle(
-                color: Colors.black, fontSize: 34, fontWeight: FontWeight.w400),
+                color: Colors.black, fontSize: 38, fontWeight: FontWeight.w300),
           ),
         ],
       ),
@@ -377,7 +386,7 @@ class HomePage extends StatelessWidget {
         } else {
           final user = snapshot.data;
           return ClipRRect(
-            borderRadius: BorderRadius.circular(40.0),
+            borderRadius: BorderRadius.circular(100.0),
             child: _buildProfileImage(user?.profileImage),
           );
         }

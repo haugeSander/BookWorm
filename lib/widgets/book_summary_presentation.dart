@@ -16,18 +16,19 @@ class BookSummary extends StatefulWidget {
 class _BookSummaryState extends State<BookSummary> {
   late PageController _pageController;
   User? user;
-  List<UserBookEntry>? userData;
+  Map<String, dynamic>? statistics;
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      user = await IsarService().getUser();
-      userData = await IsarService().getAllUserData();
-      setState(() {});
-    });
-
     super.initState();
     _pageController = PageController(viewportFraction: 1);
+    _loadData();
+  }
+
+  void _loadData() async {
+    user = await IsarService().getUser();
+    statistics = await IsarService().getStatistics();
+    setState(() {});
   }
 
   @override
@@ -95,11 +96,6 @@ class _BookSummaryState extends State<BookSummary> {
     return _buildPageContainer(
       Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.blue[50]!, Colors.blue[100]!],
-          ),
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
@@ -179,7 +175,9 @@ class _BookSummaryState extends State<BookSummary> {
           ),
           const SizedBox(height: 16),
           Builder(builder: (context) {
-            var statistics = _getStatistics();
+            if (statistics == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
             return Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -187,25 +185,25 @@ class _BookSummaryState extends State<BookSummary> {
                 _buildCompactStatCard(
                   icon: Icons.book,
                   title: 'Total',
-                  value: statistics['totalBooks'].toString(),
+                  value: statistics!['totalBooks'].toString(),
                   color: Colors.blue,
                 ),
                 _buildCompactStatCard(
                   icon: Icons.hourglass_empty,
                   title: 'In Progress',
-                  value: statistics['booksInProgress'].toString(),
+                  value: statistics!['booksInProgress'].toString(),
                   color: Colors.orange,
                 ),
                 _buildCompactStatCard(
                   icon: Icons.check_circle,
                   title: 'Finished',
-                  value: statistics['finishedBooks'].toString(),
+                  value: statistics!['finishedBooks'].toString(),
                   color: Colors.green,
                 ),
                 _buildCompactStatCard(
                   icon: Icons.star,
                   title: 'Avg. Rating',
-                  value: statistics['averageRating'].toStringAsFixed(1),
+                  value: statistics!['averageRating'].toStringAsFixed(1),
                   color: Colors.purple,
                 ),
               ],
@@ -251,14 +249,18 @@ class _BookSummaryState extends State<BookSummary> {
   }
 
   Widget _buildChapterTwoPage() {
-    Map<String, dynamic> stats = _getStatistics();
+    if (statistics == null || user == null) {
+      return _buildPageContainer(
+        const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     int readingGoal = user?.readingGoal ?? 0;
     DateTime? achieveBy = user?.achieveBy;
 
     // Calculate progress
     double progress =
-        readingGoal > 0 ? stats['finishedBooks'] / readingGoal : 0;
+        readingGoal > 0 ? statistics!['finishedBooks'] / readingGoal : 0;
     progress = progress.clamp(0.0, 1.0);
 
     // Calculate days remaining
@@ -307,7 +309,7 @@ class _BookSummaryState extends State<BookSummary> {
             children: [
               _buildCompactInfoChip(
                 icon: Icons.book,
-                label: '${stats['finishedBooks']} / $readingGoal books',
+                label: '${statistics!['finishedBooks']} / $readingGoal books',
               ),
               _buildCompactInfoChip(
                 icon: Icons.calendar_today,
@@ -323,7 +325,8 @@ class _BookSummaryState extends State<BookSummary> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const EditGoals()),
-              );
+              ).then((_) =>
+                  _loadData()); // Reload data when returning from EditGoals
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -354,9 +357,9 @@ class _BookSummaryState extends State<BookSummary> {
         decoration: BoxDecoration(
           color: Colors.brown[100],
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.brown[200]!),
+          border: Border.all(color: Colors.brown[100]!),
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -370,7 +373,7 @@ class _BookSummaryState extends State<BookSummary> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Your literary journey awaits',
+              'Your literary journey continues',
               style: TextStyle(
                 fontSize: 16,
                 fontStyle: FontStyle.italic,
@@ -406,39 +409,5 @@ class _BookSummaryState extends State<BookSummary> {
         ),
       ),
     );
-  }
-
-  Map<String, dynamic> _getStatistics() {
-    if (userData != null) {
-      double averageRating = 0;
-      int finishedBooks = 0;
-      int booksInProgress = 0;
-
-      for (var entry in userData!) {
-        if (entry.finishedNote.value != null &&
-            entry.status == BookStatus.finished) {
-          averageRating += entry.finishedNote.value!.rating;
-          finishedBooks++;
-        } else if (entry.status == BookStatus.reading ||
-            entry.status == BookStatus.listening) {
-          booksInProgress++;
-        }
-      }
-      averageRating = averageRating / finishedBooks;
-
-      return {
-        'totalBooks': userData!.length,
-        'booksInProgress': booksInProgress,
-        'finishedBooks': finishedBooks.toInt(),
-        'averageRating': averageRating,
-      };
-    } else {
-      return {
-        'totalBooks': 0,
-        'booksInProgress': 0,
-        'finishedBooks': 0,
-        'averageRating': 0,
-      };
-    }
   }
 }

@@ -105,6 +105,38 @@ class IsarService {
     }
   }
 
+  Future<Map<String, dynamic>> getStatistics() async {
+    final isar = await db;
+
+    final allEntries = await isar.userBookEntrys.where().findAll();
+
+    int totalBooks = allEntries.length;
+    int booksInProgress = 0;
+    int finishedBooks = 0;
+    double totalRating = 0;
+
+    for (var entry in allEntries) {
+      if (entry.status == BookStatus.finished) {
+        finishedBooks++;
+        if (entry.finishedNote.value != null) {
+          totalRating += entry.finishedNote.value!.rating;
+        }
+      } else if (entry.status == BookStatus.reading ||
+          entry.status == BookStatus.listening) {
+        booksInProgress++;
+      }
+    }
+
+    double averageRating = finishedBooks > 0 ? totalRating / finishedBooks : 0;
+
+    return {
+      'totalBooks': totalBooks,
+      'booksInProgress': booksInProgress,
+      'finishedBooks': finishedBooks,
+      'averageRating': averageRating,
+    };
+  }
+
   Future<List<BookNotes>> getAllBookNotes() async {
     final isar = await db;
     return isar.bookNotes.where(sort: Sort.asc).findAll();
