@@ -65,6 +65,7 @@ class BookDetailState extends ChangeNotifier {
   void updateBookStatus(BookStatus newStatus) {
     userData.status = newStatus;
     userData.dateOfCurrentStatus = DateTime.now();
+    IsarService().updateUserDataEntry(userData);
     notifyListeners();
   }
 
