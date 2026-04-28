@@ -1,234 +1,224 @@
-// book_detail_state.dart
-import 'dart:io';
+import 'dart:convert';
 
-import 'package:book_worm/models/book_notes.dart';
-import 'package:book_worm/services/isar_service.dart';
+import 'package:book_worm/database/app_database.dart';
+import 'package:book_worm/services/database_service.dart';
+import 'package:book_worm/utility/app_theme.dart';
 import 'package:book_worm/widgets/image_picker.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
-import 'package:book_worm/models/book.dart';
-import 'package:book_worm/models/user_book_entry.dart';
-import 'package:book_worm/models/finished_book_note.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:path_provider/path_provider.dart';
 
 class BookDetailState extends ChangeNotifier {
   Book book;
-  UserBookEntry userData;
-  FinishedBookNote? finalNote;
+  final DatabaseService databaseService;
   bool isEditMode = false;
-  bool somethingChanged = false;
 
-  BookDetailState({
-    required this.book,
-    required this.userData,
-    this.finalNote,
-  });
+  // Mutable copies of editable fields
+  late String _title;
+  late String _author;
+  late String _status;
+  int? _rating;
+  String? _note;
+  String _coverImage;
+  bool _isNonFiction;
+
+  // Structured non-fiction note fields
+  late List<String> _inThreeSentences;
+  String? _impressions;
+  String? _whoShouldRead;
+  String? _howChangedMe;
+  late List<String> _topThreeQuotes;
+  late List<String> _tags;
+
+  BookDetailState({required this.book, required this.databaseService})
+      : _title = book.title,
+        _author = book.author,
+        _status = book.status,
+        _rating = book.rating,
+        _note = book.note,
+        _coverImage = book.coverImage,
+        _isNonFiction = book.isNonFiction,
+        _inThreeSentences = _decodeJsonList(book.inThreeSentences),
+        _impressions = book.impressions,
+        _whoShouldRead = book.whoShouldRead,
+        _howChangedMe = book.howChangedMe,
+        _topThreeQuotes = _decodeJsonList(book.topThreeQuotes),
+        _tags = _decodeJsonList(book.tags);
+
+  static List<String> _decodeJsonList(String? raw) {
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      return (jsonDecode(raw) as List<dynamic>).cast<String>();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static String _encodeJsonList(List<String> list) => jsonEncode(list);
+
+  // Getters
+  String get title => _title;
+  String get author => _author;
+  String get status => _status;
+  int? get rating => _rating;
+  String? get note => _note;
+  String get coverImage => _coverImage;
+  bool get isNonFiction => _isNonFiction;
+  List<String> get inThreeSentences => _inThreeSentences;
+  String? get impressions => _impressions;
+  String? get whoShouldRead => _whoShouldRead;
+  String? get howChangedMe => _howChangedMe;
+  List<String> get topThreeQuotes => _topThreeQuotes;
+  List<String> get tags => _tags;
 
   void toggleEditMode() {
     isEditMode = !isEditMode;
     notifyListeners();
   }
 
-  void toggleSomethingChanged() {
-    somethingChanged = !somethingChanged;
-    notifyListeners();
-  }
-
   void discardChanges() {
+    _title = book.title;
+    _author = book.author;
+    _status = book.status;
+    _rating = book.rating;
+    _note = book.note;
+    _coverImage = book.coverImage;
+    _isNonFiction = book.isNonFiction;
+    _inThreeSentences = _decodeJsonList(book.inThreeSentences);
+    _impressions = book.impressions;
+    _whoShouldRead = book.whoShouldRead;
+    _howChangedMe = book.howChangedMe;
+    _topThreeQuotes = _decodeJsonList(book.topThreeQuotes);
+    _tags = _decodeJsonList(book.tags);
     isEditMode = false;
     notifyListeners();
   }
 
-  void saveChanges() {
+  Future<void> saveChanges() async {
+    final updated = book.copyWith(
+      title: _title,
+      author: _author,
+      status: _status,
+      rating: Value(_rating),
+      note: Value(_note),
+      coverImage: _coverImage,
+      isNonFiction: _isNonFiction,
+      dateStarted: _status == 'leser' && book.dateStarted == null
+          ? Value(DateTime.now().millisecondsSinceEpoch)
+          : Value(book.dateStarted),
+      dateFinished: _status == 'lest' && book.dateFinished == null
+          ? Value(DateTime.now().millisecondsSinceEpoch)
+          : Value(book.dateFinished),
+      inThreeSentences: Value(_inThreeSentences.isEmpty
+          ? null
+          : _encodeJsonList(_inThreeSentences)),
+      impressions: Value(_impressions),
+      whoShouldRead: Value(_whoShouldRead),
+      howChangedMe: Value(_howChangedMe),
+      topThreeQuotes: Value(
+          _topThreeQuotes.isEmpty ? null : _encodeJsonList(_topThreeQuotes)),
+      tags: Value(_tags.isEmpty ? null : _encodeJsonList(_tags)),
+    );
+    await databaseService.updateBook(updated);
+    book = updated;
     isEditMode = false;
-    userData.finishedNote.value = finalNote;
-    IsarService().updateBookEntry(book);
-    IsarService().updateUserDataEntry(userData);
     notifyListeners();
   }
 
-  void updateBookSummary(String newSummary) {
-    book.summary = newSummary;
+  void updateTitle(String v) {
+    _title = v;
     notifyListeners();
   }
 
-  void updateBookTitle(String newTitle) {
-    book.title = newTitle;
+  void updateAuthor(String v) {
+    _author = v;
     notifyListeners();
   }
 
-  void updateBookAuthor(String newAuthor) {
-    book.author = newAuthor;
+  void updateStatus(String v) {
+    _status = v;
     notifyListeners();
   }
 
-  void updateBookStatus(BookStatus newStatus) {
-    userData.status = newStatus;
-    userData.dateOfCurrentStatus = DateTime.now();
-    IsarService().updateUserDataEntry(userData);
+  void updateRating(int v) {
+    _rating = v;
     notifyListeners();
   }
 
-  void updateStartDate(DateTime newDate) {
-    userData.timeStarted = newDate;
+  void updateNote(String v) {
+    _note = v.isEmpty ? null : v;
     notifyListeners();
   }
 
-  void updateFinishDate(DateTime newDate) {
-    if (finalNote != null) {
-      finalNote!.timeEnded = newDate;
-      notifyListeners();
+  void updateIsNonFiction(bool v) {
+    _isNonFiction = v;
+    notifyListeners();
+  }
+
+  void updateInThreeSentences(int index, String v) {
+    while (_inThreeSentences.length <= index) {
+      _inThreeSentences.add('');
     }
+    _inThreeSentences[index] = v;
+    notifyListeners();
+  }
+
+  void updateImpressions(String v) {
+    _impressions = v.isEmpty ? null : v;
+    notifyListeners();
+  }
+
+  void updateWhoShouldRead(String v) {
+    _whoShouldRead = v.isEmpty ? null : v;
+    notifyListeners();
+  }
+
+  void updateHowChangedMe(String v) {
+    _howChangedMe = v.isEmpty ? null : v;
+    notifyListeners();
+  }
+
+  void updateTopThreeQuotes(int index, String v) {
+    while (_topThreeQuotes.length <= index) {
+      _topThreeQuotes.add('');
+    }
+    _topThreeQuotes[index] = v;
+    notifyListeners();
   }
 
   void addTag(String tag) {
-    if (finalNote != null) {
-      var updatedTags = List<String>.from(finalNote!.tags!)..add(tag);
-      finalNote!.tags = updatedTags;
+    if (tag.isNotEmpty && !_tags.contains(tag)) {
+      _tags = List.from(_tags)..add(tag);
       notifyListeners();
     }
   }
 
   void removeTag(String tag) {
-    if (finalNote != null) {
-      var updatedTags = List<String>.from(finalNote!.tags!)..remove(tag);
-      finalNote!.tags = updatedTags;
-      notifyListeners();
-    }
-  }
-
-  void addImageToGallery(String imagePath) {
-    userData.gallery.add(imagePath);
+    _tags = List.from(_tags)..remove(tag);
     notifyListeners();
-  }
-
-  void removeImageFromGallery(int index) {
-    userData.gallery.removeAt(index);
-    notifyListeners();
-  }
-
-  void addNote(BookNotes note) {
-    userData.bookNote.add(note);
-    notifyListeners();
-  }
-
-  void updateNote(int index, String newContent) {
-    var toUpdate = userData.bookNote.elementAtOrNull(index);
-    if (toUpdate != null) {
-      toUpdate.noteContent = newContent;
-      notifyListeners();
-    }
-  }
-
-  void deleteNote(BookNotes noteToRemove) {
-    userData.bookNote.remove(noteToRemove);
-    IsarService().deleteNote(noteToRemove);
-    notifyListeners();
-  }
-
-  void updateRating(int newRating) {
-    if (finalNote != null) {
-      finalNote!.rating = newRating;
-      notifyListeners();
-    }
   }
 
   void updateCoverImage(BuildContext context) {
     ImagePickerHelper(onImagePicked: (file) async {
       try {
-        final applicationDirectory = await getApplicationDocumentsDirectory();
-        final path = applicationDirectory.path;
+        final dir = await getApplicationDocumentsDirectory();
         final fileName =
             '${book.title}-${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final File newImage = await file.copy('$path/$fileName');
-        book.coverImage = newImage.path;
-        IsarService().saveBook(book, userData);
+        final newImage = await file.copy('${dir.path}/$fileName');
+        _coverImage = newImage.path;
         notifyListeners();
       } catch (e) {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save image: $e')),
+          SnackBar(content: Text('Klarte ikke lagre bilde: $e')),
         );
       }
     }).showImagePickerOptions(context);
   }
 
-  void updateFinalNote(FinishedBookNote updatedNote) {
-    IsarService().saveFinalBookNote(updatedNote);
-  }
+  Color statusColor() => AppTheme.statusColor(_status);
 
-  Color getStatusColor() {
-    return _getCorrespondingColor(userData.status);
-  }
-
-  Widget getStatusIcon() {
-    return _getCorrespondingIcon(userData.status);
-  }
-
-  bool get isFinished => userData.status == BookStatus.finished;
-
-  void updateDate(String dateType, DateTime date) {
-    switch (dateType) {
-      case 'Started':
-        userData.timeStarted = date;
-        break;
-      case 'Finished':
-        finalNote?.timeEnded = date;
-        break;
-      case 'Stopped':
-      case 'Added':
-        userData.dateOfCurrentStatus = date;
-        break;
-    }
-    notifyListeners();
-  }
-
-  void deleteGalleryImage(int index) {
-    File(userData.gallery[index]).delete();
-    userData.gallery.removeAt(index);
-    IsarService().updateUserDataEntry(userData);
-    notifyListeners();
-  }
-
-  void addGalleryImage(String imagePath) {
-    userData.gallery.add(imagePath);
-    IsarService().updateUserDataEntry(userData);
-    notifyListeners();
-  }
-
-  Color _getCorrespondingColor(BookStatus status) {
-    switch (status) {
-      case BookStatus.finished:
-        return Colors.green;
-      case BookStatus.reading:
-        return Colors.teal;
-      case BookStatus.listening:
-        return Colors.amber;
-      case BookStatus.dropped:
-        return Colors.red;
-      case BookStatus.added:
-        return Colors.black;
-    }
-  }
-
-  Widget _getCorrespondingIcon(BookStatus status) {
-    switch (status) {
-      case BookStatus.finished:
-        return SvgPicture.asset("assets/icons/finished_medal.svg",
-            width: 75.0, height: 75.0);
-      case BookStatus.reading:
-        return SvgPicture.asset("assets/icons/reading_icon.svg",
-            width: 75.0, height: 75.0);
-      case BookStatus.listening:
-        return const Icon(Icons.headphones, size: 75);
-      case BookStatus.dropped:
-        return const Icon(Icons.block_outlined, size: 75);
-      case BookStatus.added:
-        return SvgPicture.asset("assets/icons/added_icon.svg",
-            width: 75.0, height: 75.0);
-    }
-  }
-
-  navigateBack(BuildContext context) {
+  void navigateBack(BuildContext context) {
     isEditMode = false;
     Navigator.pop(context);
   }

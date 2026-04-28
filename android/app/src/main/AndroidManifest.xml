@@ -1,7 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.book_worm">
+   <uses-permission android:name="android.permission.CAMERA"/>
    <application
-        android:label="Book Worm"
+        android:label="Bokorm"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

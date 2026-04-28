@@ -1,13 +1,19 @@
+# Environment variables
+.env
+
 # Miscellaneous
 *.class
 *.log
 *.pyc
 *.swp
 .DS_Store
+.vscode/
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -31,6 +37,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+**/build/
 
 # Web related
 lib/generated_plugin_registrant.dart
@@ -42,6 +49,25 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
+/android/.gradle/
+/android/app/.cxx/
+/android/app/build/
+/android/build/
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# iOS/macOS generated dependencies and ephemeral files
+**/.symlinks/
+**/Pods/
+**/Flutter/ephemeral/
+**/Flutter/Generated.xcconfig
+**/Flutter/flutter_export_environment.sh
+**/Flutter/Flutter.podspec
+**/GeneratedPluginRegistrant.*
+**/xcuserdata/
+
+# Build outputs
+*.apk
+*.aab
+*.ipa

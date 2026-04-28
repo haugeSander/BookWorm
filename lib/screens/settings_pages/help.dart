@@ -7,14 +7,14 @@ class HelpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Help'),
+        title: const Text('Hjelp'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('Features'),
+            _buildSectionTitle('Funksjoner'),
             _buildFeatureContent(),
             const SizedBox(height: 24),
           ],
@@ -41,20 +41,20 @@ class HelpPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildInfoItem(
-          'Deletion',
-          'Most data may be deleted by long pressing the item and selecting "Delete". For example, notes, gallery images and books.',
+          'Sletting',
+          'Det meste kan slettes ved å holde inne elementet og velge "Slett". Dette gjelder for eksempel notater, bilder og bøker.',
         ),
         _buildInfoItem(
-          'Adding Books',
-          'In this version, the only way to add books is thorugh the floating action button in the library page.',
+          'Legge til bøker',
+          'I denne versjonen legger du til bøker med den flytende knappen på biblioteksiden.',
         ),
         _buildInfoItem(
-          'Adding Images',
-          'Images may be added either by taking an image yourself, or uploading from your gallery.',
+          'Legge til bilder',
+          'Bilder kan legges til ved å ta et nytt bilde eller velge et bilde fra galleriet.',
         ),
         _buildInfoItem(
-          'Adding Notes',
-          'To add a note to the book you are reading, go to the home page, and press the book you want to add a note.',
+          'Legge til notater',
+          'Slå på notater i innstillingene, åpne en faglitterær bok fra biblioteket, og trykk på redigeringsikonet for å legge til notater.',
         ),
       ],
     );

@@ -1,99 +1,187 @@
-import 'package:book_worm/screens/settings_pages/edit_goals.dart';
-import 'package:book_worm/screens/settings_pages/edit_user.dart';
 import 'package:book_worm/screens/settings_pages/export.dart';
 import 'package:book_worm/screens/settings_pages/help.dart';
-import 'package:book_worm/screens/settings_pages/privacy_and_security_page.dart';
+import 'package:book_worm/utility/app_strings.dart';
+import 'package:book_worm/utility/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class UserSettingsPage extends StatelessWidget {
+class UserSettingsPage extends StatefulWidget {
   const UserSettingsPage({super.key});
+
+  @override
+  State<UserSettingsPage> createState() => _UserSettingsPageState();
+}
+
+class _UserSettingsPageState extends State<UserSettingsPage> {
+  bool _notesEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() => _notesEnabled = prefs.getBool('notesEnabled') ?? false);
+    }
+  }
+
+  Future<void> _setNotes(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notesEnabled', value);
+    if (mounted) setState(() => _notesEnabled = value);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('User Settings'),
-      ),
+      appBar: AppBar(title: const Text(AppStrings.settings)),
       body: Column(
         children: [
-          Expanded(
-            child: ListView(
+          // App identity header
+          Container(
+            color: AppTheme.primaryLight,
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+            child: Row(
               children: [
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Edit Profile'),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const EditUserPage()));
-                  },
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.menu_book,
+                      color: Colors.white, size: 28),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.flag),
-                  title: const Text('Edit Goals'),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const EditGoals()));
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.security),
-                  title: const Text('Privacy and Security'),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const PrivacySecurityPage()));
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.help),
-                  title: const Text('Help'),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const HelpPage()));
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.import_export),
-                  title: const Text('Data Transfer'),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const DataTransferPage()));
-                  },
+                const SizedBox(width: 16),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppStrings.appName,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'Din personlige boklogg',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 20),
               children: [
-                Text(
-                  'Made by Sandeth, August 2024',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
+                // Section label
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+                  child: Text(
+                    'INNSTILLINGER',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textSecondary,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                SvgPicture.asset(
-                  'assets/icons/legal-license-mit.svg',
-                  width: 40,
-                  height: 40,
+                // Notes toggle
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 2),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: SwitchListTile(
+                    secondary: const Icon(Icons.notes, color: AppTheme.primary),
+                    title: const Text(AppStrings.aktiverStrukturertNotater),
+                    value: _notesEnabled,
+                    onChanged: _setNotes,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Section label
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+                  child: Text(
+                    'DATA & HJELP',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textSecondary,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+                // Data transfer + Help grouped
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        shape: const RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(12)),
+                        ),
+                        leading: const Icon(Icons.import_export,
+                            color: AppTheme.primary),
+                        title: const Text(AppStrings.dataTransfer),
+                        trailing: const Icon(Icons.chevron_right,
+                            color: AppTheme.textSecondary),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const DataTransferPage()),
+                        ),
+                      ),
+                      const Divider(indent: 56, endIndent: 0, height: 1),
+                      ListTile(
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                              bottom: Radius.circular(12)),
+                        ),
+                        leading: const Icon(Icons.help_outline,
+                            color: AppTheme.primary),
+                        title: const Text(AppStrings.help),
+                        trailing: const Icon(Icons.chevron_right,
+                            color: AppTheme.textSecondary),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const HelpPage()),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Footer
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                const Text(
+                  'Laget av Sander, Mai 2026',
+                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
