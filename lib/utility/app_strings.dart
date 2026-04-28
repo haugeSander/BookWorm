@@ -7,6 +7,8 @@ class AppStrings {
   static const tabWantToRead = 'Skal lese';
   static const tabDropped = 'Droppet';
   static const addBook = 'Legg til bok';
+  static const addManually = 'Legg til manuelt';
+  static const manualBookDetails = 'Bokdetaljer';
   static const scanBarcode = 'Skann strekkode';
   static const searchForBook = 'Søk etter bok';
   static const alreadyAdded = 'Bok er allerede lagt til';
@@ -58,8 +60,15 @@ class AppStrings {
   static const pickStatus = 'Velg status';
   static const searchPlaceholder = 'Søk på tittel eller forfatter...';
   static const noResults = 'Ingen resultater';
+  static const noSearchResults =
+      'Fant ikke boken. Du kan legge den til manuelt.';
   static const searching = 'Søker...';
   static const title = 'Tittel';
   static const author = 'Forfatter';
+  static const isbn = 'ISBN';
+  static const publisher = 'Forlag';
+  static const publicationDate = 'Publiseringsdato';
+  static const coverUrl = 'Lenke til omslagsbilde';
+  static const requiredFieldsMissing = 'Tittel og forfatter må fylles ut.';
   static const notesHint = 'Skriv et notat...';
 }

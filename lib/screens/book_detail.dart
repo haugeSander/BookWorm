@@ -40,18 +40,15 @@ class _BookDetailPageState extends State<BookDetailPage> {
           extendBodyBehindAppBar: !state.isEditMode,
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            backgroundColor: state.isEditMode
-                ? AppTheme.surface
-                : Colors.transparent,
+            backgroundColor:
+                state.isEditMode ? AppTheme.surface : Colors.transparent,
             elevation: state.isEditMode ? null : 0,
             scrolledUnderElevation: state.isEditMode ? null : 0,
             surfaceTintColor: Colors.transparent,
             systemOverlayStyle: state.isEditMode
                 ? SystemUiOverlayStyle.dark
                 : SystemUiOverlayStyle.light,
-            title: state.isEditMode
-                ? const Text(AppStrings.editBook)
-                : null,
+            title: state.isEditMode ? const Text(AppStrings.editBook) : null,
             actions: [
               if (state.isEditMode) ...[
                 TextButton(
@@ -65,9 +62,20 @@ class _BookDetailPageState extends State<BookDetailPage> {
                   child: const Text(AppStrings.save),
                 ),
               ] else
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: Colors.white),
-                  onPressed: state.toggleEditMode,
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Material(
+                    color: Colors.black54,
+                    shape: const CircleBorder(),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        color: Colors.white,
+                      ),
+                      tooltip: AppStrings.editBook,
+                      onPressed: state.toggleEditMode,
+                    ),
+                  ),
                 ),
             ],
           ),
