@@ -1063,15 +1063,406 @@ class BooksCompanion extends UpdateCompanion<Book> {
   }
 }
 
+class $BookWidgetsTable extends BookWidgets
+    with TableInfo<$BookWidgetsTable, BookWidget> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BookWidgetsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _bookIdMeta = const VerificationMeta('bookId');
+  @override
+  late final GeneratedColumn<int> bookId = GeneratedColumn<int>(
+      'book_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES books (id) ON DELETE CASCADE'));
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _payloadJsonMeta =
+      const VerificationMeta('payloadJson');
+  @override
+  late final GeneratedColumn<String> payloadJson = GeneratedColumn<String>(
+      'payload_json', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, bookId, type, payloadJson, sortOrder, createdAt, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'book_widgets';
+  @override
+  VerificationContext validateIntegrity(Insertable<BookWidget> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('book_id')) {
+      context.handle(_bookIdMeta,
+          bookId.isAcceptableOrUnknown(data['book_id']!, _bookIdMeta));
+    } else if (isInserting) {
+      context.missing(_bookIdMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('payload_json')) {
+      context.handle(
+          _payloadJsonMeta,
+          payloadJson.isAcceptableOrUnknown(
+              data['payload_json']!, _payloadJsonMeta));
+    } else if (isInserting) {
+      context.missing(_payloadJsonMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BookWidget map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BookWidget(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      bookId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}book_id'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+      payloadJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}payload_json'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $BookWidgetsTable createAlias(String alias) {
+    return $BookWidgetsTable(attachedDatabase, alias);
+  }
+}
+
+class BookWidget extends DataClass implements Insertable<BookWidget> {
+  final int id;
+  final int bookId;
+  final String type;
+  final String payloadJson;
+  final int sortOrder;
+  final int createdAt;
+  final int updatedAt;
+  const BookWidget(
+      {required this.id,
+      required this.bookId,
+      required this.type,
+      required this.payloadJson,
+      required this.sortOrder,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['book_id'] = Variable<int>(bookId);
+    map['type'] = Variable<String>(type);
+    map['payload_json'] = Variable<String>(payloadJson);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    return map;
+  }
+
+  BookWidgetsCompanion toCompanion(bool nullToAbsent) {
+    return BookWidgetsCompanion(
+      id: Value(id),
+      bookId: Value(bookId),
+      type: Value(type),
+      payloadJson: Value(payloadJson),
+      sortOrder: Value(sortOrder),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory BookWidget.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BookWidget(
+      id: serializer.fromJson<int>(json['id']),
+      bookId: serializer.fromJson<int>(json['bookId']),
+      type: serializer.fromJson<String>(json['type']),
+      payloadJson: serializer.fromJson<String>(json['payloadJson']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'bookId': serializer.toJson<int>(bookId),
+      'type': serializer.toJson<String>(type),
+      'payloadJson': serializer.toJson<String>(payloadJson),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+    };
+  }
+
+  BookWidget copyWith(
+          {int? id,
+          int? bookId,
+          String? type,
+          String? payloadJson,
+          int? sortOrder,
+          int? createdAt,
+          int? updatedAt}) =>
+      BookWidget(
+        id: id ?? this.id,
+        bookId: bookId ?? this.bookId,
+        type: type ?? this.type,
+        payloadJson: payloadJson ?? this.payloadJson,
+        sortOrder: sortOrder ?? this.sortOrder,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  BookWidget copyWithCompanion(BookWidgetsCompanion data) {
+    return BookWidget(
+      id: data.id.present ? data.id.value : this.id,
+      bookId: data.bookId.present ? data.bookId.value : this.bookId,
+      type: data.type.present ? data.type.value : this.type,
+      payloadJson:
+          data.payloadJson.present ? data.payloadJson.value : this.payloadJson,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BookWidget(')
+          ..write('id: $id, ')
+          ..write('bookId: $bookId, ')
+          ..write('type: $type, ')
+          ..write('payloadJson: $payloadJson, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, bookId, type, payloadJson, sortOrder, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BookWidget &&
+          other.id == this.id &&
+          other.bookId == this.bookId &&
+          other.type == this.type &&
+          other.payloadJson == this.payloadJson &&
+          other.sortOrder == this.sortOrder &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class BookWidgetsCompanion extends UpdateCompanion<BookWidget> {
+  final Value<int> id;
+  final Value<int> bookId;
+  final Value<String> type;
+  final Value<String> payloadJson;
+  final Value<int> sortOrder;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  const BookWidgetsCompanion({
+    this.id = const Value.absent(),
+    this.bookId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.payloadJson = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  BookWidgetsCompanion.insert({
+    this.id = const Value.absent(),
+    required int bookId,
+    required String type,
+    required String payloadJson,
+    required int sortOrder,
+    required int createdAt,
+    required int updatedAt,
+  })  : bookId = Value(bookId),
+        type = Value(type),
+        payloadJson = Value(payloadJson),
+        sortOrder = Value(sortOrder),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<BookWidget> custom({
+    Expression<int>? id,
+    Expression<int>? bookId,
+    Expression<String>? type,
+    Expression<String>? payloadJson,
+    Expression<int>? sortOrder,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (bookId != null) 'book_id': bookId,
+      if (type != null) 'type': type,
+      if (payloadJson != null) 'payload_json': payloadJson,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  BookWidgetsCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? bookId,
+      Value<String>? type,
+      Value<String>? payloadJson,
+      Value<int>? sortOrder,
+      Value<int>? createdAt,
+      Value<int>? updatedAt}) {
+    return BookWidgetsCompanion(
+      id: id ?? this.id,
+      bookId: bookId ?? this.bookId,
+      type: type ?? this.type,
+      payloadJson: payloadJson ?? this.payloadJson,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (bookId.present) {
+      map['book_id'] = Variable<int>(bookId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (payloadJson.present) {
+      map['payload_json'] = Variable<String>(payloadJson.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BookWidgetsCompanion(')
+          ..write('id: $id, ')
+          ..write('bookId: $bookId, ')
+          ..write('type: $type, ')
+          ..write('payloadJson: $payloadJson, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $BooksTable books = $BooksTable(this);
+  late final $BookWidgetsTable bookWidgets = $BookWidgetsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [books];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [books, bookWidgets];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+        [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('books',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('book_widgets', kind: UpdateKind.delete),
+            ],
+          ),
+        ],
+      );
 }
 
 typedef $$BooksTableCreateCompanionBuilder = BooksCompanion Function({
@@ -1124,6 +1515,25 @@ typedef $$BooksTableUpdateCompanionBuilder = BooksCompanion Function({
   Value<String?> topThreeQuotes,
   Value<String?> tags,
 });
+
+final class $$BooksTableReferences
+    extends BaseReferences<_$AppDatabase, $BooksTable, Book> {
+  $$BooksTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$BookWidgetsTable, List<BookWidget>>
+      _bookWidgetsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+          db.bookWidgets,
+          aliasName: $_aliasNameGenerator(db.books.id, db.bookWidgets.bookId));
+
+  $$BookWidgetsTableProcessedTableManager get bookWidgetsRefs {
+    final manager = $$BookWidgetsTableTableManager($_db, $_db.bookWidgets)
+        .filter((f) => f.bookId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_bookWidgetsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
 
 class $$BooksTableFilterComposer extends Composer<_$AppDatabase, $BooksTable> {
   $$BooksTableFilterComposer({
@@ -1203,6 +1613,27 @@ class $$BooksTableFilterComposer extends Composer<_$AppDatabase, $BooksTable> {
 
   ColumnFilters<String> get tags => $composableBuilder(
       column: $table.tags, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> bookWidgetsRefs(
+      Expression<bool> Function($$BookWidgetsTableFilterComposer f) f) {
+    final $$BookWidgetsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.bookWidgets,
+        getReferencedColumn: (t) => t.bookId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$BookWidgetsTableFilterComposer(
+              $db: $db,
+              $table: $db.bookWidgets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$BooksTableOrderingComposer
@@ -1368,6 +1799,27 @@ class $$BooksTableAnnotationComposer
 
   GeneratedColumn<String> get tags =>
       $composableBuilder(column: $table.tags, builder: (column) => column);
+
+  Expression<T> bookWidgetsRefs<T extends Object>(
+      Expression<T> Function($$BookWidgetsTableAnnotationComposer a) f) {
+    final $$BookWidgetsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.bookWidgets,
+        getReferencedColumn: (t) => t.bookId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$BookWidgetsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.bookWidgets,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$BooksTableTableManager extends RootTableManager<
@@ -1379,9 +1831,9 @@ class $$BooksTableTableManager extends RootTableManager<
     $$BooksTableAnnotationComposer,
     $$BooksTableCreateCompanionBuilder,
     $$BooksTableUpdateCompanionBuilder,
-    (Book, BaseReferences<_$AppDatabase, $BooksTable, Book>),
+    (Book, $$BooksTableReferences),
     Book,
-    PrefetchHooks Function()> {
+    PrefetchHooks Function({bool bookWidgetsRefs})> {
   $$BooksTableTableManager(_$AppDatabase db, $BooksTable table)
       : super(TableManagerState(
           db: db,
@@ -1493,9 +1945,32 @@ class $$BooksTableTableManager extends RootTableManager<
             tags: tags,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) =>
+                  (e.readTable(table), $$BooksTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({bookWidgetsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (bookWidgetsRefs) db.bookWidgets],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (bookWidgetsRefs)
+                    await $_getPrefetchedData<Book, $BooksTable, BookWidget>(
+                        currentTable: table,
+                        referencedTable:
+                            $$BooksTableReferences._bookWidgetsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$BooksTableReferences(db, table, p0)
+                                .bookWidgetsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.bookId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
@@ -1508,13 +1983,313 @@ typedef $$BooksTableProcessedTableManager = ProcessedTableManager<
     $$BooksTableAnnotationComposer,
     $$BooksTableCreateCompanionBuilder,
     $$BooksTableUpdateCompanionBuilder,
-    (Book, BaseReferences<_$AppDatabase, $BooksTable, Book>),
+    (Book, $$BooksTableReferences),
     Book,
-    PrefetchHooks Function()>;
+    PrefetchHooks Function({bool bookWidgetsRefs})>;
+typedef $$BookWidgetsTableCreateCompanionBuilder = BookWidgetsCompanion
+    Function({
+  Value<int> id,
+  required int bookId,
+  required String type,
+  required String payloadJson,
+  required int sortOrder,
+  required int createdAt,
+  required int updatedAt,
+});
+typedef $$BookWidgetsTableUpdateCompanionBuilder = BookWidgetsCompanion
+    Function({
+  Value<int> id,
+  Value<int> bookId,
+  Value<String> type,
+  Value<String> payloadJson,
+  Value<int> sortOrder,
+  Value<int> createdAt,
+  Value<int> updatedAt,
+});
+
+final class $$BookWidgetsTableReferences
+    extends BaseReferences<_$AppDatabase, $BookWidgetsTable, BookWidget> {
+  $$BookWidgetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $BooksTable _bookIdTable(_$AppDatabase db) => db.books
+      .createAlias($_aliasNameGenerator(db.bookWidgets.bookId, db.books.id));
+
+  $$BooksTableProcessedTableManager get bookId {
+    final $_column = $_itemColumn<int>('book_id')!;
+
+    final manager = $$BooksTableTableManager($_db, $_db.books)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_bookIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$BookWidgetsTableFilterComposer
+    extends Composer<_$AppDatabase, $BookWidgetsTable> {
+  $$BookWidgetsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get payloadJson => $composableBuilder(
+      column: $table.payloadJson, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  $$BooksTableFilterComposer get bookId {
+    final $$BooksTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.bookId,
+        referencedTable: $db.books,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$BooksTableFilterComposer(
+              $db: $db,
+              $table: $db.books,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$BookWidgetsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BookWidgetsTable> {
+  $$BookWidgetsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get payloadJson => $composableBuilder(
+      column: $table.payloadJson, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  $$BooksTableOrderingComposer get bookId {
+    final $$BooksTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.bookId,
+        referencedTable: $db.books,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$BooksTableOrderingComposer(
+              $db: $db,
+              $table: $db.books,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$BookWidgetsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BookWidgetsTable> {
+  $$BookWidgetsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get payloadJson => $composableBuilder(
+      column: $table.payloadJson, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$BooksTableAnnotationComposer get bookId {
+    final $$BooksTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.bookId,
+        referencedTable: $db.books,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$BooksTableAnnotationComposer(
+              $db: $db,
+              $table: $db.books,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$BookWidgetsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $BookWidgetsTable,
+    BookWidget,
+    $$BookWidgetsTableFilterComposer,
+    $$BookWidgetsTableOrderingComposer,
+    $$BookWidgetsTableAnnotationComposer,
+    $$BookWidgetsTableCreateCompanionBuilder,
+    $$BookWidgetsTableUpdateCompanionBuilder,
+    (BookWidget, $$BookWidgetsTableReferences),
+    BookWidget,
+    PrefetchHooks Function({bool bookId})> {
+  $$BookWidgetsTableTableManager(_$AppDatabase db, $BookWidgetsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BookWidgetsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BookWidgetsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BookWidgetsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> bookId = const Value.absent(),
+            Value<String> type = const Value.absent(),
+            Value<String> payloadJson = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<int> createdAt = const Value.absent(),
+            Value<int> updatedAt = const Value.absent(),
+          }) =>
+              BookWidgetsCompanion(
+            id: id,
+            bookId: bookId,
+            type: type,
+            payloadJson: payloadJson,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int bookId,
+            required String type,
+            required String payloadJson,
+            required int sortOrder,
+            required int createdAt,
+            required int updatedAt,
+          }) =>
+              BookWidgetsCompanion.insert(
+            id: id,
+            bookId: bookId,
+            type: type,
+            payloadJson: payloadJson,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$BookWidgetsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({bookId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (bookId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.bookId,
+                    referencedTable:
+                        $$BookWidgetsTableReferences._bookIdTable(db),
+                    referencedColumn:
+                        $$BookWidgetsTableReferences._bookIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$BookWidgetsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $BookWidgetsTable,
+    BookWidget,
+    $$BookWidgetsTableFilterComposer,
+    $$BookWidgetsTableOrderingComposer,
+    $$BookWidgetsTableAnnotationComposer,
+    $$BookWidgetsTableCreateCompanionBuilder,
+    $$BookWidgetsTableUpdateCompanionBuilder,
+    (BookWidget, $$BookWidgetsTableReferences),
+    BookWidget,
+    PrefetchHooks Function({bool bookId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$BooksTableTableManager get books =>
       $$BooksTableTableManager(_db, _db.books);
+  $$BookWidgetsTableTableManager get bookWidgets =>
+      $$BookWidgetsTableTableManager(_db, _db.bookWidgets);
 }

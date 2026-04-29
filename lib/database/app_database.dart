@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
@@ -34,15 +36,27 @@ class Books extends Table {
   TextColumn get tags => text().nullable()();
 }
 
-@DriftDatabase(tables: [Books])
+class BookWidgets extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get bookId =>
+      integer().references(Books, #id, onDelete: KeyAction.cascade)();
+  TextColumn get type => text()();
+  TextColumn get payloadJson => text()();
+  IntColumn get sortOrder => integer()();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+}
+
+@DriftDatabase(tables: [Books, BookWidgets])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (migrator) => migrator.createAll(),
         onUpgrade: (migrator, from, to) async {
           if (from < 2) {
             await migrator.addColumn(books, books.description);
@@ -60,8 +74,62 @@ class AppDatabase extends _$AppDatabase {
           if (from < 3) {
             await migrator.addColumn(books, books.isNonFiction);
           }
+          if (from < 4) {
+            await migrator.createTable(bookWidgets);
+            await _migrateExistingNotesToWidgets();
+          }
         },
       );
+
+  Future<void> _migrateExistingNotesToWidgets() async {
+    final existingBooks = await select(books).get();
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    await batch((batch) {
+      for (final book in existingBooks) {
+        final hasNotes = [
+          book.note,
+          book.inThreeSentences,
+          book.impressions,
+          book.whoShouldRead,
+          book.howChangedMe,
+          book.topThreeQuotes,
+          book.tags,
+        ].any((value) => value != null && value.isNotEmpty);
+
+        if (!hasNotes) continue;
+
+        batch.insert(
+          bookWidgets,
+          BookWidgetsCompanion.insert(
+            bookId: book.id,
+            type: 'notes',
+            payloadJson: jsonEncode({
+              'note': book.note,
+              'inThreeSentences': _decodeJsonList(book.inThreeSentences),
+              'impressions': book.impressions,
+              'whoShouldRead': book.whoShouldRead,
+              'howChangedMe': book.howChangedMe,
+              'topThreeQuotes': _decodeJsonList(book.topThreeQuotes),
+              'tags': _decodeJsonList(book.tags),
+            }),
+            sortOrder: 0,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+      }
+    });
+  }
+
+  static List<String> _decodeJsonList(String? raw) {
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      return (jsonDecode(raw) as List<dynamic>).cast<String>();
+    } catch (_) {
+      return [];
+    }
+  }
 
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'bokorm');

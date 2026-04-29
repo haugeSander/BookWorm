@@ -3,36 +3,9 @@ import 'package:book_worm/screens/settings_pages/help.dart';
 import 'package:book_worm/utility/app_strings.dart';
 import 'package:book_worm/utility/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class UserSettingsPage extends StatefulWidget {
+class UserSettingsPage extends StatelessWidget {
   const UserSettingsPage({super.key});
-
-  @override
-  State<UserSettingsPage> createState() => _UserSettingsPageState();
-}
-
-class _UserSettingsPageState extends State<UserSettingsPage> {
-  bool _notesEnabled = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (mounted) {
-      setState(() => _notesEnabled = prefs.getBool('notesEnabled') ?? false);
-    }
-  }
-
-  Future<void> _setNotes(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('notesEnabled', value);
-    if (mounted) setState(() => _notesEnabled = value);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,36 +57,6 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 20),
               children: [
-                // Section label
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
-                  child: Text(
-                    'INNSTILLINGER',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textSecondary,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
-                // Notes toggle
-                Container(
-                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 2),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: SwitchListTile(
-                    secondary: const Icon(Icons.notes, color: AppTheme.primary),
-                    title: const Text(AppStrings.aktiverStrukturertNotater),
-                    value: _notesEnabled,
-                    onChanged: _setNotes,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Section label
                 const Padding(
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
                   child: Text(

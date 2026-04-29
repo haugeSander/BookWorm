@@ -14,6 +14,20 @@ const _statuses = [
   ('droppet', AppStrings.statusDroppet),
 ];
 
+const _bookTypeOptions = [
+  ('header:nonFiction', 'Faglitteratur', true, false),
+  ('nonFiction:selfHelp', 'Selvutvikling', true, true),
+  ('nonFiction:journal', 'Journal / essay', true, true),
+  ('nonFiction:history', 'Historie', true, true),
+  ('nonFiction:business', 'Business', true, true),
+  ('header:fiction', 'Skjønnlitteratur', false, false),
+  ('fiction:drama', 'Drama', false, true),
+  ('fiction:action', 'Action', false, true),
+  ('fiction:sciFi', 'Sci-fi', false, true),
+  ('fiction:fantasy', 'Fantasy', false, true),
+  ('fiction:crime', 'Krim', false, true),
+];
+
 class BookDetailUserCard extends StatelessWidget {
   const BookDetailUserCard({super.key});
 
@@ -84,32 +98,68 @@ class BookDetailUserCard extends StatelessWidget {
         state.isNonFiction ? AppStrings.nonFiction : AppStrings.fiction;
 
     if (state.isEditMode) {
-      return SwitchListTile.adaptive(
-        value: state.isNonFiction,
-        onChanged: state.updateIsNonFiction,
-        contentPadding: EdgeInsets.zero,
-        dense: true,
-        secondary: const Icon(
-          Icons.category_outlined,
-          size: 18,
-          color: AppTheme.textSecondary,
+      return DropdownButtonFormField<String>(
+        initialValue: state.isNonFiction
+            ? _bookTypeOptions.firstWhere((option) => option.$3 && option.$4).$1
+            : _bookTypeOptions
+                .firstWhere((option) => !option.$3 && option.$4)
+                .$1,
+        decoration: const InputDecoration(
+          labelText: AppStrings.bookType,
+          prefixIcon: Icon(Icons.category_outlined, size: 18),
         ),
-        title: const Text(
-          AppStrings.bookType,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppTheme.textSecondary,
-          ),
+        items: _bookTypeOptions
+            .map(
+              (option) => DropdownMenuItem(
+                value: option.$1,
+                enabled: option.$4,
+                child: Text(
+                  option.$2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: option.$4 ? 13 : 12,
+                    fontWeight: option.$4 ? FontWeight.w500 : FontWeight.w700,
+                    color: option.$4
+                        ? AppTheme.textPrimary
+                        : AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+            )
+            .toList(),
+        onChanged: (value) {
+          final selected = _bookTypeOptions.firstWhere(
+            (option) => option.$1 == value && option.$4,
+            orElse: () => _bookTypeOptions.firstWhere((option) => option.$4),
+          );
+          state.updateIsNonFiction(selected.$3);
+        },
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: AppTheme.textPrimary,
         ),
-        subtitle: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: AppTheme.textPrimary,
-          ),
-        ),
+        dropdownColor: AppTheme.surface,
+        iconEnabledColor: AppTheme.primary,
+        isExpanded: true,
+        selectedItemBuilder: (context) {
+          return _bookTypeOptions.map((option) {
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            );
+          }).toList();
+        },
+        borderRadius: BorderRadius.circular(12),
+        menuMaxHeight: 320,
       );
     }
 
@@ -207,8 +257,10 @@ class BookDetailUserCard extends StatelessWidget {
                 Navigator.of(ctx).pop();
               },
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -260,11 +312,7 @@ class _DateRow extends StatelessWidget {
   final String label;
   final String date;
 
-  const _DateRow({
-    required this.icon,
-    required this.label,
-    required this.date,
-  });
+  const _DateRow({required this.icon, required this.label, required this.date});
 
   @override
   Widget build(BuildContext context) {
