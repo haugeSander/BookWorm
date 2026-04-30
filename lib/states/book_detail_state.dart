@@ -21,6 +21,7 @@ class BookDetailState extends ChangeNotifier {
   String? _note;
   String _coverImage;
   bool _isNonFiction;
+  String? _genre;
 
   // Structured non-fiction note fields
   late List<String> _inThreeSentences;
@@ -38,6 +39,7 @@ class BookDetailState extends ChangeNotifier {
         _note = book.note,
         _coverImage = book.coverImage,
         _isNonFiction = book.isNonFiction,
+        _genre = book.genre,
         _inThreeSentences = _decodeJsonList(book.inThreeSentences),
         _impressions = book.impressions,
         _whoShouldRead = book.whoShouldRead,
@@ -64,6 +66,7 @@ class BookDetailState extends ChangeNotifier {
   String? get note => _note;
   String get coverImage => _coverImage;
   bool get isNonFiction => _isNonFiction;
+  String? get genre => _genre;
   List<String> get inThreeSentences => _inThreeSentences;
   String? get impressions => _impressions;
   String? get whoShouldRead => _whoShouldRead;
@@ -84,6 +87,7 @@ class BookDetailState extends ChangeNotifier {
     _note = book.note;
     _coverImage = book.coverImage;
     _isNonFiction = book.isNonFiction;
+    _genre = book.genre;
     _inThreeSentences = _decodeJsonList(book.inThreeSentences);
     _impressions = book.impressions;
     _whoShouldRead = book.whoShouldRead;
@@ -103,6 +107,7 @@ class BookDetailState extends ChangeNotifier {
       note: Value(_note),
       coverImage: _coverImage,
       isNonFiction: _isNonFiction,
+      genre: Value(_genre),
       dateStarted: _status == 'leser' && book.dateStarted == null
           ? Value(DateTime.now().millisecondsSinceEpoch)
           : Value(book.dateStarted),
@@ -152,6 +157,12 @@ class BookDetailState extends ChangeNotifier {
 
   void updateIsNonFiction(bool v) {
     _isNonFiction = v;
+    _genre = null;
+    notifyListeners();
+  }
+
+  void updateGenre(String? v) {
+    _genre = v == null || v.isEmpty ? null : v;
     notifyListeners();
   }
 

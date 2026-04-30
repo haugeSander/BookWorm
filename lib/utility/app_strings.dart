@@ -22,6 +22,7 @@ class AppStrings {
   static const aktiverStrukturertNotater = 'Strukturerte faglitteraturnotater';
   static const note = 'Notat';
   static const bookType = 'Boktype';
+  static const genre = 'Sjanger';
   static const fiction = 'Skjønnlitteratur';
   static const nonFiction = 'Faglitteratur';
   static const nonFictionNotesHint =

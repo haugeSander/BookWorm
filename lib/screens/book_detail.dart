@@ -27,6 +27,24 @@ class BookDetailPage extends StatelessWidget {
             systemOverlayStyle: state.isEditMode
                 ? SystemUiOverlayStyle.dark
                 : SystemUiOverlayStyle.light,
+            leading: state.isEditMode
+                ? null
+                : Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Material(
+                      color: Colors.black54,
+                      shape: const CircleBorder(),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                        ),
+                        tooltip:
+                            MaterialLocalizations.of(context).backButtonTooltip,
+                        onPressed: () => state.navigateBack(context),
+                      ),
+                    ),
+                  ),
             title: state.isEditMode ? const Text(AppStrings.editBook) : null,
             actions: [
               if (state.isEditMode) ...[

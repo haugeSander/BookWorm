@@ -10,7 +10,6 @@ class BookDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<BookDetailState>(builder: (context, state, child) {
-      final topPadding = MediaQuery.of(context).padding.top;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -35,27 +34,10 @@ class BookDetailHeader extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Back button
-                Positioned(
-                  top: topPadding + 8,
-                  left: 8,
-                  child: Material(
-                    color: Colors.black38,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => state.navigateBack(context),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Icon(Icons.arrow_back, color: Colors.white, size: 22),
-                      ),
-                    ),
-                  ),
-                ),
                 // Camera button (edit mode only)
                 if (state.isEditMode)
                   Positioned(
-                    top: topPadding + 8,
+                    top: MediaQuery.of(context).padding.top + 8,
                     right: 8,
                     child: Material(
                       color: Colors.black38,
@@ -65,7 +47,8 @@ class BookDetailHeader extends StatelessWidget {
                         onTap: () => state.updateCoverImage(context),
                         child: const Padding(
                           padding: EdgeInsets.all(8),
-                          child: Icon(Icons.photo_camera, color: Colors.white, size: 22),
+                          child: Icon(Icons.photo_camera,
+                              color: Colors.white, size: 22),
                         ),
                       ),
                     ),

@@ -6,9 +6,11 @@ import 'package:drift/native.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('shows the library shell', (tester) async {
+    SharedPreferences.setMockInitialValues({'hasSeenOnboarding': true});
     final db = AppDatabase(NativeDatabase.memory());
 
     await tester.pumpWidget(
@@ -18,6 +20,7 @@ void main() {
         child: const MyApp(),
       ),
     );
+    await tester.pump();
 
     expect(find.text(AppStrings.appName), findsOneWidget);
     expect(find.text(AppStrings.searchHint), findsOneWidget);

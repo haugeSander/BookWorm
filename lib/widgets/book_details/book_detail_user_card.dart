@@ -1,6 +1,7 @@
 import 'package:book_worm/states/book_detail_state.dart';
 import 'package:book_worm/utility/app_strings.dart';
 import 'package:book_worm/utility/app_theme.dart';
+import 'package:book_worm/utility/book_taxonomy.dart';
 import 'package:book_worm/widgets/status_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -12,20 +13,6 @@ const _statuses = [
   ('leser', AppStrings.statusLeser),
   ('skalLese', AppStrings.statusSkalLese),
   ('droppet', AppStrings.statusDroppet),
-];
-
-const _bookTypeOptions = [
-  ('header:nonFiction', 'Faglitteratur', true, false),
-  ('nonFiction:selfHelp', 'Selvutvikling', true, true),
-  ('nonFiction:journal', 'Journal / essay', true, true),
-  ('nonFiction:history', 'Historie', true, true),
-  ('nonFiction:business', 'Business', true, true),
-  ('header:fiction', 'Skjønnlitteratur', false, false),
-  ('fiction:drama', 'Drama', false, true),
-  ('fiction:action', 'Action', false, true),
-  ('fiction:sciFi', 'Sci-fi', false, true),
-  ('fiction:fantasy', 'Fantasy', false, true),
-  ('fiction:crime', 'Krim', false, true),
 ];
 
 class BookDetailUserCard extends StatelessWidget {
@@ -94,79 +81,103 @@ class BookDetailUserCard extends StatelessWidget {
   }
 
   Widget _buildBookType(BookDetailState state) {
-    final label =
-        state.isNonFiction ? AppStrings.nonFiction : AppStrings.fiction;
+    final typeLabel = bookTypeLabel(state.isNonFiction);
+    final genreOptions = genreOptionsFor(state.isNonFiction);
+    final selectedGenre =
+        genreOptions.any((option) => option.value == state.genre)
+            ? state.genre
+            : null;
+    final selectedGenreLabel = genreLabel(state.genre);
 
     if (state.isEditMode) {
-      return DropdownButtonFormField<String>(
-        initialValue: state.isNonFiction
-            ? _bookTypeOptions.firstWhere((option) => option.$3 && option.$4).$1
-            : _bookTypeOptions
-                .firstWhere((option) => !option.$3 && option.$4)
-                .$1,
-        decoration: const InputDecoration(
-          labelText: AppStrings.bookType,
-          prefixIcon: Icon(Icons.category_outlined, size: 18),
-        ),
-        items: _bookTypeOptions
-            .map(
-              (option) => DropdownMenuItem(
-                value: option.$1,
-                enabled: option.$4,
-                child: Text(
-                  option.$2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: option.$4 ? 13 : 12,
-                    fontWeight: option.$4 ? FontWeight.w500 : FontWeight.w700,
-                    color: option.$4
-                        ? AppTheme.textPrimary
-                        : AppTheme.textSecondary,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _FieldTitle(
+            icon: Icons.category_outlined,
+            label: AppStrings.bookType,
+          ),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<bool>(
+            initialValue: state.isNonFiction,
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.category_outlined, size: 18),
+            ),
+            items: const [
+              DropdownMenuItem(
+                value: false,
+                child: Text(AppStrings.fiction),
+              ),
+              DropdownMenuItem(
+                value: true,
+                child: Text(AppStrings.nonFiction),
+              ),
+            ],
+            onChanged: (value) {
+              if (value != null) state.updateIsNonFiction(value);
+            },
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.textPrimary,
+            ),
+            dropdownColor: AppTheme.surface,
+            iconEnabledColor: AppTheme.primary,
+            isExpanded: true,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          const SizedBox(height: 12),
+          const _FieldTitle(
+            icon: Icons.local_offer_outlined,
+            label: AppStrings.genre,
+          ),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<String>(
+            initialValue: selectedGenre,
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.local_offer_outlined, size: 18),
+            ),
+            hint: const Text(AppStrings.genre),
+            items: genreOptions
+                .map(
+                  (option) => DropdownMenuItem(
+                    value: option.value,
+                    child: Text(option.label, overflow: TextOverflow.ellipsis),
                   ),
-                ),
-              ),
-            )
-            .toList(),
-        onChanged: (value) {
-          final selected = _bookTypeOptions.firstWhere(
-            (option) => option.$1 == value && option.$4,
-            orElse: () => _bookTypeOptions.firstWhere((option) => option.$4),
-          );
-          state.updateIsNonFiction(selected.$3);
-        },
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: AppTheme.textPrimary,
-        ),
-        dropdownColor: AppTheme.surface,
-        iconEnabledColor: AppTheme.primary,
-        isExpanded: true,
-        selectedItemBuilder: (context) {
-          return _bookTypeOptions.map((option) {
-            return Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-            );
-          }).toList();
-        },
-        borderRadius: BorderRadius.circular(12),
-        menuMaxHeight: 320,
+                )
+                .toList(),
+            onChanged: state.updateGenre,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.textPrimary,
+            ),
+            dropdownColor: AppTheme.surface,
+            iconEnabledColor: AppTheme.primary,
+            isExpanded: true,
+            borderRadius: BorderRadius.circular(12),
+            menuMaxHeight: 320,
+          ),
+        ],
       );
     }
 
-    return _DateRow(
-      icon: Icons.category_outlined,
-      label: AppStrings.bookType,
-      date: label,
+    return Column(
+      children: [
+        _DateRow(
+          icon: Icons.category_outlined,
+          label: AppStrings.bookType,
+          date: typeLabel,
+        ),
+        if (selectedGenreLabel != null) ...[
+          const SizedBox(height: 8),
+          _DateRow(
+            icon: Icons.local_offer_outlined,
+            label: AppStrings.genre,
+            date: selectedGenreLabel,
+          ),
+        ],
+      ],
     );
   }
 
@@ -330,6 +341,31 @@ class _DateRow extends StatelessWidget {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FieldTitle extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _FieldTitle({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: AppTheme.primary),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
             color: AppTheme.textPrimary,
           ),
         ),

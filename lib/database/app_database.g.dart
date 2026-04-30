@@ -113,6 +113,11 @@ class $BooksTable extends Books with TableInfo<$BooksTable, Book> {
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("is_non_fiction" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _genreMeta = const VerificationMeta('genre');
+  @override
+  late final GeneratedColumn<String> genre = GeneratedColumn<String>(
+      'genre', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _inThreeSentencesMeta =
       const VerificationMeta('inThreeSentences');
   @override
@@ -167,6 +172,7 @@ class $BooksTable extends Books with TableInfo<$BooksTable, Book> {
         publishedYear,
         coverUrl,
         isNonFiction,
+        genre,
         inThreeSentences,
         impressions,
         whoShouldRead,
@@ -271,6 +277,10 @@ class $BooksTable extends Books with TableInfo<$BooksTable, Book> {
           isNonFiction.isAcceptableOrUnknown(
               data['is_non_fiction']!, _isNonFictionMeta));
     }
+    if (data.containsKey('genre')) {
+      context.handle(
+          _genreMeta, genre.isAcceptableOrUnknown(data['genre']!, _genreMeta));
+    }
     if (data.containsKey('in_three_sentences')) {
       context.handle(
           _inThreeSentencesMeta,
@@ -348,6 +358,8 @@ class $BooksTable extends Books with TableInfo<$BooksTable, Book> {
           .read(DriftSqlType.string, data['${effectivePrefix}cover_url']),
       isNonFiction: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_non_fiction'])!,
+      genre: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}genre']),
       inThreeSentences: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}in_three_sentences']),
       impressions: attachedDatabase.typeMapping
@@ -387,6 +399,7 @@ class Book extends DataClass implements Insertable<Book> {
   final String? publishedYear;
   final String? coverUrl;
   final bool isNonFiction;
+  final String? genre;
   final String? inThreeSentences;
   final String? impressions;
   final String? whoShouldRead;
@@ -411,6 +424,7 @@ class Book extends DataClass implements Insertable<Book> {
       this.publishedYear,
       this.coverUrl,
       required this.isNonFiction,
+      this.genre,
       this.inThreeSentences,
       this.impressions,
       this.whoShouldRead,
@@ -457,6 +471,9 @@ class Book extends DataClass implements Insertable<Book> {
       map['cover_url'] = Variable<String>(coverUrl);
     }
     map['is_non_fiction'] = Variable<bool>(isNonFiction);
+    if (!nullToAbsent || genre != null) {
+      map['genre'] = Variable<String>(genre);
+    }
     if (!nullToAbsent || inThreeSentences != null) {
       map['in_three_sentences'] = Variable<String>(inThreeSentences);
     }
@@ -512,6 +529,8 @@ class Book extends DataClass implements Insertable<Book> {
           ? const Value.absent()
           : Value(coverUrl),
       isNonFiction: Value(isNonFiction),
+      genre:
+          genre == null && nullToAbsent ? const Value.absent() : Value(genre),
       inThreeSentences: inThreeSentences == null && nullToAbsent
           ? const Value.absent()
           : Value(inThreeSentences),
@@ -552,6 +571,7 @@ class Book extends DataClass implements Insertable<Book> {
       publishedYear: serializer.fromJson<String?>(json['publishedYear']),
       coverUrl: serializer.fromJson<String?>(json['coverUrl']),
       isNonFiction: serializer.fromJson<bool>(json['isNonFiction']),
+      genre: serializer.fromJson<String?>(json['genre']),
       inThreeSentences: serializer.fromJson<String?>(json['inThreeSentences']),
       impressions: serializer.fromJson<String?>(json['impressions']),
       whoShouldRead: serializer.fromJson<String?>(json['whoShouldRead']),
@@ -581,6 +601,7 @@ class Book extends DataClass implements Insertable<Book> {
       'publishedYear': serializer.toJson<String?>(publishedYear),
       'coverUrl': serializer.toJson<String?>(coverUrl),
       'isNonFiction': serializer.toJson<bool>(isNonFiction),
+      'genre': serializer.toJson<String?>(genre),
       'inThreeSentences': serializer.toJson<String?>(inThreeSentences),
       'impressions': serializer.toJson<String?>(impressions),
       'whoShouldRead': serializer.toJson<String?>(whoShouldRead),
@@ -608,6 +629,7 @@ class Book extends DataClass implements Insertable<Book> {
           Value<String?> publishedYear = const Value.absent(),
           Value<String?> coverUrl = const Value.absent(),
           bool? isNonFiction,
+          Value<String?> genre = const Value.absent(),
           Value<String?> inThreeSentences = const Value.absent(),
           Value<String?> impressions = const Value.absent(),
           Value<String?> whoShouldRead = const Value.absent(),
@@ -634,6 +656,7 @@ class Book extends DataClass implements Insertable<Book> {
             publishedYear.present ? publishedYear.value : this.publishedYear,
         coverUrl: coverUrl.present ? coverUrl.value : this.coverUrl,
         isNonFiction: isNonFiction ?? this.isNonFiction,
+        genre: genre.present ? genre.value : this.genre,
         inThreeSentences: inThreeSentences.present
             ? inThreeSentences.value
             : this.inThreeSentences,
@@ -674,6 +697,7 @@ class Book extends DataClass implements Insertable<Book> {
       isNonFiction: data.isNonFiction.present
           ? data.isNonFiction.value
           : this.isNonFiction,
+      genre: data.genre.present ? data.genre.value : this.genre,
       inThreeSentences: data.inThreeSentences.present
           ? data.inThreeSentences.value
           : this.inThreeSentences,
@@ -712,6 +736,7 @@ class Book extends DataClass implements Insertable<Book> {
           ..write('publishedYear: $publishedYear, ')
           ..write('coverUrl: $coverUrl, ')
           ..write('isNonFiction: $isNonFiction, ')
+          ..write('genre: $genre, ')
           ..write('inThreeSentences: $inThreeSentences, ')
           ..write('impressions: $impressions, ')
           ..write('whoShouldRead: $whoShouldRead, ')
@@ -741,6 +766,7 @@ class Book extends DataClass implements Insertable<Book> {
         publishedYear,
         coverUrl,
         isNonFiction,
+        genre,
         inThreeSentences,
         impressions,
         whoShouldRead,
@@ -769,6 +795,7 @@ class Book extends DataClass implements Insertable<Book> {
           other.publishedYear == this.publishedYear &&
           other.coverUrl == this.coverUrl &&
           other.isNonFiction == this.isNonFiction &&
+          other.genre == this.genre &&
           other.inThreeSentences == this.inThreeSentences &&
           other.impressions == this.impressions &&
           other.whoShouldRead == this.whoShouldRead &&
@@ -795,6 +822,7 @@ class BooksCompanion extends UpdateCompanion<Book> {
   final Value<String?> publishedYear;
   final Value<String?> coverUrl;
   final Value<bool> isNonFiction;
+  final Value<String?> genre;
   final Value<String?> inThreeSentences;
   final Value<String?> impressions;
   final Value<String?> whoShouldRead;
@@ -819,6 +847,7 @@ class BooksCompanion extends UpdateCompanion<Book> {
     this.publishedYear = const Value.absent(),
     this.coverUrl = const Value.absent(),
     this.isNonFiction = const Value.absent(),
+    this.genre = const Value.absent(),
     this.inThreeSentences = const Value.absent(),
     this.impressions = const Value.absent(),
     this.whoShouldRead = const Value.absent(),
@@ -844,6 +873,7 @@ class BooksCompanion extends UpdateCompanion<Book> {
     this.publishedYear = const Value.absent(),
     this.coverUrl = const Value.absent(),
     this.isNonFiction = const Value.absent(),
+    this.genre = const Value.absent(),
     this.inThreeSentences = const Value.absent(),
     this.impressions = const Value.absent(),
     this.whoShouldRead = const Value.absent(),
@@ -872,6 +902,7 @@ class BooksCompanion extends UpdateCompanion<Book> {
     Expression<String>? publishedYear,
     Expression<String>? coverUrl,
     Expression<bool>? isNonFiction,
+    Expression<String>? genre,
     Expression<String>? inThreeSentences,
     Expression<String>? impressions,
     Expression<String>? whoShouldRead,
@@ -897,6 +928,7 @@ class BooksCompanion extends UpdateCompanion<Book> {
       if (publishedYear != null) 'published_year': publishedYear,
       if (coverUrl != null) 'cover_url': coverUrl,
       if (isNonFiction != null) 'is_non_fiction': isNonFiction,
+      if (genre != null) 'genre': genre,
       if (inThreeSentences != null) 'in_three_sentences': inThreeSentences,
       if (impressions != null) 'impressions': impressions,
       if (whoShouldRead != null) 'who_should_read': whoShouldRead,
@@ -924,6 +956,7 @@ class BooksCompanion extends UpdateCompanion<Book> {
       Value<String?>? publishedYear,
       Value<String?>? coverUrl,
       Value<bool>? isNonFiction,
+      Value<String?>? genre,
       Value<String?>? inThreeSentences,
       Value<String?>? impressions,
       Value<String?>? whoShouldRead,
@@ -948,6 +981,7 @@ class BooksCompanion extends UpdateCompanion<Book> {
       publishedYear: publishedYear ?? this.publishedYear,
       coverUrl: coverUrl ?? this.coverUrl,
       isNonFiction: isNonFiction ?? this.isNonFiction,
+      genre: genre ?? this.genre,
       inThreeSentences: inThreeSentences ?? this.inThreeSentences,
       impressions: impressions ?? this.impressions,
       whoShouldRead: whoShouldRead ?? this.whoShouldRead,
@@ -1011,6 +1045,9 @@ class BooksCompanion extends UpdateCompanion<Book> {
     if (isNonFiction.present) {
       map['is_non_fiction'] = Variable<bool>(isNonFiction.value);
     }
+    if (genre.present) {
+      map['genre'] = Variable<String>(genre.value);
+    }
     if (inThreeSentences.present) {
       map['in_three_sentences'] = Variable<String>(inThreeSentences.value);
     }
@@ -1052,6 +1089,7 @@ class BooksCompanion extends UpdateCompanion<Book> {
           ..write('publishedYear: $publishedYear, ')
           ..write('coverUrl: $coverUrl, ')
           ..write('isNonFiction: $isNonFiction, ')
+          ..write('genre: $genre, ')
           ..write('inThreeSentences: $inThreeSentences, ')
           ..write('impressions: $impressions, ')
           ..write('whoShouldRead: $whoShouldRead, ')
@@ -1483,6 +1521,7 @@ typedef $$BooksTableCreateCompanionBuilder = BooksCompanion Function({
   Value<String?> publishedYear,
   Value<String?> coverUrl,
   Value<bool> isNonFiction,
+  Value<String?> genre,
   Value<String?> inThreeSentences,
   Value<String?> impressions,
   Value<String?> whoShouldRead,
@@ -1508,6 +1547,7 @@ typedef $$BooksTableUpdateCompanionBuilder = BooksCompanion Function({
   Value<String?> publishedYear,
   Value<String?> coverUrl,
   Value<bool> isNonFiction,
+  Value<String?> genre,
   Value<String?> inThreeSentences,
   Value<String?> impressions,
   Value<String?> whoShouldRead,
@@ -1593,6 +1633,9 @@ class $$BooksTableFilterComposer extends Composer<_$AppDatabase, $BooksTable> {
 
   ColumnFilters<bool> get isNonFiction => $composableBuilder(
       column: $table.isNonFiction, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get genre => $composableBuilder(
+      column: $table.genre, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get inThreeSentences => $composableBuilder(
       column: $table.inThreeSentences,
@@ -1699,6 +1742,9 @@ class $$BooksTableOrderingComposer
       column: $table.isNonFiction,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get genre => $composableBuilder(
+      column: $table.genre, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get inThreeSentences => $composableBuilder(
       column: $table.inThreeSentences,
       builder: (column) => ColumnOrderings(column));
@@ -1782,6 +1828,9 @@ class $$BooksTableAnnotationComposer
   GeneratedColumn<bool> get isNonFiction => $composableBuilder(
       column: $table.isNonFiction, builder: (column) => column);
 
+  GeneratedColumn<String> get genre =>
+      $composableBuilder(column: $table.genre, builder: (column) => column);
+
   GeneratedColumn<String> get inThreeSentences => $composableBuilder(
       column: $table.inThreeSentences, builder: (column) => column);
 
@@ -1862,6 +1911,7 @@ class $$BooksTableTableManager extends RootTableManager<
             Value<String?> publishedYear = const Value.absent(),
             Value<String?> coverUrl = const Value.absent(),
             Value<bool> isNonFiction = const Value.absent(),
+            Value<String?> genre = const Value.absent(),
             Value<String?> inThreeSentences = const Value.absent(),
             Value<String?> impressions = const Value.absent(),
             Value<String?> whoShouldRead = const Value.absent(),
@@ -1887,6 +1937,7 @@ class $$BooksTableTableManager extends RootTableManager<
             publishedYear: publishedYear,
             coverUrl: coverUrl,
             isNonFiction: isNonFiction,
+            genre: genre,
             inThreeSentences: inThreeSentences,
             impressions: impressions,
             whoShouldRead: whoShouldRead,
@@ -1912,6 +1963,7 @@ class $$BooksTableTableManager extends RootTableManager<
             Value<String?> publishedYear = const Value.absent(),
             Value<String?> coverUrl = const Value.absent(),
             Value<bool> isNonFiction = const Value.absent(),
+            Value<String?> genre = const Value.absent(),
             Value<String?> inThreeSentences = const Value.absent(),
             Value<String?> impressions = const Value.absent(),
             Value<String?> whoShouldRead = const Value.absent(),
@@ -1937,6 +1989,7 @@ class $$BooksTableTableManager extends RootTableManager<
             publishedYear: publishedYear,
             coverUrl: coverUrl,
             isNonFiction: isNonFiction,
+            genre: genre,
             inThreeSentences: inThreeSentences,
             impressions: impressions,
             whoShouldRead: whoShouldRead,

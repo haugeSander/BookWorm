@@ -26,6 +26,7 @@ class Books extends Table {
   TextColumn get publishedYear => text().nullable()();
   TextColumn get coverUrl => text().nullable()(); // remote image URL
   BoolColumn get isNonFiction => boolean().withDefault(const Constant(false))();
+  TextColumn get genre => text().nullable()();
 
   // Structured non-fiction notes (lists stored as JSON, added in schema v2)
   TextColumn get inThreeSentences => text().nullable()();
@@ -52,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -77,6 +78,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 4) {
             await migrator.createTable(bookWidgets);
             await _migrateExistingNotesToWidgets();
+          }
+          if (from < 5) {
+            await migrator.addColumn(books, books.genre);
           }
         },
       );

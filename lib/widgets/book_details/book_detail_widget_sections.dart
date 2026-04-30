@@ -30,15 +30,21 @@ class BookDetailWidgetSections extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final widget in widgets) ...[
-                _BookWidgetCard(
-                  key: ValueKey(widget.id),
-                  widget: widget,
+              if (state.isEditMode)
+                _ReorderableWidgetCards(
+                  widgets: widgets,
                   state: state,
                   service: service,
-                ),
-                const SizedBox(height: 12),
-              ],
+                )
+              else
+                for (final widget in widgets) ...[
+                  _BookWidgetCard(
+                    widget: widget,
+                    state: state,
+                    service: service,
+                  ),
+                  const SizedBox(height: 12),
+                ],
               Align(
                 alignment: Alignment.center,
                 child: FilledButton.icon(
@@ -120,6 +126,65 @@ class BookDetailWidgetSections extends StatelessWidget {
   }
 }
 
+class _ReorderableWidgetCards extends StatelessWidget {
+  final List<BookWidget> widgets;
+  final BookDetailState state;
+  final DatabaseService service;
+
+  const _ReorderableWidgetCards({
+    required this.widgets,
+    required this.state,
+    required this.service,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ReorderableListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
+      itemCount: widgets.length,
+      proxyDecorator: (child, index, animation) {
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            final scale = 1 + animation.value * 0.015;
+            return Transform.scale(
+              scale: scale,
+              child: Material(
+                color: Colors.transparent,
+                shadowColor: Colors.black.withValues(alpha: 0.12),
+                child: child,
+              ),
+            );
+          },
+          child: child,
+        );
+      },
+      onReorder: (oldIndex, newIndex) async {
+        if (newIndex > oldIndex) newIndex -= 1;
+        final reordered = List<BookWidget>.of(widgets);
+        final moved = reordered.removeAt(oldIndex);
+        reordered.insert(newIndex, moved);
+        await service.reorderBookWidgets(reordered);
+      },
+      itemBuilder: (context, index) {
+        final widget = widgets[index];
+        return Padding(
+          key: ValueKey(widget.id),
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _BookWidgetCard(
+            widget: widget,
+            state: state,
+            service: service,
+            reorderIndex: index,
+          ),
+        );
+      },
+    );
+  }
+}
+
 enum _BookWidgetType {
   review('notes', AppStrings.bookReviewWidget, Icons.rate_review_outlined),
   textNote('textNote', AppStrings.notesWidget, Icons.edit_note_outlined),
@@ -197,12 +262,13 @@ class _BookWidgetCard extends StatelessWidget {
   final BookWidget widget;
   final BookDetailState state;
   final DatabaseService service;
+  final int? reorderIndex;
 
   const _BookWidgetCard({
-    super.key,
     required this.widget,
     required this.state,
     required this.service,
+    this.reorderIndex,
   });
 
   @override
@@ -264,6 +330,20 @@ class _BookWidgetCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (state.isEditMode && reorderIndex != null) ...[
+                      ReorderableDragStartListener(
+                        index: reorderIndex!,
+                        child: const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.drag_handle,
+                            size: 20,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                    ],
                     if (state.isEditMode)
                       IconButton(
                         tooltip: AppStrings.remove,
@@ -728,6 +808,15 @@ class _LendingPayloadFieldsState extends State<_LendingPayloadFields> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.enabled) {
+      return _LendingSummary(
+        direction: _direction,
+        person: _personController.text,
+        date: _dateController.text,
+        returnDate: _returnDateController.text,
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -797,6 +886,81 @@ class _LendingPayloadFieldsState extends State<_LendingPayloadFields> {
   }
 }
 
+class _LendingSummary extends StatelessWidget {
+  final String direction;
+  final String person;
+  final String date;
+  final String returnDate;
+
+  const _LendingSummary({
+    required this.direction,
+    required this.person,
+    required this.date,
+    required this.returnDate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isBorrowed = direction == 'borrowed';
+    final color = isBorrowed ? AppTheme.statusReading : AppTheme.statusWant;
+    final label = isBorrowed ? AppStrings.borrowed : AppStrings.lentOut;
+    final name = person.trim().isEmpty ? '-' : person.trim();
+    final details = [
+      if (date.trim().isNotEmpty) date.trim(),
+      if (returnDate.trim().isNotEmpty) 'Retur $returnDate',
+    ].join(' · ');
+
+    return Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.14),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            isBorrowed ? Icons.south_west : Icons.north_east,
+            size: 17,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$label: $name',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (details.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  details,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ProgressPayloadFields extends StatefulWidget {
   final Map<String, dynamic> payload;
   final bool enabled;
@@ -850,9 +1014,8 @@ class _ProgressPayloadFieldsState extends State<_ProgressPayloadFields> {
     final progressLabel = totalPages <= 0
         ? '$currentPage sider'
         : '$currentPage / $totalPages sider';
-    final remainingPages = totalPages <= 0
-        ? null
-        : (totalPages - currentPage).clamp(0, totalPages);
+    final percentage = '${(progress * 100).round()}%';
+    final lastUpdated = _updatedController.text.trim();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -861,7 +1024,7 @@ class _ProgressPayloadFieldsState extends State<_ProgressPayloadFields> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${(progress * 100).round()}%',
+              percentage,
               style: const TextStyle(
                 color: AppTheme.statusReading,
                 fontSize: 34,
@@ -891,81 +1054,76 @@ class _ProgressPayloadFieldsState extends State<_ProgressPayloadFields> {
                     backgroundColor: AppTheme.surfaceVariant,
                     color: AppTheme.statusReading,
                   ),
-                  if (remainingPages != null) ...[
-                    const SizedBox(height: 7),
-                    Text(
-                      '$remainingPages sider igjen',
-                      style: const TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final useColumns = constraints.maxWidth < 360;
-            final fields = [
-              _SingleLineField(
-                controller: _currentPageController,
-                enabled: widget.enabled,
-                label: AppStrings.currentPage,
-                icon: Icons.menu_book_outlined,
-                keyboardType: TextInputType.number,
-                onChanged: (_) {
-                  setState(() {});
-                  _save(updateDate: true);
-                },
+        if (!widget.enabled && lastUpdated.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.update, size: 14, color: AppTheme.textSecondary),
+              const SizedBox(width: 5),
+              Text(
+                '${AppStrings.lastUpdated}: $lastUpdated',
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              _SingleLineField(
-                controller: _totalPagesController,
-                enabled: widget.enabled,
-                label: AppStrings.totalPages,
-                icon: Icons.format_list_numbered,
-                keyboardType: TextInputType.number,
-                onChanged: (_) {
-                  setState(() {});
-                  _save(updateDate: true);
-                },
-              ),
-            ];
-
-            if (useColumns) {
-              return Column(
-                children: [
-                  fields.first,
-                  const SizedBox(height: 10),
-                  fields.last,
-                ],
-              );
-            }
-
-            return Row(
-              children: [
-                Expanded(child: fields.first),
-                const SizedBox(width: 10),
-                Expanded(child: fields.last),
-              ],
-            );
-          },
-        ),
+            ],
+          ),
+        ],
         if (widget.enabled) ...[
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _PageStepButton(
+                icon: Icons.remove,
+                onPressed: () => _addPages(-1),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _SingleLineField(
+                  controller: _currentPageController,
+                  enabled: widget.enabled,
+                  label: 'Lest',
+                  icon: Icons.menu_book_outlined,
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) {
+                    setState(() {});
+                    _save(updateDate: true);
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _SingleLineField(
+                  controller: _totalPagesController,
+                  enabled: widget.enabled,
+                  label: 'Totalt',
+                  icon: Icons.format_list_numbered,
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) {
+                    setState(() {});
+                    _save(updateDate: true);
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              _PageStepButton(
+                icon: Icons.add,
+                onPressed: () => _addPages(1),
+              ),
+            ],
+          ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              OutlinedButton.icon(
-                onPressed: () => _addPages(1),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('1 side'),
-              ),
               OutlinedButton.icon(
                 onPressed: () => _addPages(5),
                 icon: const Icon(Icons.add, size: 16),
@@ -973,15 +1131,15 @@ class _ProgressPayloadFieldsState extends State<_ProgressPayloadFields> {
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          _DateField(
+            controller: _updatedController,
+            enabled: widget.enabled,
+            label: AppStrings.lastUpdated,
+            icon: Icons.update,
+            onChanged: () => _save(updateDate: false),
+          ),
         ],
-        const SizedBox(height: 8),
-        _DateField(
-          controller: _updatedController,
-          enabled: widget.enabled,
-          label: AppStrings.lastUpdated,
-          icon: Icons.update,
-          onChanged: () => _save(updateDate: false),
-        ),
       ],
     );
   }
@@ -989,8 +1147,9 @@ class _ProgressPayloadFieldsState extends State<_ProgressPayloadFields> {
   void _addPages(int amount) {
     final current = int.tryParse(_currentPageController.text) ?? 0;
     final total = int.tryParse(_totalPagesController.text);
+    final rawNext = current + amount;
     final next =
-        total == null ? current + amount : (current + amount).clamp(0, total);
+        total == null ? rawNext.clamp(0, 999999) : rawNext.clamp(0, total);
 
     _currentPageController.text = next.toString();
     setState(() {});
@@ -1006,6 +1165,28 @@ class _ProgressPayloadFieldsState extends State<_ProgressPayloadFields> {
       'totalPages': _totalPagesController.text,
       'lastUpdated': _updatedController.text,
     });
+  }
+}
+
+class _PageStepButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _PageStepButton({required this.icon, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton.filledTonal(
+      tooltip: icon == Icons.add ? 'Legg til side' : 'Trekk fra side',
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      style: IconButton.styleFrom(
+        fixedSize: const Size(38, 38),
+        padding: EdgeInsets.zero,
+        backgroundColor: AppTheme.statusReading.withValues(alpha: 0.12),
+        foregroundColor: AppTheme.statusReading,
+      ),
+    );
   }
 }
 
@@ -1386,6 +1567,10 @@ InputDecoration _bookWidgetInputDecoration({
     borderRadius: BorderRadius.circular(10),
     borderSide: BorderSide(color: AppTheme.divider.withValues(alpha: 0.9)),
   );
+  final disabledBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    borderSide: BorderSide(color: AppTheme.divider.withValues(alpha: 0.35)),
+  );
 
   return InputDecoration(
     hintText: hintText,
@@ -1398,7 +1583,7 @@ InputDecoration _bookWidgetInputDecoration({
     contentPadding: contentPadding,
     border: border,
     enabledBorder: border,
-    disabledBorder: border,
+    disabledBorder: disabledBorder,
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: const BorderSide(color: AppTheme.primary, width: 1.3),
@@ -1453,6 +1638,7 @@ class _MultilineField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      enabled: enabled,
       readOnly: !enabled,
       maxLines: null,
       minLines: 2,
@@ -1495,17 +1681,23 @@ class _IndexedField extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 2, right: 10),
-            child: Text(
-              '$index.',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textSecondary,
+          SizedBox(
+            width: 24,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(
+                '$index.',
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                  height: 1,
+                ),
               ),
             ),
           ),
+          const SizedBox(width: 10),
           Expanded(
             child: _MultilineField(
               controller: controller,
@@ -1546,6 +1738,7 @@ class _SingleLineField extends StatelessWidget {
         const SizedBox(height: 6),
         TextField(
           controller: controller,
+          enabled: enabled,
           readOnly: !enabled,
           keyboardType: keyboardType,
           decoration: _bookWidgetInputDecoration(
@@ -1583,20 +1776,23 @@ class _DateField extends StatelessWidget {
         const SizedBox(height: 6),
         TextField(
           controller: controller,
+          enabled: enabled,
           readOnly: true,
           onTap: enabled ? () => _pickDate(context) : null,
           decoration: _bookWidgetInputDecoration(
             hintText: AppStrings.optionalDate,
-            suffixIcon: controller.text.isEmpty || !enabled
-                ? const Icon(Icons.calendar_today_outlined, size: 18)
-                : IconButton(
-                    tooltip: AppStrings.clearDate,
-                    icon: const Icon(Icons.close, size: 18),
-                    onPressed: () {
-                      controller.clear();
-                      onChanged();
-                    },
-                  ),
+            suffixIcon: !enabled
+                ? null
+                : controller.text.isEmpty
+                    ? const Icon(Icons.calendar_today_outlined, size: 18)
+                    : IconButton(
+                        tooltip: AppStrings.clearDate,
+                        icon: const Icon(Icons.close, size: 18),
+                        onPressed: () {
+                          controller.clear();
+                          onChanged();
+                        },
+                      ),
           ),
           style: const TextStyle(fontSize: 14, color: AppTheme.textPrimary),
         ),

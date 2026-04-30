@@ -7,6 +7,7 @@ import 'package:book_worm/services/database_service.dart';
 import 'package:book_worm/states/book_detail_state.dart';
 import 'package:book_worm/utility/app_strings.dart';
 import 'package:book_worm/utility/app_theme.dart';
+import 'package:book_worm/utility/book_taxonomy.dart';
 import 'package:book_worm/widgets/duplicate_book_dialog.dart';
 import 'package:book_worm/widgets/status_picker_sheet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -34,6 +35,7 @@ class _SearchAddPageState extends State<SearchAddPage> {
   List<BookSearchResult> _results = [];
   bool _loading = false;
   bool _manualIsNonFiction = false;
+  String? _manualGenre;
 
   @override
   void dispose() {
@@ -173,14 +175,49 @@ class _SearchAddPageState extends State<SearchAddPage> {
                     label: AppStrings.coverUrl,
                     keyboardType: TextInputType.url,
                   ),
-                  const SizedBox(height: 8),
-                  SwitchListTile.adaptive(
-                    value: _manualIsNonFiction,
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<bool>(
+                    initialValue: _manualIsNonFiction,
+                    decoration: const InputDecoration(
+                      labelText: AppStrings.bookType,
+                      prefixIcon: Icon(Icons.category_outlined),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: false,
+                        child: Text(AppStrings.fiction),
+                      ),
+                      DropdownMenuItem(
+                        value: true,
+                        child: Text(AppStrings.nonFiction),
+                      ),
+                    ],
                     onChanged: (value) {
-                      setDialogState(() => _manualIsNonFiction = value);
+                      if (value == null) return;
+                      setDialogState(() {
+                        _manualIsNonFiction = value;
+                        _manualGenre = null;
+                      });
                     },
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text(AppStrings.nonFiction),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: _manualGenre,
+                    decoration: const InputDecoration(
+                      labelText: AppStrings.genre,
+                      prefixIcon: Icon(Icons.local_offer_outlined),
+                    ),
+                    items: genreOptionsFor(_manualIsNonFiction)
+                        .map(
+                          (option) => DropdownMenuItem(
+                            value: option.value,
+                            child: Text(option.label),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setDialogState(() => _manualGenre = value);
+                    },
                   ),
                 ],
               ),
@@ -245,6 +282,7 @@ class _SearchAddPageState extends State<SearchAddPage> {
       publisher: Value(_emptyToNull(_manualPublisherController.text)),
       publishedYear: Value(_emptyToNull(_manualPublicationDateController.text)),
       isNonFiction: Value(_manualIsNonFiction),
+      genre: Value(_manualGenre),
     ));
 
     if (mounted) {
